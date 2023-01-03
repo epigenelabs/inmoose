@@ -34,7 +34,8 @@ edgepy_cpp = Extension(
 
 setup(
     install_requires=[
-        "numpy",
+        "mpmath>=1.1.0",
+        "numpy>=1.18.5",
         "pandas",
         "patsy",
         "scipy",
