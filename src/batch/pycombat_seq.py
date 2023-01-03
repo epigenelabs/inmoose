@@ -4,6 +4,7 @@ from patsy import dmatrix
 from warnings import warn
 from edgepy import asfactor, DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
 
+from .covariates import check_confounded_covariates
 from .helper_seq import vec2mat, match_quantiles
 
 def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
@@ -105,11 +106,7 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     print("Adjusting for", design.shape[1]-batchmod.shape[1], "covariate(s) or covariate level(s)")
 
     # Check if the design is confounded
-    if np.linalg.matrix_rank(design) < design.shape[1]:
-        if design.shape[1] == n_batch+1:
-            raise RuntimeError("The covariate is confounded with batch! Remove the covariate and rerun pyComBat_seq")
-        if design.shape[1] > n_batch+1:
-            raise RuntimeError("At least one covariate is confounded with batch! Please remove confounded covariates and rerun pyComBat_seq")
+    check_confounded_covariates(design, n_batch)
 
     # Check for missing values in count matrix
     nas = np.isnan(counts).any()
