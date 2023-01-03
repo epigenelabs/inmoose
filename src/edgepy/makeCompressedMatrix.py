@@ -1,0 +1,111 @@
+import numpy as np
+
+# NB: we do not fully implement edgeR class CompressedMatrix: we use fully-expanded 2D numpy arrays instead
+#     still, to avoid useless calls to `_compress*` and `check_finite`, we subclass ndarray
+#     note that the name `CompressedMatrix` for the subclass is only historical
+class CompressedMatrix(np.ndarray):
+    def __new__(cls, input_array):
+        # Input array is an already formed ndarray instance
+        # We thus cast to be our class type
+        return np.asarray(input_array, order='F').view(cls)
+
+def makeCompressedMatrix(x, dims, byrow=True):
+    """
+    Coerce a None, scalar, vector or matrix to a compressed matrix.
+    """
+    if x.__class__ == CompressedMatrix:
+        return x
+
+    if len(dims) != 2:
+        raise ValueError("dims does not represent the shape of a matrix")
+    x = np.asarray(x, order='F')
+    if len(x.shape) == 0:
+        x = np.full(dims, x, order='F')
+    elif len(x.shape) == 2:
+        assert dims == x.shape
+    elif len(x.shape) == 1:
+        if not byrow:
+            if dims[0] != len(x):
+                raise ValueError("dims[0] should be equal to length of x")
+            # build matrix by duplicating the column x
+            x = np.array([x for i in range(dims[1])], order='C').T
+            # transposing a C-array should yield a F-array, but better safe than sorry
+            x = np.asarray(x, order='F')
+        else:
+            if dims[1] != len(x):
+                raise ValueError("dims[1] should be equal to length of x")
+            # build matrix by duplicating the row x
+            x = np.array([x for i in range(dims[0])], order='F')
+    else:
+        raise ValueError("input has too many dimensions to be interpreted as a matrix")
+
+    return CompressedMatrix(x)
+
+def check_finite(x, what, negative_allowed):
+    xmin = np.amin(x)
+    if np.isnan(xmin):
+        raise ValueError("NaN " + what + " not allowed")
+    if not negative_allowed and xmin < 0:
+        raise ValueError("negative " + what + " not allowed")
+    if np.isinf(np.nanmax(x)):
+        raise ValueError("infinite " + what + " is not allowed")
+
+
+def _compressOffsets(y, offset, lib_size=None):
+    """
+    Check for finite values
+    If provided, offset takes precedence over lib_size
+    If neither are provided, lib_size is automatically as the sum of counts in the count matrix y
+    """
+    if offset.__class__ == CompressedMatrix:
+        return offset
+
+    if offset is None:
+        if lib_size is None:
+            lib_size = y.sum(axis=0)
+        offset = np.log(lib_size)
+
+    offset = np.asarray(offset, order='F', dtype='double')
+    offset = makeCompressedMatrix(offset, y.shape, byrow=True)
+    check_finite(offset, "offset", negative_allowed=True)
+    return offset
+
+def _compressWeights(y, weights=None):
+    """
+    Check for non-negative finite values
+    All weights default to 1 when not specified
+    """
+    if weights.__class__ == CompressedMatrix:
+        return weights
+
+    if weights is None:
+        weights = 1
+
+    weights = np.asarray(weights, order='F', dtype='double')
+    weights = makeCompressedMatrix(weights, y.shape, byrow=True)
+    check_finite(weights, "weights", negative_allowed=False)
+    return weights
+
+def _compressDispersions(y, dispersion):
+    """
+    Check for non-negative finite values
+    """
+    if dispersion.__class__ == CompressedMatrix:
+        return dispersion
+
+    dispersion = np.asarray(dispersion, order='F', dtype='double')
+    dispersion = makeCompressedMatrix(dispersion, y.shape, byrow=False)
+    check_finite(dispersion, "dispersion", negative_allowed=False)
+    return dispersion
+
+def _compressPrior(y, prior_count):
+    """
+    Check for non-negative finite values
+    """
+    if prior_count.__class__ == CompressedMatrix:
+        return prior_count
+
+    prior_count = np.asarray(prior_count, order='F', dtype='double')
+    prior_count = makeCompressedMatrix(prior_count, y.shape, byrow=False)
+    check_finite(prior_count, "prior counts", negative_allowed=False)
+    return prior_count

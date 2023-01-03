@@ -1,0 +1,6 @@
+[run]
+dynamic_context = test_function
+source = edgepy,batch
+
+[html]
+show_contexts = true
