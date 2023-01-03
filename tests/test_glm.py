@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from helper import rnbinom
+from .helper import rnbinom
 
 from edgepy import addPriorCount, DGEList, glmFit, nbinomDeviance
 
