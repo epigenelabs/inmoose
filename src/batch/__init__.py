@@ -1,1 +1,1 @@
-from .pyComBat_seq import pyComBat_seq
+from .pycombat_seq import pycombat_seq

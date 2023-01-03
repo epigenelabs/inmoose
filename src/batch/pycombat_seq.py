@@ -6,9 +6,8 @@ from edgepy import asfactor, DGEList, estimateGLMCommonDisp, estimateGLMTagwiseD
 
 from .helper_seq import vec2mat, match_quantiles
 
-def pyComBat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
-    """
-    pyComBat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
+def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
+    """pycombat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
 
     :param counts: raw count matrix from genomic studies (dimensions gene x sample)
     :type counts: matrix
@@ -83,10 +82,10 @@ def pyComBat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
             group[j] = nan_batch_group[i]
 
     if full_mod and group.nlevels() > 1:
-        print("Using full model in pyComBat_seq")
+        print("Using full model in pycombat_seq")
         mod = dmatrix("~group")
     else:
-        print("Using null model in pyComBat_seq")
+        print("Using null model in pycombat_seq")
         mod = dmatrix("~1", DataFrame(counts.T))
     # drop intercept in covariate model
     if covar_mod is not None:

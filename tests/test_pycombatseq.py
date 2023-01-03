@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from .helper import rnbinom
 
-from batch import pyComBat_seq
+from batch import pycombat_seq
 
 class test_pycombatseq(unittest.TestCase):
 
@@ -35,7 +35,7 @@ class test_pycombatseq(unittest.TestCase):
             [38,30,42,28],
             [25,23,21,29],
             [18,21,22,18]])
-        res = pyComBat_seq(self.y, self.batch)
+        res = pycombat_seq(self.y, self.batch)
         self.assertTrue(np.array_equal(res, ref))
 
         ref = np.array([
@@ -61,11 +61,11 @@ class test_pycombatseq(unittest.TestCase):
             [40,34,40,25],
             [22,21,22,33],
             [19,21,22,17]])
-        res = pyComBat_seq(self.y, self.batch, group=[1,1,1,2])
+        res = pycombat_seq(self.y, self.batch, group=[1,1,1,2])
         self.assertTrue(np.array_equal(res, ref))
 
         # test with reference batch
-        res = pyComBat_seq(self.y, self.batch, ref_batch=1)
+        res = pycombat_seq(self.y, self.batch, ref_batch=1)
         ref_col = self.batch == 1
         non_ref_col = self.batch != 1
         # make sure that reference batch counts have not been adjusted
@@ -74,11 +74,11 @@ class test_pycombatseq(unittest.TestCase):
         self.assertFalse(np.array_equal(res[:,non_ref_col], self.y[:,non_ref_col]))
 
         # also test with non-integer batch ids
-        res2 = pyComBat_seq(self.y, ['a', 'a', 'b', 'b'], ref_batch='a')
+        res2 = pycombat_seq(self.y, ['a', 'a', 'b', 'b'], ref_batch='a')
         self.assertTrue(np.array_equal(res, res2))
 
         # test with incomplete group
-        ref = pyComBat_seq(self.y, self.batch, group=[1,2,1,3])
+        ref = pycombat_seq(self.y, self.batch, group=[1,2,1,3])
         with self.assertWarnsRegex(UserWarning, r"\d+ missing covariates in group. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."):
-            res = pyComBat_seq(self.y, self.batch, group=[1,np.nan,1,np.nan])
+            res = pycombat_seq(self.y, self.batch, group=[1,np.nan,1,np.nan])
         self.assertTrue(np.array_equal(res, ref))
