@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# Copyright (C) 2019-2022 A. Behdenna, A. Nordor, J. Haziza and A. Gema
+# Copyright (C) 2019-2023 A. Behdenna, A. Nordor, J. Haziza and A. Gema
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,12 +13,6 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-# For more information, please contact Abdelkader Behdenna <abdelkader@epigenelabs.com>/<kaderbehdenna@gmail.com>
-
-# file 	pycombat.py
-# author A. Behdenna, J. Haziza, A. Gema, A. Nordor
-# date 	Sept 2020
 #-----------------------------------------------------------------------------
 
 import numpy as np
