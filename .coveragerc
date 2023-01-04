@@ -1,6 +1,6 @@
 [run]
 dynamic_context = test_function
-source = edgepy,batch
+source = inmoose
 
 [html]
 show_contexts = true

@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from .helper import rnbinom
 
-from edgepy import DGEList, dispCoxReid, maximizeInterpolant, movingAverageByCol, systematicSubset
+from inmoose.edgepy import DGEList, dispCoxReid, maximizeInterpolant, movingAverageByCol, systematicSubset
 
 class test_dispersion(unittest.TestCase):
     def setUp(self):

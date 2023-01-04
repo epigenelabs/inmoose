@@ -2,11 +2,11 @@ import unittest
 import numpy as np
 from .helper import rnbinom
 
-from edgepy import addPriorCount, DGEList, glmFit, nbinomDeviance
+from inmoose.edgepy import addPriorCount, DGEList, glmFit, nbinomDeviance
 
 class test_DGEGLM(unittest.TestCase):
     def test_constructor(self):
-        from edgepy import DGEGLM
+        from inmoose.edgepy import DGEGLM
         d = DGEGLM((1,2,3,4,5))
 
         self.assertIsNotNone(d.coefficients)

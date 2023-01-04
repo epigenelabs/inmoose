@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from .helper import rnbinom
 
-import edgepy
+import inmoose.edgepy
 
 @unittest.skip("unimplemented")
 class test_equalize(unittest.TestCase):

@@ -1,11 +1,11 @@
 import unittest
 import numpy as np
 
-from edgepy import DGEList, validDGEList
+from inmoose.edgepy import DGEList, validDGEList
 
 class test_utils(unittest.TestCase):
     def test_isAllZero(self):
-        from edgepy.utils import _isAllZero
+        from inmoose.edgepy.utils import _isAllZero
         self.assertEqual(_isAllZero(np.array([])), False)
         self.assertEqual(_isAllZero(np.array([0,0,0])), True)
         self.assertEqual(_isAllZero(np.array([2,1,0])), False)

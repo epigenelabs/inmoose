@@ -22,8 +22,8 @@ import numpy as np
 from pandas import DataFrame
 from patsy import dmatrix
 from warnings import warn
-from edgepy import asfactor, DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
 
+from ..edgepy import asfactor, DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
 from .covariates import check_confounded_covariates
 from .helper_seq import vec2mat, match_quantiles
 

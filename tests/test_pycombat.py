@@ -2,12 +2,12 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from batch.pycombat import model_matrix, all_1
-from batch.pycombat import compute_prior, postmean, postvar, it_sol, int_eprior
-from batch.pycombat import check_mean_only, define_batchmod, check_ref_batch, treat_batches, treat_covariates, check_NAs
-from batch.pycombat import calculate_mean_var, calculate_stand_mean
-from batch.pycombat import standardise_data, fit_model, adjust_data
-from batch import pycombat
+from inmoose.batch.pycombat import model_matrix, all_1
+from inmoose.batch.pycombat import compute_prior, postmean, postvar, it_sol, int_eprior
+from inmoose.batch.pycombat import check_mean_only, define_batchmod, check_ref_batch, treat_batches, treat_covariates, check_NAs
+from inmoose.batch.pycombat import calculate_mean_var, calculate_stand_mean
+from inmoose.batch.pycombat import standardise_data, fit_model, adjust_data
+from inmoose.batch import pycombat
 
 class test_pycombat(unittest.TestCase):
 

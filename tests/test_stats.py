@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from edgepy import pnbinom, qnbinom
+from inmoose.edgepy import pnbinom, qnbinom
 
 class test_nbinom(unittest.TestCase):
     def test_nbinom(self):

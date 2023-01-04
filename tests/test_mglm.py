@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from .helper import rnbinom
 
-from edgepy import mglmLevenberg, mglmOneGroup, mglmOneWay, designAsFactor, Factor
+from inmoose.edgepy import mglmLevenberg, mglmOneGroup, mglmOneWay, designAsFactor, Factor
 
 class test_mglm(unittest.TestCase):
 

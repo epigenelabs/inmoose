@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from .helper import rnbinom
 
-from edgepy import aveLogCPM, DGEList
+from inmoose.edgepy import aveLogCPM, DGEList
 
 class test_aveLogCPM(unittest.TestCase):
 

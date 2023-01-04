@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from edgepy.makeCompressedMatrix import makeCompressedMatrix
+from inmoose.edgepy.makeCompressedMatrix import makeCompressedMatrix
 
 class test_DGEList(unittest.TestCase):
     def test_makeCompressedMatrix(self):
