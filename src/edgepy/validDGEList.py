@@ -19,6 +19,9 @@
 # This file is based on the file 'R/validDGEList.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
+import numpy as np
+from .factor import gl
+
 def validDGEList(y):
     """
     Check for standard components of DGEList object
@@ -26,8 +29,7 @@ def validDGEList(y):
     """
     if y.counts is None:
         raise RuntimeError("No count matrix")
-    # TODO
-    #y.counts = as.matrix(y.counts)
+    y.counts = np.asarray(y.counts, order='F')
     nlib = y.counts.shape[1]
     if (y.samples.group.values == None).any():
         y.samples.group = gl(1, nlib)
@@ -37,3 +39,4 @@ def validDGEList(y):
         y.samples.norm_factors = np.ones(nlib)
 
     return y
+

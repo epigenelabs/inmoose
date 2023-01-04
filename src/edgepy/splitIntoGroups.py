@@ -22,7 +22,7 @@
 from .dropEmptyLevels import dropEmptyLevels
 import numpy as np
 
-def splitIntoGroups(self):
+def splitIntoGroups_DGEList(self):
     group = self.samples.group
     return splitIntoGroups(self.counts, group=group)
 

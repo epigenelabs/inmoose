@@ -34,6 +34,7 @@ class DGEList(object):
     from .estimateGLMTagwiseDisp import estimateGLMTagwiseDisp_DGEList as estimateGLMTagwiseDisp
     from .glmFit import glmFit_DGEList as glmFit
     from .predFC import predFC_DGEList as predFC
+    from .splitIntoGroups import splitIntoGroups_DGEList as splitIntoGroups
 
     def __init__(self, counts, lib_size=None, norm_factors=None, samples=None, group=None, genes=None, remove_zeroes=False):
         """
