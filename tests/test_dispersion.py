@@ -142,17 +142,6 @@ class test_dispersion(unittest.TestCase):
         ref = [0.1615715,0.1615715,0.1391734,0.1337411,0.3107981,0.1923997,0.1378647,0.1995537,0.1175669,0.2083242,0.1458728,0.1251945,0.1974399,0.1553991,0.1252869,0.1348553,0.1209722,0.2864446,0.1629382,0.1191966,0.1243685,0.1157305]
         self.assertTrue(np.allclose(e.tagwise_dispersion, ref, atol=1e-6, rtol=0))
 
-    @unittest.skip("implementation pending")
-    def test_CommonDisp(self):
-
-        #d.filterByExpr()
-
-        # estimate common dispersion and find differences in expression
-        d = d.estimateCommonDisp()
-        print(d.common_dispersion)
-        #de = exactTest(d)
-        #summary(de.table)
-        #topTags(de)
 
 if __name__ == '__main__':
     unittest.main()
