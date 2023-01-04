@@ -1,7 +1,15 @@
+from codecs import open
+import os
 import sys
 import numpy
 from setuptools import Extension, setup
 from Cython.Build import cythonize
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+about: dict = dict()
+with open(os.path.join(here, "inmoose", "__version__.py"), "r", "utf-8") as fp:
+    exec(fp.read(), about)
 
 macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 profiling = False
@@ -41,7 +49,7 @@ setup(
         "scipy",
     ],
     name="inmoose",
-    version="0.1.0",
+    version=about["__version__"],
     author="Maximilien Colange",
     author_email="maximilien@epigenelabs.com",
     description="InMoose: the Integrated Multi Omic Open Source Environment",
