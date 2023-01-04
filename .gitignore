@@ -1,0 +1,4 @@
+# Python files
+build
+*.pyc
+*.egg-info
