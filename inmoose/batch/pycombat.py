@@ -595,26 +595,30 @@ def adjust_data(s_data, gamma_star, delta_star, batch_design, n_batches, var_poo
 def pycombat(data, batch, mod=[], par_prior=True, prior_plots=False, mean_only=False, ref_batch=None, precision=None, **kwargs):
     """Corrects batch effect in microarray expression data. Takes an gene expression file and a list of known batches corresponding to each sample.
 
-    Arguments:
-        data {matrix} -- The expression matrix (dataframe). It contains the information about the gene expression (rows) for each sample (columns).
+    Arguments
+    ---------
+    data : matrix
+        expression matrix (dataframe). It contains the information about the gene expression (rows) for each sample (columns).
+    batch : list
+        batch indices. Must have as many elements as the number of columns in the expression matrix.
+    mod : list, optional
+        list (or list of lists) of covariate(s) indexes. The mod list describes the covariate(s) for each sample.
+        Each mod list has as many elements as the number of columns in the expression matrix (default: `[]`).
+    par_prior : bool, optional
+        False for non-parametric estimation of batch effects (default: `True`).
+    prior_plots : bool, optional
+        True if requires to plot the priors (default: `False`). -- Not implemented yet!
+    mean_only : bool, optional
+        True iff just adjusting the means and not individual batch effects (default: `False`).
+    ref_batch, optional
+        batch id of the batch to use as reference (default: `None`)
+    precision : float, optional
+        level of precision for precision computing (default: `None`).
 
-        batch {list} -- List of batch indexes. The batch list describes the batch for each sample. The batches list has as many elements as the number of columns in the expression matrix.
-
-    Keyword Arguments:
-        mod {list} -- List (or list of lists) of covariate(s) indexes. The mod list describes the covariate(s) for each sample. Each mod list has as many elements as the number of columns in the expression matrix (default: {[]}).
-
-        par_prior {bool} -- False for non-parametric estimation of batch effects (default: {True}).
-
-        prior_plots {bool} -- True if requires to plot the priors (default: {False} -- Not implemented yet!).
-
-        mean_only {bool} -- True iff just adjusting the means and not individual batch effects (default: {False}).
-
-        ref_batch -- reference batch selected (default: {None}).
-
-        precision {float} -- level of precision for precision computing (default: {None}).
-
-    Returns:
-        bayes_data_df -- The expression dataframe adjusted for batch effects.
+    Returns
+    -------
+    dataframe
+        the input expression matrix adjusted for batch effects.
     """
 
     list_samples = data.columns

@@ -20,7 +20,14 @@ import numpy as np
 from pandas import Categorical
 
 class Factor(Categorical):
+    """A class to represent a factor, as in R.
+
+    It is essentially a :obj:`pandas.Categorical` object, with additional methods to mimic R API.
+    """
+
     def __init__(self, arr):
+        """Constructs a Factor instance from an array
+        """
         super().__init__(arr)
 
 #    def __len__(self):

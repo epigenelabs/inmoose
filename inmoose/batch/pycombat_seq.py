@@ -30,27 +30,31 @@ from .helper_seq import vec2mat, match_quantiles
 def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
     """pycombat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
 
-    :param counts: raw count matrix from genomic studies (dimensions gene x sample)
-    :type counts: matrix
-    :param batch: vector/factor for batch
-    :type batch: vector or factor
-    :param group: vector/factor for biological condition of interest
-    :type group: vector or factor, optional
-    :param covar_mod: model matrix for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
-    :type covar_mod: matrix, optional
-    :param full_mod: if True, include condition of interest in model
-    :type full_mod: bool
-    :param shrink: whether to apply shrinkage on parameter estimation
-    :type shrink: bool
-    :param shrink_disp: whether to apply shrinkage on dispersion
-    :type shrink_disp: bool
-    :param gene_subset_n: number of genes to use in emprirical Bayes estimation, only useful when shrink = True
-    :type gene_subset_n: int, optional
-    :param ref_batch: batch id of the batch to use as reference, defaults to None
-    :type ref_batch: optional
+    Arguments
+    ---------
+    counts : matrix
+        raw count matrix from genomic studies (dimensions gene x sample)
+    batch : vector or list or :obj:`inmoose.edgepy.factor.Factor`
+        Batch indices. Must have as many elements as the number of columns in the expression matrix.
+    group : vector or list or :obj:`inmoose.edgepy.factor.Factor`, optional
+        vector/factor for biological condition of interest (default: `None`)
+    covar_mod : matrix, optional
+        model matrix for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
+    full_mod : bool, optional
+        if True, include condition of interest in model
+    shrink : bool, optional
+        whether to apply shrinkage on parameter estimation
+    shrink_disp : bool, optional
+        whether to apply shrinkage on dispersion
+    gene_subset_n : int, optional
+        number of genes to use in emprirical Bayes estimation, only useful when shrink = True
+    ref_batch, optional
+        batch id of the batch to use as reference (default: `None`)
 
-    :return: the input count matrix adjusted from batch effects
-    :rtype: same as `counts`
+    Returns
+    -------
+    matrix
+        the input expression matrix adjusted for batch effects
     """
 
     ####### Preparation #######
