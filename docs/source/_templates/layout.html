@@ -1,0 +1,19 @@
+{% extends "!layout.html" %}
+  {% block footer %} {{ super() }}
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #333333;
+    }
+    /* Sidebar */
+    .wy-nav-side {
+      background: #6600CC;
+    }
+    /* functions */
+    /* .rst-content dl:not(.docutils) dt {
+      background: #B0F0F7;
+      border-top: #10DDBA;
+    } */
+  </style>
+{% endblock %}
