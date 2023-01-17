@@ -19,7 +19,7 @@ release = version
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 # logo
-html_log = "epigenelogo.png"
+html_logo = "inmoose.png"
 html_favicon = "epigenelogo_favicon.png"
 
 import sphinx_rtd_theme
@@ -32,7 +32,6 @@ extensions = [
 
 # Napoleon settings
 # https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
-
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 
