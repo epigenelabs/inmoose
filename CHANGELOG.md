@@ -3,6 +3,7 @@
 ## [0.2.5-dev]
 
 - add and optimize a few functions in the `utils.stats` module
+- add a module featuring a port of the DESeq2 R package
 
 ## [0.2.4]
 
