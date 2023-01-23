@@ -17,6 +17,7 @@ from . import edgepy
 from . import pycombat
 from . import utils
 from . import consensus_clustering
+from . import deseq2
 
 import logging
 

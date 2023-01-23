@@ -5,6 +5,7 @@
 - add a `data` module, with two RNA-Seq datasets: `pasilla` and `airway`
 - fix build on readthedocs
 - add and optimize a few functions in the `utils.stats` module
+- add a module featuring a port of the DESeq2 R package
 
 ## [0.2.3]
 

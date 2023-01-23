@@ -23,6 +23,7 @@ dependencies = [
   "scipy",
   "seaborn",
   "scikit-learn",
+  "statsmodels",
 ]
 
 [project.urls]

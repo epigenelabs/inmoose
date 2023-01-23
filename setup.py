@@ -66,6 +66,7 @@ setup(
         "inmoose/edgepy/edgepy_cpp",
         "inmoose/sim",
         "inmoose/utils",
+        "inmoose/deseq2",
     ],
     package_data={
         "inmoose/edgepy/edgepy_cpp": [
