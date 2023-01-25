@@ -106,7 +106,8 @@ def pycombat_seq(
     # Remove genes with only 0 counts in any batch
     keep = np.full((counts.shape[0],), True)
     for b in batch.categories:
-        keep &= counts[:, batch == b].sum(axis=1) > 0
+        # force ndarray instead of matrices (if any), and squeeze to remove dims of length 1
+        keep &= np.asarray(counts[:, batch == b].sum(axis=1) > 0).squeeze()
     rm = np.logical_not(keep).nonzero()[0]
     keep = keep.nonzero()[0]
     countsOri = counts.copy()
