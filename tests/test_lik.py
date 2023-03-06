@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from .helper import rnbinom
 
+from inmoose.utils import rnbinom
 from inmoose.edgepy import DGEList, adjustedProfileLik
 
 class test_dispersion(unittest.TestCase):
