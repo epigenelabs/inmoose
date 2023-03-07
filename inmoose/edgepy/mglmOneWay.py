@@ -20,7 +20,7 @@
 
 
 import numpy as np
-from .factor import Factor, asfactor
+from ..utils import Factor, asfactor
 from .makeCompressedMatrix import _compressOffsets, _compressDispersions, _compressWeights
 from .mglmOneGroup import mglmOneGroup
 from edgepy_cpp import cxx_get_one_way_fitted

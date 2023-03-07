@@ -19,7 +19,7 @@
 # This file is based on the file 'R/dropEmptyLevels.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
-from .factor import Factor
+from ..utils import Factor
 
 def dropEmptyLevels(x):
     """

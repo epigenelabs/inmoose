@@ -6,7 +6,6 @@ from .DGEList import DGEList
 from .dispCoxReid import dispCoxReid
 from .estimateGLMCommonDisp import estimateGLMCommonDisp
 from .estimateGLMTagwiseDisp import estimateGLMTagwiseDisp
-from .factor import Factor, gl, asfactor
 from .glmFit import glmFit
 from .maximizeInterpolant import maximizeInterpolant
 from .mglmLevenberg import mglmLevenberg

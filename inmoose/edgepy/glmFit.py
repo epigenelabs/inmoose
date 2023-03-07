@@ -21,8 +21,8 @@
 
 import numpy as np
 
+from ..utils import asfactor
 from .DGEGLM import DGEGLM
-from .factor import asfactor
 from .makeCompressedMatrix import _compressDispersions, _compressOffsets
 from .mglmLevenberg import mglmLevenberg
 from .mglmOneWay import designAsFactor, mglmOneWay

@@ -24,7 +24,7 @@ import pandas as pd
 from warnings import warn
 from edgepy_cpp import is_integer_array
 
-from .factor import Factor
+from ..utils import Factor
 from .utils import _isAllZero
 
 class DGEList(object):

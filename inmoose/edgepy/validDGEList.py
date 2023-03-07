@@ -20,7 +20,7 @@
 
 
 import numpy as np
-from .factor import gl
+from ..utils import gl
 
 def validDGEList(y):
     """

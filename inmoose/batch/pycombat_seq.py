@@ -23,7 +23,8 @@ from pandas import DataFrame
 from patsy import dmatrix
 from warnings import warn
 
-from ..edgepy import asfactor, DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
+from ..edgepy import DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
+from ..utils import asfactor
 from .covariates import check_confounded_covariates
 from .helper_seq import vec2mat, match_quantiles
 
@@ -34,9 +35,9 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     ---------
     counts : matrix
         raw count matrix from genomic studies (dimensions gene x sample)
-    batch : vector or list or :obj:`inmoose.edgepy.factor.Factor`
+    batch : vector or list or :obj:`inmoose.utils.factor.Factor`
         Batch indices. Must have as many elements as the number of columns in the expression matrix.
-    group : vector or list or :obj:`inmoose.edgepy.factor.Factor`, optional
+    group : vector or list or :obj:`inmoose.utils.factor.Factor`, optional
         vector/factor for biological condition of interest (default: `None`)
     covar_mod : matrix, optional
         model matrix for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
