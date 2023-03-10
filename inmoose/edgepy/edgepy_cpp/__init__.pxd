@@ -24,7 +24,6 @@ from numpy cimport ndarray
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data)
 
 cdef extern from "objects.h":
-    cpdef void init_numpy_c_api()
     cpdef bool is_integer_array(ndarray arr) except +
 
 cdef extern from "add_prior_count.h":

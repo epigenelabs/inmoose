@@ -11,6 +11,7 @@ about: dict = dict()
 with open(os.path.join(here, "inmoose", "__version__.py"), "r", "utf-8") as fp:
     exec(fp.read(), about)
 
+cxx_compile_flags = ["-std=c++17"]
 macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 profiling = False
 linetrace = False
@@ -19,6 +20,17 @@ if "--profile" in sys.argv:
     linetrace = True
     macros += [("CYTHON_TRACE_NOGIL", "1")]
     sys.argv.remove("--profile")
+
+common_cpp = Extension(
+    "inmoose.common_cpp",
+    [
+        'inmoose/common_cpp/common_cpp.pyx',
+        'inmoose/common_cpp/matrix.cpp',
+    ],
+    include_dirs = [numpy.get_include()],
+    extra_compile_args = cxx_compile_flags,
+    define_macros = macros,
+    )
 
 edgepy_cpp = Extension(
     "inmoose.edgepy.edgepy_cpp",
@@ -34,8 +46,8 @@ edgepy_cpp = Extension(
         'inmoose/edgepy/edgepy_cpp/nbdev.cpp',
         'inmoose/edgepy/edgepy_cpp/objects.cpp',
     ],
-    include_dirs = [numpy.get_include()],
-    extra_compile_args = ["-std=c++17"],
+    include_dirs = [numpy.get_include(), 'inmoose/common_cpp/'],
+    extra_compile_args = cxx_compile_flags,
     define_macros = macros,
     )
 
@@ -75,7 +87,7 @@ setup(
         'utils.h',
     ] },
     ext_modules = cythonize(
-        [edgepy_cpp],
+        [common_cpp, edgepy_cpp],
         annotate = True,
         gdb_debug = True,
         emit_linenums = True,

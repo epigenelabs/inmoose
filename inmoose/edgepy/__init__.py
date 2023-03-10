@@ -1,3 +1,4 @@
+from .. import common_cpp
 from .addPriorCount import addPriorCount
 from .adjustedProfileLik import adjustedProfileLik
 from .aveLogCPM import aveLogCPM

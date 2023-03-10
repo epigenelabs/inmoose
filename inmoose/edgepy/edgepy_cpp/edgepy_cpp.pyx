@@ -20,11 +20,6 @@ import numpy as np
 from scipy.linalg.cython_lapack cimport dormqr, dgeqrf, dtrtrs, dpotrf, dpotrs, dsytrf
 from scipy.linalg.cython_blas cimport dgemv
 
-#from edgepy_cpp import QRDecomposition
-
-# initialization
-init_numpy_c_api()
-
 cdef public object make_levenberg_result "make_levenberg_result"(
         ndarray[double, ndim=2] coefficients,
         ndarray[double, ndim=2] fitted_values,
