@@ -25,7 +25,7 @@ import numpy as np
 from .utils import _isAllZero
 from .makeCompressedMatrix import _compressDispersions, _compressWeights, _compressOffsets, _compressPrior
 from .mglmOneGroup import mglmOneGroup
-from edgepy_cpp import cxx_ave_log_cpm
+from .edgepy_cpp import cxx_ave_log_cpm
 
 def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion=None):
     """

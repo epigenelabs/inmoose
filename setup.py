@@ -21,7 +21,7 @@ if "--profile" in sys.argv:
     sys.argv.remove("--profile")
 
 edgepy_cpp = Extension(
-    "edgepy_cpp",
+    "inmoose.edgepy.edgepy_cpp",
     [
         'inmoose/edgepy/edgepy_cpp/edgepy_cpp.pyx',
         'inmoose/edgepy/edgepy_cpp/add_prior.cpp',

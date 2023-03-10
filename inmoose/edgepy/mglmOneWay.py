@@ -23,7 +23,7 @@ import numpy as np
 from ..utils import Factor, asfactor
 from .makeCompressedMatrix import _compressOffsets, _compressDispersions, _compressWeights
 from .mglmOneGroup import mglmOneGroup
-from edgepy_cpp import cxx_get_one_way_fitted
+from .edgepy_cpp import cxx_get_one_way_fitted
 from scipy.linalg import solve
 
 def designAsFactor(design):

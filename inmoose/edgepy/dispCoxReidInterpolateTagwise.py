@@ -27,7 +27,7 @@ from .aveLogCPM import aveLogCPM
 from .makeCompressedMatrix import _compressOffsets, _compressWeights
 from .maximizeInterpolant import maximizeInterpolant
 from .movingAverageByCol import movingAverageByCol
-from edgepy_cpp import cxx_maximize_interpolant
+from .edgepy_cpp import cxx_maximize_interpolant
 
 def dispCoxReidInterpolateTagwise(y, design, dispersion, offset=None, trend=True, AveLogCPM=None, min_row_sum=5, prior_df=10, span=0.3, grid_npts=11, grid_range=(-6,6), weights=None):
     """

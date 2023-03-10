@@ -23,7 +23,7 @@ import numpy as np
 
 from .makeCompressedMatrix import _compressDispersions, _compressOffsets, _compressWeights
 from .utils import _isAllZero
-from edgepy_cpp import cxx_fit_one_group
+from .edgepy_cpp import cxx_fit_one_group
 
 def mglmOneGroup(y, dispersion=0, offset=0, weights=None, coef_start=None, maxit=50, tol=1e-10, verbose=False):
     """

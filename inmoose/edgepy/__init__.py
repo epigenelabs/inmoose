@@ -16,4 +16,4 @@ from .nbinomDeviance import nbinomDeviance
 from .stats import pnbinom, qnbinom
 from .systematicSubset import systematicSubset
 from .validDGEList import validDGEList
-from edgepy_cpp import *
+from .edgepy_cpp import *

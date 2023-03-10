@@ -22,7 +22,7 @@
 import numpy as np
 from .makeCompressedMatrix import _compressOffsets, _compressDispersions, _compressWeights
 from .glmFit import glmFit
-from edgepy_cpp import cxx_compute_apl
+from .edgepy_cpp import cxx_compute_apl
 
 def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True, start=None, get_coef=False):
     """

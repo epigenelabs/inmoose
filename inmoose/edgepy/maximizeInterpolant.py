@@ -21,7 +21,7 @@
 
 import numpy as np
 
-from edgepy_cpp import cxx_maximize_interpolant
+from .edgepy_cpp import cxx_maximize_interpolant
 
 def maximizeInterpolant(x,y):
     """
