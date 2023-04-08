@@ -18,10 +18,9 @@
 
 # This file is based on the file 'R/DGEList.R' of the Bioconductor edgeR package (version 3.38.4).
 
-
+import logging
 import numpy as np
 import pandas as pd
-from warnings import warn
 
 from .edgepy_cpp import is_integer_array
 from ..utils import Factor
@@ -69,7 +68,7 @@ class DGEList(object):
         if minlibsize == 0:
             if np.logical_and(lib_size == 0, (counts.sum(axis=0) > 0)).any():
                 raise ValueError("library size set to zero but counts are nonzero")
-            warn("library size of zero detected")
+            logging.warnings.warn("library size of zero detected")
 
         # Check norm_factors
         if norm_factors is None:

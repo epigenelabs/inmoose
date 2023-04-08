@@ -19,6 +19,7 @@
 # This file is based on the file 'R/mglmOneGroup.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
+import logging
 import numpy as np
 
 from .makeCompressedMatrix import _compressDispersions, _compressOffsets, _compressWeights
@@ -51,8 +52,8 @@ def mglmOneGroup(y, dispersion=0, offset=0, weights=None, coef_start=None, maxit
     output = cxx_fit_one_group(y, offset, dispersion, weights, maxit, tol, coef_start)
 
     # Convergence achieved for all tags?
-    if verbose and np.count_nonzero(output[1]) > 0:
-        warn("max iterations exceeded for ", np.count_nonzero(output[1]), "tags")
+    if np.count_nonzero(output[1]) > 0:
+        logging.debug(f"max iterations exceeded for {np.count_nonzero(output[1])} tags")
 
     return output[0]
 
