@@ -2,7 +2,7 @@
 
 ## [0.2.5-dev]
 
-- None
+- add and optimize a few functions in the `utils.stats` module
 
 ## [0.2.4]
 
