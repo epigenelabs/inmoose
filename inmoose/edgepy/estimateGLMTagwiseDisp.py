@@ -19,6 +19,7 @@
 # This file is based on the file 'R/estimateGLMTagwiseDisp.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
+import logging
 import numpy as np
 
 from .aveLogCPM import aveLogCPM
@@ -70,7 +71,7 @@ def estimateGLMTagwiseDisp(y, dispersion, design=None, offset=None, prior_df=10,
         design = np.asarray(design, order='F')
 
     if design.shape[1] >= y.shape[1]:
-        warn("No residual df: setting dispersion to NA")
+        logging.warnings.warn("No residual df: setting dispersion to NA")
         return np.full((ntags,), np.nan, order='F')
 
     # Check offset
