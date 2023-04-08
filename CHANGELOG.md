@@ -4,6 +4,7 @@
 
 - add a `data` module, with two RNA-Seq datasets: `pasilla` and `airway`
 - fix build on readthedocs
+- add and optimize a few functions in the `utils.stats` module
 
 ## [0.2.3]
 
