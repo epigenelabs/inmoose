@@ -86,30 +86,6 @@ def qnbinom(p, size, prob=None, mu=None, lower_tail=True):
         return nbinom.isf(p, size, prob)
 
 
-def pnorm(q, mean=0, sd=1, lower_tail=True, log_p=False):
-    """
-    Distribution function of the normal distribution.
-
-    Parameters
-    ----------
-    q           vector of quantiles
-    mean        vector of means
-    sd          vector of standard deviations
-    log_p       if True, probabilities are given in log
-    lower_tail  if True, probabilities are P[X <= x], otherwise P[X > x]
-    """
-    if lower_tail and log_p:
-        f = norm.logcdf
-    elif lower_tail and not log_p:
-        f = norm.cdf
-    elif not lower_tail and log_p:
-        f = norm.logsf
-    elif not lower_tail and not log_p:
-        f = norm.sf
-
-    return f(q, loc=mean, scale=sd)
-
-
 def qnorm(p, mean=0, sd=1, lower_tail=True, log_p=False):
     """
     Quantile function of the normal distribution.

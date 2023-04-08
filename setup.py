@@ -23,6 +23,16 @@ common_cpp = Extension(
     define_macros=macros,
 )
 
+stats_cpp = Extension(
+    "inmoose.utils.stats_cpp",
+    [
+        "inmoose/utils/_stats.pyx",
+    ],
+    include_dirs=[numpy.get_include()],
+    extra_compile_args=cxx_compile_flags,
+    define_macros=macros,
+)
+
 edgepy_cpp = Extension(
     "inmoose.edgepy.edgepy_cpp",
     [
@@ -98,5 +108,5 @@ setup(
             "untreated4fb.txt",
         ],
     },
-    ext_modules=[common_cpp, edgepy_cpp],
+    ext_modules=[common_cpp, edgepy_cpp, stats_cpp],
 )
