@@ -10,6 +10,9 @@ about: dict = dict()
 with open(os.path.join(here, "inmoose", "__version__.py"), "r", "utf-8") as fp:
     exec(fp.read(), about)
 
+with open(os.path.join(here, "README.md"), "r") as fh:
+    long_description = fh.read()
+
 cxx_compile_flags = ["-std=c++17"]
 macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 profiling = False
@@ -64,7 +67,14 @@ setup(
     author="Maximilien Colange",
     author_email="maximilien@epigenelabs.com",
     description="InMoose: the Integrated Multi Omic Open Source Environment",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url = "https://github.com/epigenelabs/inmoose",
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+    ],
     packages = [
         "inmoose",
         "inmoose/batch",
