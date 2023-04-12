@@ -44,10 +44,10 @@ Please refer to [CONTRIBUTING.md](https://github.com/epigenelabs/inmoose/blob/ma
 
 # References
 
-[1] Behdenna A, Haziza J, Azencot CA and Nordor A. (2020) pyComBat, a Python tool for batch effects correction in high-throughput molecular data using empirical Bayes methods. bioRxiv doi: 10.1101/2020.03.17.995431
+[1] Behdenna A, Haziza J, Azencot CA and Nordor A. (2020) pyComBat, a Python tool for batch effects correction in high-throughput molecular data using empirical Bayes methods. bioRxiv. https://doi.org/10.1101/2020.03.17.995431
 
-[2] Johnson W E, et al. (2007) Adjusting batch effects in microarray expression data using empirical Bayes methods. Biostatistics, 8, 118–12
+[2] Johnson W E, et al. (2007) Adjusting batch effects in microarray expression data using empirical Bayes methods. Biostatistics, 8, 118–12. https://doi.org/10.1093/biostatistics/kxj037
 
 [3] Zhang Y, et al. (2020) ComBat-Seq: batch effect adjustment for RNASeq count
-data. NAR Genomics and Bioinformatics, 2(3)
+data. NAR Genomics and Bioinformatics, 2(3). https://doi.org/10.1093/nargab/lqaa078
 
