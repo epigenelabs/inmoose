@@ -65,7 +65,13 @@ setup(
     author_email="maximilien@epigenelabs.com",
     description="InMoose: the Integrated Multi Omic Open Source Environment",
     url = "https://github.com/epigenelabs/inmoose",
-    packages = ["inmoose", "inmoose/batch", "inmoose/edgepy", "inmoose/edgepy/edgepy_cpp"],
+    packages = [
+        "inmoose",
+        "inmoose/batch",
+        "inmoose/edgepy",
+        "inmoose/edgepy/edgepy_cpp",
+        "inmoose/utils",
+    ],
     package_data = {
         "inmoose/edgepy/edgepy_cpp": [
             'edgepy_cpp.pyx',
