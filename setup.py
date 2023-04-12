@@ -3,7 +3,6 @@ import os
 import sys
 import numpy
 from setuptools import Extension, setup
-from Cython.Build import cythonize
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -67,31 +66,31 @@ setup(
     description="InMoose: the Integrated Multi Omic Open Source Environment",
     url = "https://github.com/epigenelabs/inmoose",
     packages = ["inmoose", "inmoose/batch", "inmoose/edgepy", "inmoose/edgepy/edgepy_cpp"],
-    package_data = { "edgepy/edgepy_cpp": [
-        'edgepy_cpp.pyx',
-        'add_prior.h',
-        'add_prior_count.h',
-        'ave_log_cpm.cpp',
-        'compute_apl.cpp',
-        'compute_nbdev.cpp',
-        'edgepy_cpp.h',
-        'fit_levenberg.h',
-        'fit_one_group.cpp',
-        'get_one_way_fitted.cpp',
-        'glm.h',
-        'initialize_levenberg.cpp',
-        'initialize_levenberg.h',
-        'interpolator.h',
-        'maximize_interpolant.cpp',
-        'objects.h',
-        'utils.h',
-    ] },
-    ext_modules = cythonize(
-        [common_cpp, edgepy_cpp],
-        annotate = True,
-        gdb_debug = True,
-        emit_linenums = True,
-        compiler_directives = { 'language_level': "3", 'profile': profiling, 'linetrace': linetrace },
-    )
+    package_data = {
+        "inmoose/edgepy/edgepy_cpp": [
+            'edgepy_cpp.pyx',
+            '__init__.pxd',
+            'add_prior.h',
+            'add_prior_count.h',
+            'ave_log_cpm.cpp',
+            'compute_apl.cpp',
+            'compute_nbdev.cpp',
+            'edgepy_cpp.h',
+            'fit_levenberg.h',
+            'fit_one_group.cpp',
+            'get_one_way_fitted.cpp',
+            'glm.h',
+            'initialize_levenberg.cpp',
+            'initialize_levenberg.h',
+            'interpolator.h',
+            'maximize_interpolant.cpp',
+            'objects.h',
+            'utils.h',
+        ],
+        "inmoose/common_cpp": [
+            'matrix.h',
+        ],
+    },
+    ext_modules = [common_cpp, edgepy_cpp],
 )
 
