@@ -36,17 +36,62 @@ def nbinomLRT(
     type_="DESeq2",
 ):
     """
+    Likelihood ratio test (chi-squared test) for GLMs
+
+    This function tests for significance of change in deviance between a full
+    and reduced model which are provided as :code:`formula`. Fitting uses
+    previously calculated :attr:`.DESeqDataSet.sizeFactors` (or
+    :attr:`.DESeqDataSet.normalizationFactors`) and dispersion estimates.
+
+    The difference in deviance is compared to chi-squared distribution with df
+    = (reduced residual degrees of freedom - full residual degrees of freedom).
+    This function is an alternative to :func:`nbinomWaldTest`.
+
+    See Also
+    --------
+    DESeq
+    nbinomWaldTest
+
     Arguments
     ---------
+    obj : DESeqDataSet
+        a DESeqDataSet
     full
+        the full model formula, this should be the formula in
+        :code:`obj.design`.  Alternatively can be a matrix.
     reduced
-    betaTol
+        a reduced formula to compare against, e.g. the full model with a term
+        or terms of interest removed.
+    betaTol : float
+        control parameter defining convergence
     maxit : int
+        the maximum number of iterations to allow for convergence of the
+        coefficient vector
     useOptim : bool
+        whether to use the native optim function on columns which do not
+        converge within :code:`maxit` iterations
     quiet : bool
+        whether to print messages at each step
     useQR : bool
+        whether to use the QR decomposition of the design matrix while fitting
+        the GLM
     minmu : float
+        lower bound on the estimated count while fitting the GLM
     type_ : "DESeq2" or "glmGamPoi"
+        If :code:`"DESeq2"`, a classical Likelihood ratio test based on the Chi-squared distribution is conducted.
+
+        If :code:`"glmGamPoi"` and previously the dispersion has been estimated
+        with :code:`"glmGamPoi"` as well, a quasi-likelihood ratio test based
+        on the F-distribution is conducted. It is supposed to be more accurate,
+        because it takes the uncertainty of dispersion estimate into account
+        in the same way that a t-test improves upon a Z-test.
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj` with new results columns accessible through
+        :meth:`.DESeqDataSet.results`. The coefficients and standard errors are
+        reported on a log2 scale.
     """
 
     if type_ not in ["DESeq2", "glmGamPoi"]:

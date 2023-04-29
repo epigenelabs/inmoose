@@ -32,9 +32,35 @@ def estimateBetaPriorVar(
     obj, betaPriorMethod="weighted", upperQuantile=0.05, modelMatrix=None
 ):
     """
+    steps for estimating the beta prior variance
+
+    This lower-level function is called within :func:`DESeq` or
+    :func:`nbinomWaldTest`. End users should use those higher-level functions.
+
     Arguments
     ---------
     obj : DESeqDataSet
+        a :class:`.DESeqDataSet`
+    betaPriorMethod : { "weighted", "quantile" }
+        the method for calculating the beta prior variance:
+
+        - :code:`"quantile"` matches a normal distribution using the upper
+          quantile of the finite MLE betas.
+        - :code:`"weighted"` matches a normal distribution using the upper
+          quantile, but weighting by the variance of the MLE betas.
+
+    upperQuantile : float
+        the upper quantile to be used for the method of beta prior variance
+        estimation
+    modelMatrix : design matrix
+        an optional design matrix, typically left :code:`None` and built within
+        the function
+
+    Returns
+    -------
+    ndarray
+        the vector of variances for the prior on the beta in the :func:`DESeq`
+        GLM
     """
     objNZ = obj[:, ~obj.var["allZero"]]
 

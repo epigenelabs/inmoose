@@ -89,12 +89,14 @@ class DispFunction:
 
 class DESeqDataSet(AnnData):
     """
-    AnnData stores observations (samples) of variables/features in the rows of a matrix.
+    DESeqDataSet extends AnnData class to store observations (samples) of
+    variables/features in the rows of a matrix. AnnData also offers a
+    convenient way to store observation-wise (per row) and feature-wise (per
+    column) data.
 
-    Attributes
-    ----------
-    modelMatrix : patsy.DesignMatrix
-        the design matrix
+    See Also
+    --------
+    .makeExampleDESeqDataSet
     """
 
     from .dispersions import estimateDispersions_dds as estimateDispersions
@@ -103,12 +105,23 @@ class DESeqDataSet(AnnData):
 
     def __init__(self, countData, clinicalData=None, design=None, ignoreRank=False):
         """
+        DESeqDataSet constructor
+
         Arguments
         ---------
-        countData : pandas.DataFrame
-            Raw counts. One column per gene, one row per sample.
+        countData : pandas.DataFrame or DESeqDataSet
+            Raw counts (if pandas.DataFrame) or DESeqDataSet object to copy.
+            Raw counts matrix has one column per feature (usually genes) and
+            one row per observation (usually single cells or samples).
         clinicalData : pandas.DataFrame
-
+            Observation-wise clinical data. Arbitrary number of columns, as many
+            rows as in countData.
+        design : patsy.DesignMatrix-like
+            An object (formula, matrix...) representing the design matrix. It
+            will be fed to patsy.dmatrix and the resulting patsy.DesignMatrix
+            will be stored in the DESeqDataSet.
+        ignoreRank : bool, optional
+            Whether to ignore testing that the design matrix is full rank.
         """
 
         if isinstance(countData, AnnData):
@@ -133,6 +146,7 @@ class DESeqDataSet(AnnData):
             self.weightsOK = None
 
     def copy(self):
+        """deep copy of self"""
         res = __class__(super().copy())
         res.design = self.design
         for k, v in self.__dict__.items():
@@ -142,6 +156,7 @@ class DESeqDataSet(AnnData):
 
     @property
     def design(self):
+        """design matrix"""
         return self.obsm["design"]
 
     @design.setter
@@ -152,6 +167,16 @@ class DESeqDataSet(AnnData):
 
     @property
     def sizeFactors(self):
+        """
+        accessor for the size factors
+
+        The size factors assign to each sample of the count matrix a value, the
+        size factor, such that sample-wise count values can be brought to a
+        common scale by dividing by the corresponding size factor (as performed
+        by :code:`dds.counts(normalized=True)`.  See :func:`.DESeq` for a
+        description of the use of size factors. If gene-specific normalization
+        is desired for each sample, use :attr:`normalizationFactors`.
+        """
         try:
             return self.obs["sizeFactors"]
         except KeyError:
@@ -173,6 +198,35 @@ class DESeqDataSet(AnnData):
 
     @property
     def normalizationFactors(self):
+        """
+        accessor for the normalization factors
+
+        Gene-specific normalization factors for eacg sample can be provided as
+        a matrix, which will preempt :attr:`sizeFactors`. In some experiments,
+        counts for each sample have varying dependence on covariates, *e.g.* on
+        GC-content for sequencing data run on different days, and in this case
+        it makes sense to provide gene-specific factors for each sample rather
+        than a single size factor.
+
+        Notes
+        -----
+
+        Normalization factors alter the model of :func:`.DESeq` in the
+        following way, for counts :math:`K_{ij}` and normalization factors
+        :math:`NF_{ij}` for gene :math:`i` and sample :math:`j`:
+
+        .. math::
+           K_{ij} \sim \mathcal{NB}(\mu_{ij}, \\alpha_i)
+           \mu_{ij} = NF_{ij} q_{ij}
+
+        Normalization factors are on the scale of the counts (similar to
+        :attr:`sizeFactors`) and unlike offsets, which are typically on the
+        scale of the predictors (in this case, log counts). Normalization
+        factors should include library size normalization. They should have
+        gene-wise geometric mean near 1, as is the case with size factors, such
+        that the mean of normalized counts is close to the mean of unnormalized
+        counts.
+        """
         try:
             return self.layers["normalizationFactors"]
         except KeyError:
@@ -194,6 +248,19 @@ class DESeqDataSet(AnnData):
 
     @property
     def dispersionFunction(self):
+        """
+        dispersion function
+
+        The dispersion function is calculated by
+        :meth:`DESeqDataSet.estimateDispersions` and used by
+        :func:`varianceStabilizingTransformation`. Parametric dispersion fits
+        store the coefficients of the fit as attributes in this property.
+
+        This property cannot be set directly, only through
+        :meth:`DESeqDataSet.setDispFunction`. Setting it will also overwrite
+        :code:`self.var["dispFit"]` and the estimate of the variance of
+        dispersion residuals.
+        """
         return DispFunction(
             self._dispersionFunction, self._dispPriorVar, self._varLogDispEsts
         )
@@ -205,6 +272,32 @@ class DESeqDataSet(AnnData):
         )
 
     def setDispFunction(self, value, estimateVar=True):
+        """
+        Setter for the :attr:`DESeqDataSet.dispersionFunction` property
+
+        This function also overwrites :code:`self.var["dispFit"]` and the
+        estimate of the variance of dispersion residuals (see argument
+        :code:`estimateVar`).
+
+        See also
+        --------
+        estimateDispersions
+
+        Arguments
+        ---------
+        value : function
+            a function
+        estimateVar : bool
+            whether to estimate the variance of the dispersion residuals.
+            Setting this to :code:`False` is needed, *e.g.* in
+            :func:`.estimateDispersionsMAP`, when called on a subset of the full
+            dataset in parallel execution.
+
+        Returns
+        -------
+        DESeqDataSet
+            self object
+        """
         if not isinstance(value, DispFunction):
             value = DispFunction(value)
 
@@ -268,12 +361,34 @@ class DESeqDataSet(AnnData):
         return res
 
     def counts(self, normalized=False, replaced=False):
+        """
+        Accessor for the counts of a :class:`DESeqDataSet`, which are stored as
+        a matrix of non-negative integer, with one row per observation and one
+        column per feature.
+
+        Arguments
+        ---------
+        normalized : bool, optional
+            Flag indicating whether to divide the counts by the size factors or
+            normalization factors before returning. Normalization factors (if
+            present) always preempt size factors.
+        replaced : bool, optional
+            Flag indicating whether to return the counts with outliers replaced
+            instead of the original counts. This flag is meaningful only after
+            a call to :func:`.DESeq`.
+
+        Returns
+        -------
+        ndarray
+            the count data, possibly normalized, possibly with outliers
+            replaced
+        """
         if replaced:
             if "replaceCounts" in self.layers:
                 cnts = self.layers["replaceCounts"]
             else:
                 logging.warnings.warn(
-                    "there is no layer named 'replacedCounts', using original. calling DESeq() will replace outliers if they are detected and store this layers."
+                    "there is no layer named 'replacedCounts', using original. calling DESeq() will replace outliers if they are detected and store this layer."
                 )
                 cnts = self.X
         else:
@@ -349,9 +464,26 @@ class DESeqDataSet(AnnData):
             return self.sizeFactors.to_numpy()[:, None].repeat(self.n_vars, axis=1)
 
     def resultsNames(self):
+        """
+        Return the names of the estimated effects (coefficients) of the model
+
+        Returns
+        -------
+        index
+            the names of the columns available as results, usually a
+            combination of the variable name and a level
+        """
         return self.var.description.filter(regex="log2 fold change").columns
 
     def removeResults(self):
+        """
+        remove results columns from the object
+
+        Returns
+        -------
+        DESeqDataSet
+            :code:`self` with results data removed
+        """
         self.var = self.var.drop(self.var.type.filter("results").columns, axis=1)
         return self
 
@@ -435,6 +567,18 @@ def makeExampleDESeqDataSet(
     seed=None,
 ):
     """
+    Make a simulated :class:`.DESeqDataSet`
+
+    This function constructs a simulated dataset of Negative Binomial data
+    from two conditions. By default, there are no fold changes between the two
+    conditions, but this can be adjusted with the :code:`betaSD` argument.
+
+    See also
+    --------
+    ~inmoose.sim.sim_rnaseq
+        another function to create simulated Negative Binomial data, accounting
+        for conditions, outliers and batches
+
     Arguments
     ---------
     n : int
@@ -442,8 +586,24 @@ def makeExampleDESeqDataSet(
     m : int
         the number of samples
     betaSD : float
-        the dispersion standard deviation
-        optional, defaults to 0
+        the standard deviation for non-intercept betas, i.e.
+        :math:`\\beta \sim \mathcal{N}(0, betaSD)`
+    interceptMean : float
+        the mean of the intercept betas (log2 scale)
+    interceptSD : float
+        the standard deviation of the intercept betas (log2 scale)
+    dispMeanRel
+        a function specifying the relationship of the dispersions on the
+        :code:`2^trueIntercept`
+    sizeFactors : array-like
+        multiplicative factors for each sample
+
+    Returns
+    -------
+    DESeqDataSet
+        a :class:`.DESeqDataSet` with true dispersion, intercept and beta values
+        in :attr:`DESeqDataSet.var`. Note that the true betas are provided on
+        the log2 scale.
     """
     if sizeFactors is None:
         sizeFactors = np.ones(m)

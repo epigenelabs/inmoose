@@ -35,8 +35,21 @@ from .weights import getAndCheckWeights
 
 
 def nbinomLogLike(counts, mu, disp, weights, useWeights):
-    """convenience function for testing the log likelihood
-    for a count matrix, mu matrix and vector disp
+    """
+    Compute the log likelihood for a count matrix, mu matrix and disp vector
+
+    Arguments
+    ---------
+    counts : ndarray
+        a count matrix
+    mu : ndarray
+        matrix of means. Should be broadcastable to the shape of :code:`counts`.
+    disp : ndarray
+        vector of dispersions. Should be broadcastable to the shape of :code:`counts`.
+    weights : ndarray
+        matrix of weights. Should be broadcastable to the shape of :code:`counts`.
+    useWeights : bool
+        whether to use weights
     """
     if disp is None:
         return np.full(counts.shape[1], np.nan)
@@ -62,7 +75,51 @@ def fitNbinomGLMs(
     minmu=0.5,
     type_="DESeq2",
 ):
-    """ """
+    """
+    Fit negative binomial GLMs
+
+    This is a low-level function. Users typically call :func:`nbinomWaldTest`
+    or :func:`nbinomLRT` which calls this function to perform fitting. These
+    functions return a :func:`DESeqDataSet` object with the appropriate columns
+    added. This function returns its resuts as a list.
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        a DESeqDataSet
+    modelMatrix : ndarray
+        the design matrix
+    modelFormula
+        a formula specifying how to construct the design matrix
+    alpha_hat : array-like
+        the dispersion parameters estimates
+    lambda_ : array-like
+        the "ridge" term added for the penalized GLM on the log2 scale
+    renameCols : bool
+        flag indicating whether to give columns variable_B_vs_A style names
+    betaTol : float
+        the relative tolerance for deviance. Fitting stops when
+        :math:`abs(dev - dev_old) / (abs(dev) + 0.1) < betaTol`
+    maxit : int
+        the maximum number of iterations to allow for convergence
+    useOptim : bool
+        flag indicating whether to use optim on rows that have not converged.
+        Fisher scoring is not ideal with multiple groups and sparse count
+        distributions
+    useQR : bool
+        flag indicating whether to use the QR decomposition of the design matrix
+    forceOptim : bool
+        flag indicating whether to use optim on all rows
+    warnNonposVar : bool
+        flag indicating whether to warn about non-positive variances. This flag
+        is intended for advanced users only running LRT without beta prior.
+    minmu : float
+        TODO
+    type_ : str
+
+    Returns
+    -------
+    """
     if type_ not in ["DESeq2", "glmGamPoi"]:
         raise ValueError(f"invalid value for type_: {type_}")
 

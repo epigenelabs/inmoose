@@ -34,7 +34,36 @@ def estimateSizeFactors_dds(
     quiet=False,
 ):
     """
-    Estimate size factors.
+    Estimate the size factors of a :class:`DESeqDataSet`
+
+    This function estimates the size factors using the "median ratio method",
+    described by Equation 5 in Ander and Huber (2010) [1]_.
+
+    The estimated size factors can be accessed through the
+    :attr:`DESeqDataSet.sizeFactors` property of :class:`DESeqDataSet`.
+    Alternative library size estimators can also be supplied through this
+    property.
+
+    See :func:`.DESeq` for a description of the use of size factors in the GLM.
+    One should call this function after building a :obj:`DESeqDataSet`, unless
+    size factors are manually specified with property
+    :attr:`DESeqDataSet.sizeFactors`.  Alternatively, gene-specific
+    normalization factors for each sample can be provided using the
+    :attr:`DESeqDataSet.normalizationFactors` which will always preempt
+    :attr:`DESeqDataSet.sizeFactors` in calculations.
+
+    Internally, the function calls :func:`.estimateSizeFactorsForMatrix`, which
+    provides more details on the calculation.
+
+    References
+    ----------
+    .. [1] S. Anders and W. Huber. 2010. Differential expression for sequence
+       count data. *Genome Biology*, 11:106. :doi:`10.1186/gb-2010-11-10-r106`
+
+    See also
+    --------
+    .DESeq
+    .estimateSizeFactorsForMatrix
 
     Arguments
     ---------
@@ -42,14 +71,50 @@ def estimateSizeFactors_dds(
         the input dataset
     type_ : "ratio", "poscounts" or "iterate"
         the algorithm to estimate the size factors
+
+        :code:`"ratio"` uses the standard median ratio method introduced in
+        DESeq. The size factor is the median ratio of the sample over a
+        "pseudosample": for each gene, the geometric mean of all samples.
+
+        :code:`"poscounts"` and :code:`"iterate"` offer alternative estimators,
+        which can be used even when all genes contain a sample with a zero (a
+        problem for the default method, as the geometric then becomes zero, and
+        the ratio undefined).
+
+        The :code:`"poscounts"` estimator deals with a gene with some zeros by
+        calculating a modified geometric mean by taking the n-th root of the
+        product of the non-zero counts.  This evolved out of use cases with
+        Paul McMurdie's phyloseq package for metagenomic samples.
+
+        The :code:`"iterate"` estimator iterates between estimating the
+        dispersion with a design of ~1, and finding a size factor vector by
+        numerically optimizing the likelihood of the ~1 model.
     locfunc
-        defaults to the median
+        a function to compute a location for a sample. By default, the median is
+        used.
     geoMeans : array-like, optional
-        user-provided geometric means
-    controlGenes : ??
-    normMatrix : ??
+        by default, the geometric means of the counts are calculated within the
+        function. A vector of geometric means from another count matrix can be
+        provided for a "frozen" size factor calculation. The size factors will
+        be scaled to have a geometric mean of 1 when supplying :code:`geoMeans`.
+    controlGenes : array-like, optional
+        index vector specifying those genes to use for size factor estimation
+        (e.g. housekeeping or spike-in genes)
+    normMatrix : ndarray, optional
+        a matrix of normalization factors which do not yet control for library
+        size. Providing :code:`normMatrix` will estimate size factors on the
+        count matrix divided by :code:`normMatrix` and store the product of the
+        size factors and :code:`normMatrix` as
+        :attr:`DESeqDataSet.normalizationFactors`.  It is recommended to divide
+        out the sample-wise geometric mean of :code:`normMatrix` so the
+        sample-wise factors are roughly centered on 1.
     quiet : bool
         controls verbosity, defaults to False
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj`, with the size factors filled in
     """
 
     if type_ not in ["ratio", "poscounts", "iterate"]:
@@ -108,19 +173,42 @@ def estimateSizeFactorsForMatrix(
     counts, type_="ratio", locfunc=np.median, geoMeans=None, controlGenes=None
 ):
     """
+    Low-level function to estimate size factors with robust regression
+
+    Given a matrix or data frame of count data, this function estimates the
+    size factors as follows: each row is divided by the geometric means of the
+    columns. The median (or, if requested, another location estimator) of these
+    ratios (skipping the genes with a geometric mean of zero) is used as the
+    size factor for this row. Typically, one will not call this function
+    directly, but use :meth:`.DESeqDataSet.estimateSizeFactors`.
+
+    See also
+    --------
+    .DESeqDataSet.estimateSizeFactors
+
     Arguments
     ---------
-    counts : pandas.DataFrame
-        raw counts. One column per gene, one row per sample.
+    counts : array-like
+        matrix of raw counts. One column per gene, one row per sample.
     type_ : "ratio" or "poscounts"
-        the algorithm to estimate the size factors
+        the algorithm to estimate the size factors: standard median ratio
+        (:code:`"ratio"`), or there the geometric mean is only calculated over
+        positive counts (:code:`"poscounts"`).
     locfunc
-        a function to compute a location for a sample. By default, the median is used.
-    geoMeans : ??
-        gene-wise geometric mean (i.e. by column)
-        optional
-    controlGenes : ??
-        optional
+        a function to compute a location for a sample. By default, the median
+        is used.
+    geoMeans : ndarray, optional
+        by default, the geometric means of the counts are calculated within
+        the function. A vector of geometric means from another count matrix can
+        be provided for a "frozen" size factor calculation.
+    controlGenes : array-like, optional
+        index vector specifying those genes to use for size factor estimation
+        (e.g. housekeeping or spike-in genes)
+
+    Returns
+    -------
+    ndarray
+        the estimated size factors, one element per row of :code:`counts`
     """
 
     if type_ not in ["ratio", "poscounts"]:
@@ -184,12 +272,6 @@ def estimateSizeFactorsForMatrix(
 def estimateNormFactors(
     counts, normMatrix, locfunc=np.median, geoMeans=None, controlGenes=None
 ):
-    """
-    Arguments
-    ---------
-    counts : pandas.DataFrame
-    """
-
     sf = estimateSizeFactorsForMatrix(
         counts / normMatrix,
         locfunc=locfunc,

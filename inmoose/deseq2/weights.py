@@ -25,7 +25,32 @@ import numpy as np
 
 
 def getAndCheckWeights(obj, modelMatrix, weightThreshold=1e-2):
-    """ """
+    """
+    Check and retrive weights
+
+    Weights checking consists in verifying that the model matrix remains full
+    rank, even when considering weights below `weightThreshold` are considered
+    to be zero.  Checking sets an attribute in `obj`, so that this verification
+    is performed only once.
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        the DESeqDataSet to retrieve weights from
+    modelMatrix : matrix
+        the design matrix
+    weightThreshold : float
+        the threshold below which weights may be considered zero
+
+    Returns
+    -------
+    obj : DESeqDataSet
+        the updated input `obj`
+    weights : ndarray
+        the matrix of weights (same shape as `obj`)
+    useWeights : bool
+        a flag indicating weights are used or not
+    """
     if "weights" in obj.layers:
         useWeights = True
         weights = obj.layers["weights"]

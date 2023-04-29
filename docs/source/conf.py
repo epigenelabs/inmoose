@@ -30,6 +30,8 @@ extensions = [
     "sphinx_rtd_theme",
 ]
 
+nitpick_ignore = [("py:class", "optional"), ("py:class", "array-like")]
+
 # Napoleon settings
 # https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
 napoleon_google_docstring = False
@@ -37,6 +39,7 @@ napoleon_numpy_docstring = True
 
 # Turn on autosummary
 autosummary_generate = True
+autosummary_generate_overwrite = False
 
 # Add a doi role
 extlinks = {

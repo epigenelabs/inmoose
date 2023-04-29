@@ -28,10 +28,15 @@ from ..utils import Factor
 def wtd_quantile(
     x, weights=None, probs=[0, 0.25, 0.5, 0.75, 1], normwt=False, na_rm=True
 ):
-    """this is copied from R package Hmisc, to avoid extra package dependencies.
-    with the alteration of leaving out param 'type' (not used in DESeq2) and
-    commenting out the `isdate` test.
-    NB: this copy was originally done in the original DESeq2 R code.
+    """
+    compute weighted quantiles
+
+    This function is copied from R package `Hmisc
+    <https://hbiostat.org/r/hmisc/>`_, to avoid extra package dependencies,
+    with the alteration of leaving out parameter :code:`type` (not used in
+    DESeq) and commenting out the :code:`isdate` test.
+
+    Note that this copy was already done in the original DESeq2 R code.
     """
     if np.any((probs < 0) | (probs > 1)):
         raise ValueError("Probabilities must be between 0 and 1 inclusive")

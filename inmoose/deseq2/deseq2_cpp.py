@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (C) ??-2022 Michael I. Love, Constantin Ahlmann-Eltze
+# Copyright (C) 2013-2022 Michael I. Love, Constantin Ahlmann-Eltze
 # Copyright (C) 2023 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
@@ -48,9 +48,41 @@ def log_posterior(
     useCR,
 ):
     """
-    This function returns the log posterior of dispersion parameter alpha, for negative binomial variables.
-    Given the counts y, the expected means my, the design matrix x (used for calculating the Cox-Reid adjustment),
-    and the parameters for the normal prior on log alpha
+    This function returns the log posterior of dispersion parameter alpha, for
+    negative binomial variables.  Given the counts y, the expected means mu,
+    the design matrix x (used for calculating the Cox-Reid adjustment), and the
+    parameters for the normal prior on log alpha.
+
+    Arguments
+    ---------
+    log_alpha : float
+        log of the dispersion parameter alpha
+    y : ndarray
+        counts, vector of length N
+    mu : ndarray
+        expected means, same shape as y
+    x : ndarray
+        design matrix, with as many rows as in y
+    log_alpha_prior_mean : float
+        normal prior on log alpha
+    log_alpha_prior_sigmasq : float
+        standard deviation of the prior on log alpha
+    usePrior : bool
+        whether to use prior regularization
+    weights : ndarray
+        weights to apply, same shape as y
+    useWeights : bool
+        whether to use weights
+    weightThreshold : float
+        minimal weight to consider in Cox-Reid regularization
+    useCR : bool
+        whether to use Cox-Reid regularization
+
+    Returns
+    -------
+    float
+        the log value of the posterior, weighted and regularized as specified
+        by the input arguments
     """
     alpha = np.exp(log_alpha)
     if useCR:
@@ -108,8 +140,41 @@ def dlog_posterior(
     useCR,
 ):
     """
-    this function returns the derivative of the log posterior with respect to the log of the
-    dispersion parameter alpha, given the same inputs as the previous function
+    This function returns the derivative of the log posterior with respect to
+    the log of the dispersion parameter alpha, given the same inputs as
+    :func:`log_posterior`.
+
+    Arguments
+    ---------
+    log_alpha : ndarray
+        log of the dispersion parameters alpha, last dim is M (or broadcastable)
+    y : ndarray
+        counts, matrix of shape (N,M) or vector of length N
+    mu : ndarray
+        expected means, same shape as :code:`y`
+    x : ndarray
+        design matrix, shape (N,P)
+    log_alpha_prior_mean : ndarray
+        normal prior on log alpha, vector of length M
+    log_alpha_prior_sigmasq : float
+        standard deviation of the prior on log alpha
+    usePrior : bool
+        whether to use prior regularization
+    weights : ndarray
+        weights to apply, same shape as :code:`y`
+    useWeights : bool
+        whether to use weights
+    weightThreshold : float
+        minimal weight to consider in Cox-Reid regularization
+    useCR : bool
+        whether to use Cox-Reid regularization
+
+    Returns
+    -------
+    ndarray
+        the derivative of the log value of the posterior, weighted and
+        regularized as specified by the input arguments
+        same shape as first argument :code:`log_alpha`
     """
     alpha = np.exp(log_alpha)
     if useCR:
@@ -177,8 +242,41 @@ def d2log_posterior(
     useCR,
 ):
     """
-    this function returns the second derivative of the log posterior with respect to the log of the
-    dispersion parameter alpha, given the same inputs as the previous function
+    This function returns the second derivative of the log posterior with
+    respect to the log of the dispersion parameter alpha, given the same inputs
+    as :func:`log_posterior`.
+
+    Arguments
+    ---------
+    log_alpha : ndarray
+        log of the dispersion parameters alpha, last dim is M (or broadcastable)
+    y : ndarray
+        counts, matrix of shape (N,M) or vector of length N
+    mu : ndarray
+        expected means, same shape as :code:`y`
+    x : ndarray
+        design matrix, shape (N,P)
+    log_alpha_prior_mean : ndarray
+        normal prior on log alpha, vector of length M
+    log_alpha_prior_sigmasq : float
+        standard deviation of the prior on log alpha
+    usePrior : bool
+        whether to use prior regularization
+    weights : ndarray
+        weights to apply, same shape as :code:`y`
+    useWeights : bool
+        whether to use weights
+    weightThreshold : float
+        minimal weight to consider in Cox-Reid regularization
+    useCR : bool
+        whether to use Cox-Reid regularization
+
+    Returns
+    -------
+    ndarray
+        the second derivative of the log value of the posterior, weighted and
+        regularized as specified by the input arguments
+        same shape as first argument :code:`log_alpha`
     """
     alpha = np.exp(log_alpha)
     x_orig = x.copy()
@@ -287,6 +385,70 @@ def fitDisp(
     weightThreshold,
     useCR,
 ):
+    """
+    Fit dispersions for negative binomial GLMs.
+
+    This function estimates the dispersion parameter (alpha) for negative
+    binomial generalized linear models. The fitting is performed on the log
+    scale.
+
+    Arguments
+    ---------
+    y : ndarray
+        matrix of counts, shape (N,M)
+    x : ndarray
+        design matrix, shape (M,K)
+    mu_hat : ndarray
+        the expected mean values, shape (N,M)
+    log_alpha : ndarray
+        vector of initial guesses for log(alpha), shape N
+    log_alpha_prior_mean : ndarray
+        vector of fitted values for log(alpha), shape N
+    log_alpha_prior_sigmasq : float
+        the variance of the prior
+    min_log_alpha : float
+        the minimum value for log(alpha)
+    kappa_0 : float
+        parameter for initial proposal in the backtracking search.
+        initial proposal = log(alpha) + kappa_0 * d(log-likelihood)/d(log(alpha))
+    tol : float
+        tolerance for convergence estimates
+    maxit : int
+        maximum number of iterations
+    usePrior : bool
+        whether to use a priori or just compute the MLE
+    weights : ndarray
+        observation weights, shape (N,M)
+    useWeights : bool
+        whether to use weights
+    weightThreshold : float
+        the threshold for subsetting the design matrix and GLM weights to
+        calculate the Cox-Reid correction
+    useCR : bool
+        whether to use the Cox-Reid correction
+
+    Returns
+    -------
+    log_alpha : ndarray
+        the fitted dispersion parameters, on the log scale. Shape N.
+    iter : ndarray
+        the number of iterations for each parameter. Shape N.
+    iter_accept : ndarray
+        the number of accepted proposals for each parameter. Shape N.
+    last_change : ndarray
+        the last change of the fitted dispersion parameters. Shape N.
+    initial_lp : ndarray
+        the initial log posterior values. Shape N.
+    initial_dlp : ndarray
+        the initial derivatives (wrt. log(alpha)) of the log posterior. Shape N.
+    last_lp : ndarray
+        the last log posterior values. Shape N.
+    last_dlp : ndarray
+        the last derivatives (wrt. log(alpha)) of the log posterior. Shape N.
+    last_d2lp : ndarray
+        the last second derivatives (wrt. log(alpha)) of the log posterior. Shape N.
+    """
+
     if isinstance(log_alpha, (int, float)):
         log_alpha = np.repeat(float(log_alpha), y.shape[1])
     if isinstance(log_alpha_prior_mean, (int, float)):
@@ -453,6 +615,13 @@ def fitDisp(
 
 
 def fitDispWrapper(**kwargs):
+    """
+    Wrapper around :func:`fitDisp` to check for NaN in arguments
+
+    See also
+    --------
+    fitDisp
+    """
     for k, v in kwargs.items():
         if np.any(np.isnan(v)):
             raise ValueError(f"argument {k} of fitDisp contains a NaN value")
@@ -473,7 +642,42 @@ def fitDispGrid(
     useCR,
 ):
     """
-    TODO
+    Fit dispersions by evaluating over a grid
+
+    This function estimates the dispersion parameters (alpha) for negative
+    binomial generalized linear models. The fitting is performed on the log
+    scale.
+
+    Arguments
+    ---------
+    y : ndarray
+        matrix of counts, shape (N,M)
+    x : ndarray
+        design matrix, shape (M,K)
+    mu_hat : ndarray
+        the expected mean values, shape (N,M)
+    disp_grid : ndarray
+        the grid over which to estimate
+    log_alpha_prior_mean : ndarray
+        vector of fitted values for log(alpha), shape N
+    log_alpha_prior_sigmasq : float
+        the variance of the prior
+    usePrior : bool
+        whether to use a priori or just compute the MLE
+    weights : ndarray
+        observation weights, shape (N,M)
+    useWeights : bool
+        whether to use weights
+    weightThreshold : float
+        the threshold for subsetting the design matrix and GLM weights to
+        calculate the Cox-Reid correction
+    useCR : bool
+        whether to use the Cox-Reid correction
+
+    Returns
+    -------
+    ndarray
+        the estimated dispersion parameters, on the log scale. Shape N.
     """
     y_n = y.shape[1]
     disp_grid_n = disp_grid.shape[0]
@@ -530,6 +734,23 @@ def fitDispGrid(
 
 
 def fitDispGridWrapper(**kwargs):
+    """
+    Wrapper around :func:`fitDispGrid`
+
+    This wrapper checks for NaN in arguments, and automatically builds a grid
+    on which :func:`fitDispGrid` will be called. Contrary to
+    :func:`fitDispGrid`, it returns the estimated dispersion parameters on the
+    natural scale.
+
+    See also
+    --------
+    fitDispGrid
+
+    Returns
+    -------
+    ndarray
+        the estimated dispersion parameters, on the natural scale. Shape N.
+    """
     for k, v in kwargs.items():
         if np.any(np.isnan(v)):
             raise ValueError(f"argument {k} of fitDispGrid contains a NaN value")
@@ -560,8 +781,54 @@ def fitBeta(
     minmu,
 ):
     """
-    fit the negative binomial GLM
-    note: the betas are on the natural log scale
+    Fit beta coefficients for negative binomial GLMs
+
+    This function estimates the coefficients (beta) for negative binomial
+    generalized linear models. Fitting is performed on the log scale.
+
+    Arguments
+    ---------
+    y : ndarray
+        matrix of counts, shape (N,M)
+    x : ndarray
+        design matrix, shape (M,K)
+    nf : ndarray
+        matrix of normalization factors, shape (N,M)
+    alpha_hat : ndarray
+        vector of the dispersion estimates, shape N
+    contrast : array-like
+        vector for a possible contrast, shape K
+    beta_mat : ndarray
+        the initial estimates for the betas, shape (N,K)
+    lambda_ : ndarray
+        the ridge values, shape K
+    weights : ndarray
+        observation weights, shape (N,M)
+    useWeights : bool
+        whether to use weights
+    tol : float
+        tolerance for convergence estimates
+    maxit : int
+        maximum number of iterations
+    useQR : bool
+        whether to use QR decomposition
+
+    Returns
+    -------
+    beta_mat : ndarray
+        the fitted coefficients, on the log scale. Shape (N,K)
+    beta_var_mat : ndarray
+        the variance of the fitted coefficients. Shape (N,K)
+    iter : ndarray
+        the number of iterations for each row. Shape N
+    hat_diagonals : ndarray
+        TODO
+    contrast_num : ndarray
+        TODO
+    contrast_denom : ndarray
+        TODO
+    deviance : ndarray
+        TODO
     """
     y_m, y_n = y.shape
     x_p = x.shape[1]
@@ -714,6 +981,16 @@ def fitBeta(
 
 
 def fitBetaWrapper(**kwargs):
+    """
+    Wrapper around :func:`fitBeta`
+
+    This wrapper checks for NaN in arguments. It also sets a default contrast
+    if none is provided.
+
+    See also
+    --------
+    fitBeta
+    """
     for k, v in kwargs.items():
         if np.any(np.isnan(v)):
             raise ValueError(f"argument {k} of fitBeta contains a NaN value")

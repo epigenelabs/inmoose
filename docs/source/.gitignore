@@ -1,2 +1,4 @@
 _autosummary/
-generated/
+generated/*
+!generated/inmoose.deseq2.DESeqDataSet.DESeqDataSet.rst
+!generated/inmoose.deseq2.results.DESeqResults.rst
