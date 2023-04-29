@@ -1,4 +1,25 @@
-# Python files
-build
-*.pyc
-*.egg-info
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+
+# Sphinx documentation
+docs/_build/
+
+# Cython debug symbols
+cython_debug/
+
+# IDE settings
+.vscode/
