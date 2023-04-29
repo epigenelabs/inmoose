@@ -136,59 +136,65 @@ def replaceOutliers(
     obj, trim=0.2, cooksCutoff=None, minReplicates=7, whichSamples=None
 ):
     """
-    replace outliers with trimmed mean
+    Replace outliers with trimmed mean
 
-    Note that this function is called within DESeq, so is not necessary to call
-    on top of a DESeq call. See the documentation for minReplicatesForReplace
-    in DESeq.
+    Note that this function is called within :func:`DESeq`, so is not necessary
+    to call on top of a :func:`DESeq` call. See the documentation for
+    :code:`minReplicatesForReplace` in :func:`DESeq`.
 
     This function replaces outlier counts flagged by extreme Cook's distances,
-    as calculated by DESeq, nbinomWaldTest or nbinomLRT, with values predicted
-    by the trimmed mean over all samples (and adjusted by size factor or
-    normalization factor).
-    This function replace the counts in the matrix returned by dds.counts() and
-    the Cook's distances in dds.layers["cook"]. Original counts are preserved
-    in dds.layers["originalCounts"].
+    as calculated by :func:`DESeq`, :func:`nbinomWaldTest` or
+    :func:`nbinomLRT`, with values predicted by the trimmed mean over all
+    samples (and adjusted by size factor or normalization factor).  This
+    function replaces the counts in the matrix returned by :code:`dds.counts()`
+    and the Cook's distances in :code:`dds.layers["cook"]`. Original counts are
+    preserved in :code:`dds.layers["originalCounts"]`.
 
-    The DESeq function calculates a diagnostic measure called Cook's distance
-    for every gene and every sample. The results function then sets the p-values
-    NA for genes which contain an outlying count as defined by a Cook's distance
-    above a threshold. With may degrees of freedom, i.e. many more samples than
-    number of parameters to be estimated, it might be undesirable to remove
-    entire genes fomr the analysis just because their data include a single
-    count outlier.
-    An alternative strategy is to replace the outlier counts with the trimmed
-    mean over all samples, adjusted by the size factor or normalization factor
-    for that sample. The following simple function performs this replacement
-    for the user, for samples which have at least minReplicates number of
-    replicates (including that sample).
+    The :func:`DESeq` function calculates a diagnostic measure called Cook's
+    distance for every gene and every sample. The :meth:`.DESeqDataSet.results`
+    function then sets the p-values to NA for genes which contain an outlying
+    count as defined by a Cook's distance above a threshold. With may degrees
+    of freedom, i.e. many more samples than number of parameters to be
+    estimated, it might be undesirable to remove entire genes fomr the analysis
+    just because their data include a single count outlier.  An alternative
+    strategy is to replace the outlier counts with the trimmed mean over all
+    samples, adjusted by the size factor or normalization factor for that
+    sample. The following simple function performs this replacement for the
+    user, for samples which have at least :code:`minReplicates` number of
+    replicates (including that sample). For more information on Cook's
+    distance, please see the two sections of the module documentation: "Dealing
+    with count outliers" and "Count outlier detection".
 
     Arguments
     ---------
     obj : DESeqDataSet
-        a DESeqDataSet that has already been processed by either DESeq,
-        nbinomWaldTest or nbinomLRT, and therefore contains a matrix of Cook's
-        distances (used to define the outlier counts) in obj.layers["cooks"].
+        a DESeqDataSet that has already been processed by either :func:`DESeq`,
+        :func:`nbinomWaldTest` or :func:`nbinomLRT`, and therefore contains a
+        matrix of Cook's distances (used to define the outlier counts) in
+        :code:`obj.layers["cooks"]`.
     trim : float
         the fraction (0 to 0.5) of observations to be trimmed from each end of
         the normalized counts for a gene before the mean is computed.
     cooksCutoff : float
         the threshold for defining an outlier to be replaced. Defaults to the
-        .99 quantile of the F(p, m-p) distribution, where p is the number of
-        parameters and m is the number of samples.
+        .99 quantile of the :math:`F(p, m-p)` distribution, where :math:`p` is
+        the number of parameters and :math:`m` is the number of samples.
     minReplicates : int
         the minimum number of replicate samples necessary to consider a sample
         eligible for replacement (including itself). Outlier counts will not be
-        replaced if the sample is in a cell which has less than minReplicates
-        replicates.
-    whichSamples : index-like, optional
-        a numeric or logical index to specify which samples should have outliers
-        replaced. If missing, this is determined using minReplicates.
+        replaced if the sample is in a cell which has less than
+        :code:`minReplicates` replicates.
+    whichSamples : array-like, optional
+        a numeric or logical index to specify which samples should have
+        outliers replaced. If missing, this is determined using
+        :code:`minReplicates`.
 
     Return
     ------
-    a DESeqDataSet with replaced counts in the slot return by counts(), and the
-    original counts preserved in obj.layers["originalCounts"]
+    DESeqDataSet
+        the input :code:`obj` with replaced counts in the slot returned by
+        :meth:`.DESeqDataSet.counts`, and the original counts preserved in
+        :code:`obj.layers["originalCounts"]`.
     """
     if obj.modelMatrix is None or "cooks" not in obj.layers:
         raise ValueError(

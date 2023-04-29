@@ -4,6 +4,7 @@ from .dispersions import (
     estimateDispersionsGeneEst,
     estimateDispersionsFit,
     estimateDispersionsMAP,
+    estimateDispersionsPriorVar,
 )
 from .estimateSizeFactors import estimateSizeFactorsForMatrix
 from .lrt import nbinomLRT

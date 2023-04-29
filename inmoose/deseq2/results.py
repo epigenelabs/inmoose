@@ -34,10 +34,28 @@ from .misc import buildDataFrameWithNACols
 
 
 def p_adjust(*args, **kwargs):
+    """
+    Test results and p-value correction for multiple tests
+
+    This is a wrapper around :func:`statsmodels.stats.multitest.multipletests`
+    """
     return multipletests(*args, **kwargs)[1]
 
 
 class DESeqResults(pd.DataFrame):
+    """
+    a class to store a results table
+
+    This class would not typically constructed directly by "end users". This
+    simple class extends :class:`pandas.DataFrame`. It is used by
+    :meth:`.DESeqDataSet.results` to wrap up the results table.
+
+    Attributes
+    ----------
+    priorInfo : array-like
+        a list giving information on the log fold change prior
+    """
+
     _metadata = [
         "priorInfo",
         "filterThreshold",
@@ -83,7 +101,224 @@ def results_dds(
     minmu=0.5,
 ):
     """
-    TODO
+    Extract results from a :func:`.DESeq` analysis
+
+    This function extracts a result table from a DESeq analysis giving base
+    means across samples, log2 fold changes, standard errors, test statistics,
+    p-values and adjusted p-values.
+
+    The results table when printed will provide the information about the
+    comparison, *e.g.* "log2 fold change (MAP): condition treated vs.
+    untreated", meaning that the estimates are of lof2(treated / untreated), as
+    would be returned using :code:`contrast=c("condition", "treated",
+    "untreated")`. Multiple results can be returned for analyses beyond a
+    simple two group comparison, so this function takes arguments
+    :code:`contrast` and :code:`name` to help the user pick out the comparisons
+    of interest for printing a results table. The use of the :code:`contrast`
+    argument is recommended for exact specification of the levels which should
+    be compared and their order.
+
+    If :code:`results` is run without specifying :code:`contrast` or
+    :code:`name`, it will return the comparison of the last level of the last
+    variable in the design formula over the first level of this variable. For
+    example, for a simple two-group comparison, this would return the log2 fold
+    changes of the second group over the first group (the reference level).
+
+    The argument :code:`contrast` can be used to generate results tables for
+    any comparison of interest, for example, the log2 fold change between two
+    levels of a factor, and its usage is described below. It can also
+    accomodate more complicated numeric comparisons. Note that :code:`contrast`
+    will set to 0 the estimated LFC in a comparison of two groups, where all
+    the counts in the two groups are equal to 0 (while other groups have
+    positive counts), while :code:`name` will not automatically set these LFC
+    to 0.  The test statistic used for a contrast is: :math:`c^t \\beta /
+    \sqrt{c^t \Sigma c}`.
+
+    The argument :code:`name` can be used to generate results tables for
+    individual effects, which must be individual elements of
+    :code:`obj.resultsNames()`.  These individual effects could represent
+    continuous covariates, effects for individual levels, or individual
+    interaction effects.
+
+    Information on the comparison which was used to build the results table,
+    and the statistical test which was used for p-values (Wald test or
+    likelihood ratio test) is stored within the object returned by
+    :meth:`results()`. This information is stored in the columns of the results
+    table (see :class:`.DESeqResults`).
+
+    .. rubric:: On p-values
+
+    By default, independent filtering is performed to select a set of genes for
+    multiples test correction which maximizes the number of adjusted p-values
+    less than a given critical value :code:`alpha` (by default 0.1). See the
+    reference in this page for details on independent filtering. The filter
+    used for maximizing the number of rejections is the mean of normalized
+    counts for all samples in the dataset. Several arguments from
+    :func:`.filtered_p` of the genefilter package (used within :meth:`results`)
+    are provided here to control the independent filtering behavior. Note that
+    the code of :func:`.filtered_p` is copied into this package to avoid extra
+    dependencies).
+
+    The threshold that is chosen is the lowest quantile of the filter for which
+    the number of rejections is close to the peack of a curve fit to the number
+    of rejections over the filter quantiles. "Close to" is defined as within 1
+    residuel standard deviation. The adjusted p-values for the genes which do
+    not pass the filter threshold are set to :code:`nan`.
+
+    By default, :meth:`results` assigns a p-value of :code:`nan` to genes
+    containing count outliers, as identified using Cook's distance. See the
+    :code:`cooksCutoff` argument for control of this behavior. Cook's distances
+    for each sample are accessible as :code:`obj.layers["cooks"]`. This measure
+    is useful for identifying rows where the observed counts might not fit to a
+    Negative Binomial distribution.
+
+    For analyses using the likelihood ratio test (using :func:`.nbinomLRT`),
+    the p-values are determined solely by the difference in deviance between
+    the full and reduced model formula. A single log2 fold change is printed in
+    the results table for consistenct with other results table outputs, however
+    the test statistic and p-values may nevertheless involve the testing of one
+    or more log2 fold changes. Which log2 fold change is printed in the results
+    table can be controlled using the :code:`name` argument, or by default this
+    will be the estimated coefficient for the last element of
+    :code:`obj.resultsNames()`.
+
+    If :code:`useT = True` was specified when running :func:`.DESeq` or
+    :func:`.nbinomWaldTest`, the the p-value generated by :meth:`results` will
+    also make use of the t-distribution for the Wald statistic, using the
+    degrees of freedom in :code:`obj.var["tDegreesFreedom"]`.
+
+    References
+    ----------
+    .. [1] R. Bourgon, R. Gentleman, W. Huber. 2010. Independent filtering
+       increases detection power for high-throughput experiments. *PNAS*
+       :doi:`10.1073/pnas.0914005107`
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        a :class:`DESeqDataSet` one which one of the following function has
+        already been called: :func:`.DESeq`, :func:`.nbinomWaldTest` or
+        :func:`.nbinomLRT`.
+    contrast
+        this argument specifies what comparison to extract from :code:`obj` to
+        build a results table. One of either:
+
+        + a list of exactly three strings (simplest case):
+            - the name of a factor in the design formula
+            - the name of the numerator level for the fold change
+            - the name of the denominator level for the fold change
+        + a list of two string lists (more general case):
+            - the names of the numerators for LFC
+            - the names of the denominators for LFC
+          These names should be elements of :code:`obj.resultsNames()`.
+          If the list has a single element (the numerators) then the
+          denominator list is considered empty.
+        + a numeric list with one element for each element in
+          :code:`obj.resultsNames()` (most general case)
+
+        If specified, the :code:`name` argument is ignored.
+    name : str
+        the name of the individual effect (coefficient) for building a results
+        table. Use this argument rahter than :code:`contrast` for continuous
+        variables, individual effects or for individual interaction terms. The
+        value provided to :code:`name` must be an element of
+        :code:`obj.resultsNames()`.
+    lfcThreshold : float
+        a non-negative value which specifies a log2 fold change threshold. The
+        default value is 0, corresponding to a test that the log2 fold changes
+        are equal to zero. The user can specify the alternative hypothesis
+        using the :code:`altHypothesis` argument, which defaults to testing for
+        log2 fold changes greater in absolute value than a given threshold. If
+        :code:`lfcThreshold` is specified, the results are for Wald tests, and
+        LRT p-values will be overwritten.
+    altHypothesis : str
+        specifies the alternative hypothesis, *i.e.* those values of log2 fold
+        change which the user is interested in finding. the complement of this
+        set of values is the null hypothesis which will be tested. If the log2
+        fold change specified by :code:`name` or by :code:`contrast` is written
+        as :math:`\\beta`, then the possible values for :code:`altHypothesis`
+        represent the following alternative hypotheses:
+
+        * :code:`"greaterAbs"`: :math:`|\\beta| > \\text{lfcThreshold}`, and
+          p-values are two-tailed
+        * :code:`"lessAbs"`: :math:`|\\beta| < \\text{lfcThreshold}`, and
+          p-values are the maximum of the upper and lower tests. The Wald
+          statistic given is positive, an SE-scaled distance from the closest
+          boundary
+        * :code:`"greater"`: :math:`\\beta > \\text{lfcThreshold}`
+        * :code:`"less"`: :math:`\\beta < \\text{lfcThreshold}`
+
+    listValues : (float, float)
+        only used if a numerators-denominators list is provided to
+        :code:`contrast`.  The log2 fold changes in the list are multiplied by
+        these values. The first number should be positive and the second one
+        negative. Defaults to :code:`(1,-1)`.
+    cooksCutoff : float
+        threshold on Cook's distance, such that if one or more samples for a
+        gene have a distance higher, the corresponding p-value is set to
+        :code:`nan`. The default cutoff is the .99 quantile of the :math:`F(p,
+        m-p)` distribution, where :math:`p` is the number of coefficients being
+        fitted, and :math:`m` is the number of samples. Set to :code:`inf` or
+        :code:`False` to disable the resetting of p-values to :code:`nan`.
+        Note: this test excludes the Cook's distance of samples belonging to
+        experimental groups with only 2 samples.
+    independentFiltering : bool
+        whether independent filtering should be applied automatically
+    alpha : float
+        the significance cutoff used for optimizing the independent filtering
+        (defaults to 0.1). If the adjusted p-value cutoff (FDR) will be a value
+        other than 0.1, :code:`alpha` should be set to that value.
+    filter
+        the vector of filter statistics over which the independent filtering
+        will be optimized. By default, the mane of normalized counts is used.
+    theta : array-like
+        the quantiles at which to assess the number of rejections from
+        independent filtering
+    pAdjustMethod : str
+        the method to use to adjust p-values, see :func:`.p_adjust`
+    filterRun
+        an optional custom function for performing independent filtering and
+        p-value adjustment, with arguments :code:`res` (a
+        :class:`.DESeqResults` object), :code:`filter` (the quantity for
+        filtering tests), :code:`alpha` (the target FDR),
+        :code:`pAdjustMethod`. This function should resturn a
+        :class:`.DESeqResults` object with a :code:`padj` column.
+    saveCols : array-like
+        the columns of :code:`obj.var` to pass into the output results table
+    test : { "Wald", "LRT" }
+        automatically detected if not provided. The one exception is after
+        :func:`.nbinomLRT` has been run, :code:`test="Wald"` will generate Wald
+        statistics and Wald test p-values.
+    addMLE : bool
+        if :code:`betaPrio=True` was used (non-default). This argument
+        specifies if the "unshrunken" maximum likelihood estimates (MLE) of
+        log2 fold change should be added as a column to the results table
+        (defaults to :code:`False`).  This argument is preserved for backward
+        compatibility, as now :code:`betaPrior=True` by default and the
+        recommended pipeline is to generate shrunken MAP estimates using
+        :func:`lfcShrink`. This argument functionality is only implemented for
+        :code:`contrast` specified as a 3-element string list.
+    tidy : bool
+        whether to output the results table with a header
+    parallel : bool
+        unimplemented
+    minmu : float
+        lower bound on the estimated count (used when calculating contrasts)
+
+    Returns
+    -------
+    DESeqResults
+        a results table (subclass of :class:`pandas.DataFrame`), containing the
+        following results columns: :code:`"baseMean"`,
+        :code:`"log2FoldChange"`, :code:`"lfcSE"`, :code:`"stat"`,
+        :code:`"pvalue"` and :code:`"pad"`.  The :code:`"lfcSE"` gives the
+        standard error of the :code:`"log2FoldChange"`.  For the Wald test,
+        :code:`"stat"` is the Wald statistic: the :code:`"log2FoldChange"`
+        divided by :code:`"lfcSE"`, which is compared to a standard Normal
+        distribution to generate a two-tailed :code:`"pvalue"`.  For the
+        likelihood ratio test (LRT), :code:`"stat"` is the difference in
+        deviance between the reduced model and the full model, which is
+        compared to a chi-squared distribution to generate a :code:`"pvalue"`.
     """
     if altHypothesis not in ["greaterAbs", "lessAbs", "greater", "less"]:
         raise ValueError(f"invalid value for altHypothesis: {altHypothesis}")
@@ -461,6 +696,51 @@ def pvalueAdjustment(res, independentFiltering, filter, theta, alpha, pAdjustMet
 
 
 def filtered_p(filter_, test, theta, method, data=None):
+    """
+    compute and adjust p-values, with filtering
+
+    Given filter and test statistics in the form of unadjusted p-values, or
+    functions able to compute these statistics from the data, filter and then
+    correct the p-values across a range of filtering stringencies.
+
+    NB: this function is copied and ported from the R package `genefilter
+    <https://bioconductor.org/packages/release/bioc/html/genefilter.html>`_.
+    This copy was already done in the original DESeq2 R code.
+
+    Arguments
+    ---------
+    filter_
+        a list of stage-one filter statistics, or a function which is able to
+        compute such a list from :code:`data`, if :code:`data` is supplied
+    test
+        a list of unadjusted p-values, or a function which is able to compute
+        such a list from the filtered portions of :code:`data`, if :code:`data`
+        is supplied. The option to supply a function is useful when the value
+        of the test statistic depends on which hypotheses are filtered out at
+        stage one.
+    theta
+        a list with one or more filtering fractions to consider. Actual cutoffs
+        are then computed internally by applying :code:`quantile` to the filter
+        statistics contained in (or produced by) the :code:`filter_` argument.
+    method
+        the unadjusted p-values contained in (or produced by) :code:`test` will
+        be adjusted for multiple testing after filtering, using
+        :func:`p_adjust`. See the :code:`method` argument of this function for
+        more options.
+    data
+        if :code:`filter_` and/or :code:`test` are functions rather than lists
+        of statistics, they will be applied to :code:`data`. The functions will
+        be passed the whole :code:`data` object, and must work over rows etc.
+        themselves as appropriate.
+
+    Returns
+    -------
+    ndarray
+        a matrix of p-values, possibly adjusted for multiple testing, with one
+        row per  null hypothesis and one column per filtering fraction given in
+        :code:`theta`. For a given column, entries which have been filtered out
+        are :code:`nan`.
+    """
     if callable(filter_):
         U1 = filter_(data)
     else:
