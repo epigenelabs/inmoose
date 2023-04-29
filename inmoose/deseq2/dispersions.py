@@ -45,9 +45,102 @@ def estimateDispersions_dds(
     minmu=None,
 ):
     """
+    Estimate the dispersions for a :class:`DESeqDataSet`
+
+    This function obtains dispersion estimates for Negative Binomial
+    distributed data. The function is typically called with the idiom:
+    :code:`dds = dds.estimateDispersions()`.
+
+    The fitting proceeds as follows: for each gene, an estimate of the
+    dispersion is found which maximizes the Cox-Reid adjusted profile
+    likelihood (the methods of Cox-Reid adjusted profile likelihood
+    maximization for estimation of dispersion in RNA-Seq data were developed by
+    McCarthy *et al.* (2012) [1]_, first implemented in the edgeR package in
+    2010 (see :func:`inmoose.edgepy.glmFit` and
+    :func:`inmoose.edgepy.dispCoxReid`); a trend line capturing the
+    dispersion-mean relationship is fit to the maximum likelihood estimates; a
+    normal prior is determined for the log dispersion estimates centered on the
+    predicted value from the trended fit with variance equal to the difference
+    between the observed variance of the log dispersion estimates and te
+    expected sampling variance; finally maximum a posteriori dispersion
+    estimates are returned.  This final dispersion parameter is used in
+    subsequent tests. The final dispersion estimates can be accessed through
+    :attr:`DESeqDataSet.dispersions`. The fitted dispersion-mean relationship
+    is also used in :func:`varianceStabilizingTransformation`. All of the
+    intermediate values (gene-wise dispersion estimates, fitted dispersion
+    estimates from the trended fit, etc.) are stored in :code:`dds.var`.
+
+    The log normal prior on the dispersion parameter has been proposed by Wu *et
+    al.* (2012) [2]_.
+
+    References
+    ----------
+    .. [1] D. J. McCarthy, Y. Chen, G. K. Smyth. 2012. Differential expression
+       analysis of multifactor RNA-Seq experiments with respect to biological
+       variation. *Nucleic Acids Research* 40, 4288-4297.
+       :doi:`10.1093/nar/gks042`
+    .. [2] H. Wu, C. Wang, Z. Wu. 2012. A new shrinkage estimator for dispersion
+       improves differential detection in RNA-Seq data. *Biostatistics*.
+       :doi:`10.1093/biostatistics/kxs033`
+
+    See also
+    --------
+    ~inmoose.deseq2.estimateDispersionsGeneEst
+        lower-level function called by this function
+    ~inmoose.deseq2.estimateDispersionsFit
+        lower-level function called by this function
+    ~inmoose.deseq2.estimateDispersionsMAP
+        lower-level function called by this function
+
     Arguments
     ---------
+    obj : DESeqDataSet
+        the input dataset
+    fitType : "parametric", "local", "mean" or "glmGamPoi"
+        the type of fitting the dispersions to the mean intensity.
+
+        :code:`"parametric"` - fit a dispersion-mean relation of the form:
+        :math:`dispersion = asymtDisp + extraPois / mean` *via* a robust
+        gamma-family GLM.  The coefficients :code:`asymtDisp` and
+        :code:`extraPois` are given in the attribute :code:`coefficients` of
+        the :attr:`DESeqDataSet.dispersionFunction`.
+
+        :code:`"local"` - use the locfit package to fit a local regression of
+        log dispersions over log base mean (normal scale means and dispersions
+        are input and output for :attr:`DESeqDataSet.dispersionFunction`. The
+        points are weighted by normalized mean count in the local regression.
+
+        :code:`"mean"` - use the mean of gene-wise dispersion estimates.
+
+        :code:`"glmGamPoi"` - use the glmGamPoi package to fit the gene-wise
+        dispersion, its trend, and calculate the MAP based on the
+        quasi-likelihood framework. The trend is calculated using a local
+        median regression.
+
+    maxit : int
+        maximum number of iterations to allow for convergence
+    useCR : bool
+        whether to use Cox-Reid adjustment (see McCarthy *et al.* (2012) [1]_)
+    weightThreshold : float
+        threshold for subsetting the design matrix and GLM weights for
+        calculating the Cox-Reid correction
+    quiet : bool
+        whether to print messages at each step
+    modelMatrix : array-like, optional
+        an optional matrix which will be used for fitting the expected counts.
+        By default, the model matrix is constructed from
+        :attr:`DESeqDataSet.design`.
+    minmu : float
+        lower bound on the estimated count for fitting gene-wise dispersion
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj`, with the dispersion information filled in fields
+        in :attr:`DESeqDataSet.var`, or the final dispersions accessible via
+        :attr:`DESeqDataSet.dispersions`.
     """
+
     if fitType not in ["parametric", "local", "mean", "glmGamPoi"]:
         raise ValueError(f"invalid value for fitType: {fitType}")
     if minmu is None:
@@ -134,7 +227,62 @@ def estimateDispersionsGeneEst(
     type_="DESeq2",
 ):
     """
-    TODO
+    Low-level function to fit dispersion estimates
+
+    Normal users should instead use :meth:`.DESeqDataSet.estimateDispersions`.
+    This low-level function is called by
+    :meth:`.DESeqDataSet.estimateDispersions`, but is exported and documented
+    for non-standard usage.  For instance, it is possible to replace fitted
+    values with a custom fit and continue with the maximum a posteriori
+    dispersion estimate.
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        the input dataset
+    minDisp : float
+        small value for the minimum dispersion, to allow for calculations in
+        log scale, one order of magnitude above this value is used as a test
+        for inclusion in mean-dispersion fitting
+    kappa_0 : float
+        parameter used in setting the initial proposal in backtracking search,
+        higher :code:`kappa_0` results in larger steps
+    dispTol : float
+        parameter to test for convergence of log dispersion, stop when increase
+        in log posterior is less than :code:`dispTol`
+    maxit : int
+        maximum number of iterations to allow for convergence
+    useCR : bool
+        whether to use Cox-Reid adjustment
+    weightThreshold : float
+        threshold for subsetting the design matrix and GLM weights for
+        calculating the Cox-Reid correction
+    quiet : bool
+        whether to print messages at each step
+    modelMatrix : array-like
+        for advanced use only, a substitute model matrix for gene-wise and MAP
+        dispersion estimation
+    niter : int
+        number of times to iterate between estimation of means and estimation
+        of dispersion
+    linearMu :
+        estimate the expected counts matrix using a linear model.
+        Defaults to :code:`None`, in which case a linear model is used if the
+        number of groups defined by the model matrix is equal to the number of
+        columns of the model matrix.
+    minmu : float
+        lower bound on the estimated count for fitting gene-wise dispersion
+    alphaInit : array-like
+        initial guess for the dispersion estimates
+    type_ : "DESeq2" or "glmGamPoi"
+        specify if the glmGamPoi package is used to calculate the dispersion.
+        This can be significantly faster if there are many replicates with
+        small counts.
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj` with gene-wise dispersion estimates
     """
     if type_ not in ["DESeq2", "glmGamPoi"]:
         raise ValueError(f"invalid value for type_: {type_}")
@@ -314,7 +462,33 @@ def estimateDispersionsGeneEst(
 
 def estimateDispersionsFit(obj, fitType="parametric", minDisp=1e-8, quiet=False):
     """
-    TODO
+    Low-level function to fit dispersion estimates
+
+    Normal users should instead use :meth:`.DESeqDataSet.estimateDispersions`.
+    This low-level function is called by
+    :meth:`.DESeqDataSet.estimateDispersions`, but is exported and documented
+    for non-standard usage.  For instance, it is possible to replace fitted
+    values with a custom fit and continue with the maximum a posteriori
+    dispersion estimate.
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        the input dataset
+    fitType : "parametric", "local", "mean" or "glmGamPoi"
+        the type of fitting of dispersions to the mean intensity.
+        See :meth:`.DESeqDataSet.estimateDispersions` for description.
+    minDisp : float
+        small value for the minimum dispersion, to allow for calculations in
+        log scale, one order of magnitude above this value is used as a test
+        for inclusion in mean-dispersion fitting
+    quiet : bool
+        whether to print messages at each step
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj` with fitted dispersion estimates
     """
     if "allZero" not in obj.var:
         obj = obj.getBaseMeansAndVariances()
@@ -385,7 +559,65 @@ def estimateDispersionsMAP(
     quiet=False,
 ):
     """
-    TODO
+    Low-level function to fit dispersion estimates
+
+    Normal users should instead use :meth:`.DESeqDataSet.estimateDispersions`.
+    This low-level function is called by
+    :meth:`.DESeqDataSet.estimateDispersions`, but is exported and documented
+    for non-standard usage.  For instance, it is possible to replace fitted
+    values with a custom fit and continue with the maximum a posteriori
+    dispersion estimate.
+
+    :func:`estimateDispersionsPriorVar` is called inside this function, and
+    stores the dispersion prior variance as an attribute of
+    :attr:`.DESeqDataSet.dispersionFunction`, which can be manually provided to
+    :code:`estimateDispersionsMAP` for parallel execution.
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        the input dataset
+    outlierSD : int
+        the number of standard deviations of log gene-wise estimates above the
+        prior mean (fitted value), above which dispersion estimates will be
+        labelled outliers. Outliers will keep their original value and not be
+        shrunk using the prior.
+    dispPriorVar : array-like
+        the variance of the normal priori on the log dispersions. If not
+        supplied, it is calculated as the difference between the mean squared
+        residuals of gene-wise estimates to the fitted dispersion and the
+        expected sampling variance of the log dispersion.
+    minDisp : float
+        small value for the minimum dispersion, to allow for calculations in
+        log scale, one order of magnitude above this value is used as a test
+        for inclusion in mean-dispersion fitting
+    kappa_0 : float
+        parameter used in setting the initial proposal in backtracking search,
+        higher :code:`kappa_0` results in larger steps
+    dispTol : float
+        parameter to test for convergence of log dispersion, stop when increase
+        in log posterior is less than :code:`dispTol`
+    maxit : int
+        maximum number of iterations to allow for convergence
+    useCR : bool
+        whether to use Cox-Reid adjustment
+    weightThreshold : float
+        threshold for subsetting the design matrix and GLM weights for
+        calculating the Cox-Reid correction
+    quiet : bool
+        whether to print messages at each step
+    modelMatrix : array-like
+        for advanced use only, a substitute model matrix for gene-wise and MAP
+        dispersion estimation
+    type_ : "DESeq2" or "glmGamPoi"
+        specify if the glmGamPoi package is used to calculate the dispersion.
+        This can be significantly faster if there are many replicates with
+        small counts.
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj` with final MAP dispersion estimates
     """
     if type_ not in ["DESeq2", "glmGamPoi"]:
         raise ValueError(f"invalid value for type_: {type_}")
@@ -533,7 +765,36 @@ def estimateDispersionsMAP(
 
 def estimateDispersionsPriorVar(obj, minDisp=1e-8, modelMatrix=None):
     """
-    TODO
+    Low-level function to fit dispersion estimates
+
+    Normal users should instead use :meth:`.DESeqDataSet.estimateDispersions`.
+    This low-level function is called by
+    :meth:`.DESeqDataSet.estimateDispersions`, but is exported and documented
+    for non-standard usage.  For instance, it is possible to replace fitted
+    values with a custom fit and continue with the maximum a posteriori
+    dispersion estimate.
+
+    This function is called inside :func:`estimateDispersionsMAP`, and stores
+    the dispersion prior variance as an attribute of
+    :attr:`.DESeqDataSet.dispersionFunction`, which can be manually provided to
+    :func:`estimateDispersionsMAP` for parallel execution.
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        the input dataset
+    minDisp : float
+        small value for the minimum dispersion, to allow for calculations in
+        log scale, one order of magnitude above this value is used as a test
+        for inclusion in mean-dispersion fitting
+    modelMatrix : array-like
+        for advanced use only, a substitute model matrix for gene-wise and MAP
+        dispersion estimation
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj` with final MAP dispersion estimates
     """
     objNZ = obj[:, ~obj.var["allZero"]]
     aboveMinDisp = objNZ.var["dispGeneEst"] >= 100 * minDisp
@@ -588,6 +849,7 @@ def checkForExperimentalReplicates(obj, modelMatrix):
 
 def roughDispEstimate(y, x):
     """rough dispersion estimate using counts and fitted values
+
     Arguments
     ---------
     y : array-like

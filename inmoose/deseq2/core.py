@@ -51,53 +51,139 @@ def DESeq(
     Differential expression analysis based on the Negative Binomial distribution.
 
     This function performs a default analysis through the steps:
-    - estimation of size factors
-    - estimation of dispersion
-    - negative binomial GLM fitting and Wald statistics
 
-    For complete details on each step, see the documentation of the respective functions.
+    - estimation of size factors (:meth:`.DESeqDataSet.estimateSizeFactors`)
+    - estimation of dispersion (:meth:`.DESeqDataSet.estimateDispersions`)
+    - negative binomial GLM fitting and Wald statistics (:func:`nbinomWaldTest`
+      or :func:`nbinomLRT`)
+
+    For complete details on each step, see the documentation of the
+    corresponding functions. After :func:`DESeq` returns a
+    :class:`~DESeqDataSet.DESeqDataSet`, results tables (log2 fold change and
+    p-values) can be generated using the
+    :meth:`.DESeqDataSet.results` function.  Shrunken LFC can then
+    be generated using :func:`lfcShrink`.
+
+    Notes
+    -----
+    The differential expression analysis uses a generalized linear model of the
+    form:
+
+    .. math::
+
+       K_{ij} &\sim \mathcal{NB}(\mu_{ij}, \\alpha_i)
+
+       \mu_{ij} &\sim s_j \; q_{ij}
+
+       \log q_{ij} &= x_{j.} \; \\beta_i
+
+    where counts :math:`K_{ij}` for gene :math:`i` and sample :math:`j` are
+    modeled using a Negative Binomial distribution with fitted mean
+    :math:`\mu_{ij}` and a gene-specific dispersion parameter
+    :math:`\\alpha_i`.  The fitted mean is composed of a sample-specific size
+    factor :math:`s_j` and a parameter :math:`q_{ij}` proportional to the
+    expected true concentration of framents for sample :math:`j`.  The
+    coefficients :math:`\\beta_i` give the log2 fold changes for gene :math:`i`
+    for each column of the model matrix :math:`X`.  The sample-specific size
+    factors can be replaced by gene-specific normalization factors for each
+    sample using :attr:`.DESeqDataSet.normalizationFactors`.
+
+    For details on the fitting of the log2 fold changes and calculation of
+    p-values, see :func:`nbinomWaldTest` if using :code:`test="Wald"`, or
+    :func:`nbinomLRT` if using :code:`test="LRT"`.
+
+    Experiments without replicates do not allow for estimation of the dispersion
+    of counts around the expected value for each group, which is critical for
+    differential expression analysis.
+
+    The argument :code:`minReplicatesForReplace` is used to decide which
+    samples are eligible for automatic replacement in the case of extreme
+    Cook's distance.  By default, :func:`DESeq` will replace outliers if the
+    Cook's distance is large for a sample which has 7 or more replicates
+    (including itself). Outlier replacement is turned off entirely for
+    :code:`fitType="glmGamPoi"`. This replacement is performed by
+    :func:`replaceOutliers`. This default behavior helps to prevent filtering
+    genes based on Cook's distance when there are many degrees of freedom. See
+    :meth:`.DESeqDataSet.results` for more information about filtering using
+    Cook's distance, and the "Dealing with outliers" section of the module
+    documentation. Unlike the behavior of :func:`replaceOutliers`, here
+    original counts are kept in the matrix returned by :code:`counts`, original
+    Cook's distances are kept in :code:`obj.layers["cooks"]`, and the
+    replacement counts used for fitting are kept in
+    :code:`obj.layers["replaceCounts"]`.
+
+    Note that is a log2 fold change prior is used (:code:`betaPrior=True`),
+    then expanded model matrices will be used for fitting. These are described
+    in :func:`nbinomWaldTest` and in the module documentation. The
+    :code:`contrast` argument of :meth:`.DESeqDataSet.results` should be used
+    for generating result tables.
 
     Arguments
     ---------
     obj : DESeqDataSet
         DESeqDataSet object
-    test : str
-        either "Wald" or "LRT", to choose between Wald significance tests or the likelihood ratio test on the difference in deviance between a full and a reduced model formula
-        optional, defaults to "Wald"
-    fitType : str
-        either "parametric", "local", "mean" or "glmGamPoi" for the type of fitting of dispersions to the mean intensity
-        optional, defaults to "parametric"
-    sfType : str
-        either "ratio", "poscounts" or "iterate" for the type of size factor estimation
-        optional, defaults to "ratio"
-    betaPrior : bool
-        whether or not to put a zero-mean normal prior on the non-intercept coefficients
-    full
-        for test="LRT", the full model formula, which is restricted to the formula in obj.design. Alternatively, it can be a model matrix constructed by the user.
-        Advanced use: specifying a model matric for full and test="Wald" is possible if betaPrior=False
-        optional, defaults to False
-    reduced
-        for test="LRT", a reduced formula to compare agains, i.e. the full formula with the termes of interest removed.
-        Alternatively, it can be a model matrix constructed by the user.
+    test : str, optional
+        either :code:`"Wald"` (default) or :code:`"LRT"`, to choose between
+        Wald significance tests (:func:`nbinomWaldTest`) or the likelihood
+        ratio test on the difference in deviance between a full and a reduced
+        model formula (:func:`nbinomLRT`).
+    fitType : str, optional
+        either :code:`"parametric"` (default), :code:`"local"`, :code:`"mean"`
+        or :code:`"glmGamPoi"` for the type of fitting of dispersions to the
+        mean intensity. See :meth:`.DESeqDataSet.estimateDispersions` for
+        details.
+    sfType : str, optional
+        either :code:`"ratio"` (default), :code:`"poscounts"` or
+        :code:`"iterate"` for the type of size factor estimation. See
+        :meth:`.DESeqDataSet.estimateSizeFactors` for details.
+    betaPrior : bool, optional
+        whether to put a zero-mean normal prior on the non-intercept
+        coefficients. See :func:`nbinomWaldTest` for details on the calculation
+        of the beta prior. Defaults to :code:`False`, and shrunken LFCs are
+        obtained afterwards using :func:`lfcShrink`.
+    full : formula or design matrix, optional
+        for :code:`test="LRT"`, the full model formula, which is restricted to
+        the formula in :code:`obj.design`. Alternatively, it can be a model
+        matrix constructed by the user.
+        Advanced use: specifying a model matric for full and
+        :code:`test="Wald"` is possible if :code:`betaPrior=False`.
+    reduced : formula or design matrix, optional
+        for :code:`test="LRT"`, a reduced formula to compare against, i.e. the
+        full formula with the terms of interest removed.  Alternatively, it can
+        be a model matrix constructed by the user.
     quiet : bool
         whether to print messages at each step
-    minReplicatesForReplace : int
-        the minimum number of replicates required in order to use replaceOutliers on a sample.
-        If there are samples with that many replicates, the model will be refit after these replacing outliers, flagged by Cook's distance.
-        Set to inf in order to never replace outliers.
-        It is set to inf if fitType="glmGamPoi"
-    modelMatrixType : str
-        either "standard" or "expanded". Describes how the model matrix X of the GLM formula is formed.
-        If "standard", model matrix is built directly from the design formula.
-        If "expanded", model matrix includes an indicator variable for each level of factors in addition to an intercept.
-        betaPrior must be True in order for expanded model matrices to be fitted.
-    useT : bool
-        optional, defaults to False
-        passed to nbinomWaldTest, where Wald statistics are assumed to follow a standard Normal
-    minmu
-        lower bound on the estimated count for fitting gene-wise dispersion and for use with nbinomWaldTest and nbinomLRT.
-        If fitType == "glmGamPoi" then defaults to 1e-6 (as this fitType is optimized for single cell data, for which a lower minmu is recommended), otherwise defaults to 0.5
+    minReplicatesForReplace : int, optional
+        the minimum number of replicates required in order to use
+        :func:`replaceOutliers` on a sample.  If there are samples with that
+        many replicates, the model will be refit after replacing
+        outliers, flagged by Cook's distance.
+        Set it to :code:`inf` in order to never replace outliers.
+        It is set to :code:`inf` if :code:`fitType="glmGamPoi"`.
+    modelMatrixType : str, optional
+        either :code:`"standard"` or :code:`"expanded"`. Describes how the
+        model matrix X of the GLM formula is formed.  If "standard", model
+        matrix is built directly from the design formula.  If "expanded", model
+        matrix includes an indicator variable for each level of factors in
+        addition to an intercept.  :code:`betaPrior` must be :code:`True` in
+        order for expanded model matrices to be fitted.
+    useT : bool, optional
+        passed to :func:`nbinomWaldTest`, where Wald statistics are assumed to
+        follow a standard Normal
+    minmu : float, optional
+        lower bound on the estimated count for fitting gene-wise dispersion and
+        for use with nbinomWaldTest and nbinomLRT.  If :code:`fitType ==
+        "glmGamPoi"` then defaults to 1e-6 (as this :code:`fitType` is
+        optimized for single cell data, for which a lower :code:`minmu` is
+        recommended), otherwise defaults to 0.5
     parallel : bool
+        unimplemented
+
+    Returns
+    -------
+    DESeqDataSet
+        the input :code:`obj`, updated with differential expression analysis
+        data
     """
 
     # Default values

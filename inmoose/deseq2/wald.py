@@ -46,12 +46,130 @@ def nbinomWaldTest(
     useQR=True,
     minmu=0.5,
 ):
-    """\
-    TODO
+    """
+    Wald test for the GLM coefficients
+
+    This function tests for significance of coefficients in a Negative Binomial
+    GLM, using previously calculated sizeFactors or normalizationFactors and
+    dispersion estimates. See :func:`DESeq` for the GLM formula.
+
+    The fitting proceeds as follows: standard maximum likelihood estimates for
+    GLM coefficients (synonymous with "beta", "log2 fold change", "effect
+    size") are calculated. Then, optionally, a zero-centered normal prior
+    distribution (flag :code:`betaPrior`) is assumed for the coefficients other
+    than the intercept.
+
+    Note that this posterior log2 fold change estimation is now not the default
+    setting for :func:`nbinomWaldTest`, as the standard workflow for
+    coefficient shrinkage has moved to an additional function
+    :func:`lfcShrink`.
+
+    To calculate Wald test p-values, the coefficients are scaled by their
+    standard errors and then compared to a standard normal distribution. The
+    :meth:`.DESeqDataSet.results` method without any argument will
+    automatically perform a contrast of the last level of the last variable in
+    the design formula over the first level. The contrast argument of
+    :meth:`.DESeqDataSet.results` can be used to generate other comparisons.
+
+    The Wald test can be replaced with :func:`nbinomLRT` for an alternative
+    test of significance.
+
+    Notes
+    -----
+    The variance of the prior distribution for each non-intercept coefficient
+    is calculated using the observed distribution of the maximum likelihood
+    coefficients. The final coefficients are then maximum a posterior estimates
+    using this prior (Tikhonov/ridge regularization).  See below for details on
+    the prior variance and the methods section of the original DESeq2
+    manuscript for more details. The use of a prior has little effect on genes
+    with high counts and helps to moderate the large spread in coefficients for
+    genes with low counts.
+
+    The prior variance is calculated by matching the 0.05 upper quantile of the
+    observed MLE coefficients to a zero-centered normal distribution. In a
+    change of methods since the 2014 paper, the weighted upper quantile is
+    calculated using the :func:`wtd_quantile` function from the Hmisc package
+    (function has been copied into DESeq2 code to avoid extra dependencies).
+    The weights are the inverse of the expected variance of log counts, so the
+    inverse of :math:`1 / \overline{\mu} + \\alpha_{tr}` using the mean of
+    normalized counts and the trended dispersion fit. The weighting ensures
+    that noisy estimates of log fold changes from small count genes do not
+    overly influence the calculation of the prior variance (see
+    :func:`estimateBetaPriorVar`).  The final prior variance for a factor level
+    is the average of the estimated prior variance over all contrasts of all
+    levels of the factor.
+
+    When a log2 fold change prior is used (:code:`betaPrior=True`), then
+    :func:`nbinomWaldTest` will by default use expanded model matrices, as
+    described in the :code:`modelMatrixType` argument, unless this arguments is
+    used to override the default behavior.  This ensures that log2 fold changes
+    will be independent of the choice of the reference level. In this case, the
+    beta prior variance for each factor is calculated as the average of the
+    mean squared maximum likelihood estimates for each level and every possible
+    contrast.
 
     Arguments
     ---------
+    obj : DESeqDataSet
+        a DESeqDataSet object
+    betaPrior : bool
+        whether to use a zero-mean normal prior on the non-intercept
+        coefficients
+    betaPriorVar : ndarray, optional
+        a vector with length equal to the number of model terms including the
+        intercept, giving the variance of the prior on the sample beta on the
+        log2 scale. If None, it is estimated from the data
+    modelMatrix : ndarray, optional
+        a design matrix. Typically left None and created by the function
+    modelMatrixType : str
+        either :code:`"standard"` or :code:`"expanded"`, which describe how the
+        model matrix is formed.
+
+        :code:`"standard"` means as created by :func:`patsy.dmatrix` using the
+        design formula.
+
+        :code:`"expanded"` includes an indicator variable for each level of
+        factors in addition to an intercept. :code:`betaPrior` must be set to
+        :code:`True` in order for expanded model matrices to be fit.
+    betaTol : float
+        control parameter defining convergence
+    maxit : int
+        the maximum number of iterations to allow for convergence of the
+        coefficient vector
+    useOptim : bool
+        whether to use the native optimization function on rows that do not
+        converged withing :code:`maxit` iterations
+    quiet : bool
+        whether to print messages at each step
+    useT : bool
+        whether to use a t-distribution as a null distribution, for
+        significance testing of the Wald statistics.  If False, a standard
+        normal null distribution is used. See next argument df for information
+        about which t is used. If :code:`useT=True` then further calls to
+        :meth:`.DESeqDataSet.results` will make use of
+        :code:`obj.var["tDegreesFreedom"]` that is stored by
+        :func:`nbinomWaldTest`.
+    df : array-like
+        the degrees of freedom for the t-distribution. It must be broadcastable
+        to the number of columns of obj. If not specified, the degrees of
+        freedom will be set by the number of samples minus the number of columns
+        of the design matrix used for dispersion estimation. If weights are
+        included in :code:`obj.layers`, then the sum of the weights is used in
+        lieu of the number of samples.
+    useQR : bool
+        whether to use the QR decomposition of the design matrix while fitting
+        the GLM
+    minmu : float
+        lower bound on the estimated count while fitting the GLM
+
+    Returns
+    -------
+    DESeqDataSet
+        the input DESeqDataSet with results columns accessible with the
+        :meth:`.DESeqDataSet.results` method. The coefficients and standard
+        errors are reported on a log2 scale.
     """
+
     if not quiet:
         logging.basicConfig(level=logging.INFO)
     else:
@@ -305,6 +423,17 @@ def nbinomWaldTest(
 
 
 def calculateCooksDistance(obj, H, modelMatrix):
+    """
+    Compute Cook's distance
+
+    Arguments
+    ---------
+    obj : DESeqDataSet
+        the object on which to compute the Cook's distance
+    H : ndarray
+    modelMatrix : ndarray
+        the design matrix
+    """
     p = modelMatrix.shape[1]
     dispersions = robustMethodOfMomentsDisp(obj, modelMatrix)
     V = obj.layers["mu"] + dispersions * obj.layers["mu"] ** 2
@@ -314,17 +443,26 @@ def calculateCooksDistance(obj, H, modelMatrix):
 
 # TODO make it a method of DESeqDataSet
 def robustMethodOfMomentsDisp(obj, modelMatrix):
-    """calculate a robust method of moments dispersion,
-    in order to estimates the dispersion excluding]
-    individual outlier counts which would raise the variance estimate.
+    """
+    A robust method of moments dispersion
+
+    This function estimates the dispersion excluding individual outlier counts,
+    which would raise the variance estimate.
 
     Arguments
     ---------
-    obj : ??
-    modelMatrix : ??
+    obj : DESeqDataSet
+        a DESeqDataSet object
+    modelMatrix : matrix
+        a design matrix
+
+    Returns
+    -------
+    vector
+        estimates of moments dispersion
     """
     cnts = obj.counts(normalized=True)
-    # if there are 3 or more replactes in any cell
+    # if there are 3 or more replicates in any cell
     threeOrMore = nOrMoreInCell(modelMatrix, n=3)
     if np.any(threeOrMore):
         cells = Factor([tuple(modelMatrix[i]) for i in range(modelMatrix.shape[0])])
@@ -346,6 +484,9 @@ def robustMethodOfMomentsDisp(obj, modelMatrix):
 
 
 def trimmedCellVariance(cnts, cells):
+    """
+    TODO
+    """
     # how much to trim at different n
     trimratio = [1 / 3, 1 / 4, 1 / 8]
 

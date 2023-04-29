@@ -13,6 +13,7 @@ namely ComBat [1]_ and ComBat-Seq [2]_.
 
    pycombat
    data
+   deseq
 
 .. toctree::
    :maxdepth: 1
