@@ -30,6 +30,7 @@
 import numpy as np
 from scipy.special import loggamma as lgamma
 from scipy.special import digamma, polygamma
+from scipy.special import xlog1py, xlogy
 
 from ..utils import dnbinom_mu
 
@@ -49,28 +50,29 @@ def log_posterior(
 ):
     """
     This function returns the log posterior of dispersion parameter alpha, for
-    negative binomial variables.  Given the counts y, the expected means mu,
-    the design matrix x (used for calculating the Cox-Reid adjustment), and the
-    parameters for the normal prior on log alpha.
+    negative binomial variables.  Given the counts :code:`y`, the expected
+    means :code:`mu`, the design matrix :code:`x` (used for calculating the
+    Cox-Reid adjustment), and the parameters for the normal prior on
+    :code:`log_alpha`.
 
     Arguments
     ---------
-    log_alpha : float
-        log of the dispersion parameter alpha
+    log_alpha : ndarray
+        log of the dispersion parameters alpha, last dim is M (or broadcastable)
     y : ndarray
-        counts, vector of length N
+        counts, matrix of shape (N,M) or vector of length N
     mu : ndarray
-        expected means, same shape as y
+        expected means, same shape as :code:`y`
     x : ndarray
-        design matrix, with as many rows as in y
-    log_alpha_prior_mean : float
-        normal prior on log alpha
+        design matrix, shape (N,P)
+    log_alpha_prior_mean : ndarray
+        normal prior on log alpha, vector of length M
     log_alpha_prior_sigmasq : float
         standard deviation of the prior on log alpha
     usePrior : bool
         whether to use prior regularization
     weights : ndarray
-        weights to apply, same shape as y
+        weights to apply, same shape as :code:`y`
     useWeights : bool
         whether to use weights
     weightThreshold : float
@@ -80,46 +82,90 @@ def log_posterior(
 
     Returns
     -------
-    float
+    ndarray
         the log value of the posterior, weighted and regularized as specified
         by the input arguments
+        same shape as first argument :code:`log_alpha`
     """
+
+    # make sure that all arrays are broadcastable to the appropriate shapes
+    if not isinstance(log_alpha, np.ndarray):
+        log_alpha = np.repeat(log_alpha, 1)
+    if len(y.shape) == 1:
+        y = y[:, None]
+    if len(mu.shape) == 1:
+        mu = mu[:, None]
+    if len(weights.shape) == 1:
+        weights = weights[:, None]
+
+    # helper variables to control the shapes
+    M = np.maximum(y.shape[-1], log_alpha.shape[-1])
+    (N, P) = x.shape
+
     alpha = np.exp(log_alpha)
     if useCR:
-        w_diag = np.power(np.power(mu, -1) + alpha, -1)
+        x = x[None]
+        # NB: now, x.shape == (1, N, P)
+        mu_neg1 = 1.0 / mu
+        w_diag = 1.0 / (mu_neg1 + np.expand_dims(alpha, axis=-2))
         if useWeights:
-            x = x[weights > weightThreshold, :]
-            x = x[:, np.sum(np.abs(x), 0) > 0.0]
-            w_diag = w_diag[weights > weightThreshold]
-        b = x.T @ (x * w_diag[:, None])
-        (sign, logdet) = np.linalg.slogdet(b)
-        cr_term = -0.5 * logdet
+            # cancel out all weights below the threshold
+            idx = weights <= weightThreshold
+            w_diag[np.broadcast_to(idx, w_diag.shape)] = 0.0
+        assert w_diag.shape[-2:] == (N, M)
+        assert w_diag.shape[:-2] == log_alpha.shape[:-1]
+
+        # use `np.swapaxes` to transpose the matrices stored in the last 2 dims
+        w_diag = np.swapaxes(w_diag, -1, -2)
+        # insert a new axis in last position
+        w_diag = np.expand_dims(w_diag, axis=-1)
+        assert w_diag.shape[-3:] == (M, N, 1)
+        assert w_diag.shape[:-3] == log_alpha.shape[:-1]
+        b = np.swapaxes(x * w_diag, -1, -2) @ x
+        assert b.shape[-3:] == (M, P, P)
+        assert b.shape[:-3] == log_alpha.shape[:-1]
+        cr_term = -0.5 * np.linalg.slogdet(b)[1]
+        assert cr_term.shape[:-1] == log_alpha.shape[:-1]
+        assert cr_term.shape[-1] == M
     else:
         cr_term = 0.0
 
-    alpha_neg1 = np.power(alpha, -1)
+    # insert a new axis before the last one, to broadcast on the N dimension
+    # of y, mu, weights
+    alpha = np.expand_dims(alpha, axis=-2)
+    alpha_neg1 = 1.0 / alpha
     if useWeights:
         ll_part = np.sum(
             weights
             * (
                 lgamma(y + alpha_neg1)
                 - lgamma(alpha_neg1)
-                - y * np.log(mu + alpha_neg1)
-                - alpha_neg1 * np.log(1.0 + alpha * mu)
-            )
+                - xlogy(y, mu + alpha_neg1)
+                - xlog1py(alpha_neg1, alpha * mu)
+            ),
+            axis=-2,
         )
     else:
         ll_part = np.sum(
             lgamma(y + alpha_neg1)
             - lgamma(alpha_neg1)
-            - y * np.log(mu + alpha_neg1)
-            - alpha_neg1 * np.log(1.0 + alpha * mu)
+            - xlogy(y, mu + alpha_neg1)
+            - xlog1py(alpha_neg1, alpha * mu),
+            axis=-2,
         )
+
+    assert (
+        ll_part.shape[:-1] == log_alpha.shape[:-1]
+    ), f"{ll_part.shape} vs {log_alpha.shape}"
+    assert ll_part.shape[-1] == M
 
     if usePrior:
         prior_part = (
             -0.5 * (log_alpha - log_alpha_prior_mean) ** 2 / log_alpha_prior_sigmasq
         )
+        assert (
+            prior_part.shape[:-1] == log_alpha.shape[:-1]
+        ), f"{prior_part.shape} vs {log_alpha.shape}"
     else:
         prior_part = 0.0
 
@@ -176,46 +222,81 @@ def dlog_posterior(
         regularized as specified by the input arguments
         same shape as first argument :code:`log_alpha`
     """
+
+    # make sure that all arrays are broadcastable to the appropriate shapes
+    if not isinstance(log_alpha, np.ndarray):
+        log_alpha = np.repeat(log_alpha, 1)
+    if len(y.shape) == 1:
+        y = y[:, None]
+    if len(mu.shape) == 1:
+        mu = mu[:, None]
+    if len(weights.shape) == 1:
+        weights = weights[:, None]
+
+    # helper variables to control the shapes
+    M = log_alpha.shape[0]
+    (N, P) = x.shape
+
     alpha = np.exp(log_alpha)
     if useCR:
-        w_diag = np.power(np.power(mu, -1) + alpha, -1)
-        dw_diag = -1.0 * np.power(np.power(mu, -1) + alpha, -2)
+        x = x[None]
+        # NB: now, x.shape == (1, N, P)
+        mu_neg1 = 1.0 / mu
+        w_diag = 1.0 / (mu_neg1 + alpha[None])
+        dw_diag = -np.power(mu_neg1 + alpha[None], -2)
+        assert w_diag.shape == (N, M)
+        assert dw_diag.shape == (N, M)
+        # NB: w_diag.shape == dw_diag.shape == mu.shape == (N, M)
         if useWeights:
-            x = x[weights > weightThreshold, :]
-            x = x[:, np.sum(np.abs(x), 0) > 0.0]
-            w_diag = w_diag[weights > weightThreshold]
-            dw_diag = dw_diag[weights > weightThreshold]
-        b = x.T @ (x * w_diag[:, None])
-        db = x.T @ (x * dw_diag[:, None])
+            # cancel out all weights below the threshold
+            idx = weights <= weightThreshold
+            w_diag[np.broadcast_to(idx, w_diag.shape)] = 0.0
+            dw_diag[np.broadcast_to(idx, dw_diag.shape)] = 0.0
+
+        # use `np.swapaxes` to transpose the matrices stored in the last 2 dims
+        w_diag = np.swapaxes(w_diag, -1, -2)
+        dw_diag = np.swapaxes(dw_diag, -1, -2)
+        # insert a new axis in last position
+        w_diag = np.expand_dims(w_diag, axis=-1)
+        dw_diag = np.expand_dims(dw_diag, axis=-1)
+        b = np.swapaxes(x * w_diag, -1, -2) @ x
+        db = np.swapaxes(x * dw_diag, -1, -2) @ x
+        assert b.shape == (M, P, P)
+        assert db.shape == (M, P, P)
+        cr_term = -0.5 * np.trace(np.linalg.inv(b) @ db, axis1=-2, axis2=-1)
         # NB original code computes
         #   ddetb = det(b) * trace(b.i() * db)
         # then
         #   cr_term = -0.5 * ddetb / det(b)
         # not sure why they multiply/divide by det(b)...
-        cr_term = -0.5 * np.trace(np.linalg.inv(b) @ db)
+        assert cr_term.shape == alpha.shape, f"{cr_term.shape} vs {alpha.shape}"
     else:
         cr_term = 0.0
 
-    alpha_neg1 = np.power(alpha, -1)
+    alpha = alpha[None]
+    alpha_neg1 = 1.0 / alpha
     alpha_neg2 = np.power(alpha, -2)
+    alphamu = alpha * mu
     if useWeights:
-        ll_part = alpha_neg2 * np.sum(
+        ll_part = alpha_neg2.squeeze() * np.sum(
             weights
             * (
                 digamma(alpha_neg1)
-                + np.log(1 + alpha * mu)
-                - alpha * mu * np.power(1.0 + alpha * mu, -1)
+                + np.log(1 + alphamu)
+                - alphamu / (1.0 + alphamu)
                 - digamma(y + alpha_neg1)
-                + y * np.power(mu + alpha_neg1, -1)
-            )
+                + y / (mu + alpha_neg1)
+            ),
+            axis=0,
         )
     else:
-        ll_part = alpha_neg2 * np.sum(
+        ll_part = alpha_neg2.squeeze() * np.sum(
             digamma(alpha_neg1)
-            + np.log(1 + alpha * mu)
-            - alpha * mu * np.power(1.0 + alpha * mu, -1)
+            + np.log(1 + alphamu)
+            - alphamu / (1.0 + alphamu)
             - digamma(y + alpha_neg1)
-            + y * np.power(mu + alpha_neg1, -1)
+            + y / (mu + alpha_neg1),
+            axis=0,
         )
 
     # only the prior part is wrt log alpha
@@ -225,7 +306,7 @@ def dlog_posterior(
         prior_part = 0.0
 
     # note: return dlog_post / dalpha * alpha because we take derivatives wrt log alpha
-    return (ll_part + cr_term) * alpha + prior_part
+    return (ll_part + cr_term) * alpha.squeeze() + prior_part
 
 
 def d2log_posterior(
@@ -278,50 +359,87 @@ def d2log_posterior(
         regularized as specified by the input arguments
         same shape as first argument :code:`log_alpha`
     """
-    alpha = np.exp(log_alpha)
-    x_orig = x.copy()
-    if useCR:
-        w_diag = np.power(np.power(mu, -1) + alpha, -1)
-        dw_diag = -1 * np.power(np.power(mu, -1) + alpha, -2)
-        d2w_diag = 2 * np.power(np.power(mu, -1) + alpha, -3)
-        if useWeights:
-            x = x[weights > weightThreshold, :]
-            x = x[:, np.sum(np.abs(x), 0) > 0.0]
-            w_diag = w_diag[weights > weightThreshold]
-            dw_diag = dw_diag[weights > weightThreshold]
-            d2w_diag = d2w_diag[weights > weightThreshold]
 
-        b = x.T @ (x * w_diag[:, None])
+    # make sure that all arrays are broadcastable to the appropriate shapes
+    if not isinstance(log_alpha, np.ndarray):
+        log_alpha = np.repeat(log_alpha, 1)
+    if len(y.shape) == 1:
+        y = y[:, None]
+    if len(mu.shape) == 1:
+        mu = mu[:, None]
+    if len(weights.shape) == 1:
+        weights = weights[:, None]
+
+    # helper variables to control the shapes
+    M = log_alpha.shape[0]
+    (N, P) = x.shape
+
+    alpha = np.exp(log_alpha)
+    if useCR:
+        x = x[None]
+        # NB: now, x.shape == (1, N, P)
+        mu_neg1 = 1.0 / mu
+        w_diag = 1.0 / (mu_neg1 + alpha[None])
+        dw_diag = -1.0 * np.power(mu_neg1 + alpha[None], -2)
+        d2w_diag = 2.0 * np.power(mu_neg1 + alpha[None], -3)
+        assert w_diag.shape == (N, M)
+        assert dw_diag.shape == (N, M)
+        assert d2w_diag.shape == (N, M)
+        # NB: w_diag.shape == dw_diag.shape == d2w_diag.shape == mu.shape == (N, M)
+        if useWeights:
+            # cancel out all weights below the threshold
+            idx = weights <= weightThreshold
+            w_diag[np.broadcast_to(idx, w_diag.shape)] = 0.0
+            dw_diag[np.broadcast_to(idx, dw_diag.shape)] = 0.0
+            d2w_diag[np.broadcast_to(idx, d2w_diag.shape)] = 0.0
+
+        # use `np.swapaxes` to transpose the matrices stored in the last 2 dims
+        w_diag = np.swapaxes(w_diag, -1, -2)
+        dw_diag = np.swapaxes(dw_diag, -1, -2)
+        d2w_diag = np.swapaxes(d2w_diag, -1, -2)
+        # insert a new axis in last position
+        w_diag = np.expand_dims(w_diag, axis=-1)
+        dw_diag = np.expand_dims(dw_diag, axis=-1)
+        d2w_diag = np.expand_dims(d2w_diag, axis=-1)
+        b = np.swapaxes(x * w_diag, -1, -2) @ x
         b_i = np.linalg.inv(b)
-        db = x.T @ (x * dw_diag[:, None])
-        d2b = x.T @ (x * d2w_diag[:, None])
-        ddetb = np.trace(b_i @ db)
+        db = np.swapaxes(x * dw_diag, -1, -2) @ x
+        d2b = np.swapaxes(x * d2w_diag, -1, -2) @ x
+        assert b.shape == (M, P, P)
+        assert db.shape == (M, P, P)
+        assert d2b.shape == (M, P, P)
+
+        ddetb = np.trace(b_i @ db, axis1=-2, axis2=-1)
         d2detb = (
-            np.power(np.trace(b_i @ db), 2)
-            - np.trace(b_i @ db @ b_i @ db)
-            + np.trace(b_i @ d2b)
+            np.power(ddetb, 2)
+            - np.trace(b_i @ db @ b_i @ db, axis1=-2, axis2=-1)
+            + np.trace(b_i @ d2b, axis1=-2, axis2=-1)
         )
         cr_term = 0.5 * np.power(ddetb, 2) - 0.5 * d2detb
+        assert cr_term.shape == alpha.shape, f"{cr_term.shape} vs {alpha.shape}"
+        x = x.squeeze(-3)
     else:
         cr_term = 0.0
 
-    alpha_neg1 = np.power(alpha, -1)
+    alpha = alpha[None]
+    alpha_neg1 = 1.0 / alpha
     alpha_neg2 = np.power(alpha, -2)
+    alphamu = alpha * mu
     if useWeights:
         ll_part = -2 * np.power(alpha, -3) * np.sum(
             weights
             * (
                 digamma(alpha_neg1)
-                + np.log(1 + alpha * mu)
-                - alpha * mu * np.power(1 + alpha * mu, -1)
+                + np.log(1 + alphamu)
+                - alphamu / (1 + alphamu)
                 - digamma(y + alpha_neg1)
-                + y * np.power(mu + alpha_neg1, -1)
+                + y / (mu + alpha_neg1)
             )
         ) + alpha_neg2 * np.sum(
             weights
             * (
                 -1 * alpha_neg2 * polygamma(1, alpha_neg1)
-                + np.power(mu, 2) * alpha * np.power(1 + alpha * mu, -2)
+                + np.power(mu, 2) * alpha * np.power(1 + alphamu, -2)
                 + alpha_neg2 * polygamma(1, y + alpha_neg1)
                 + alpha_neg2 * y * np.power(mu + alpha_neg1, -2)
             )
@@ -329,13 +447,13 @@ def d2log_posterior(
     else:
         ll_part = -2 * np.power(alpha, -3) * np.sum(
             digamma(alpha_neg1)
-            + np.log(1 + alpha * mu)
-            - alpha * mu * np.power(1 + alpha * mu, -1)
+            + np.log(1 + alphamu)
+            - alphamu / (1 + alphamu)
             - digamma(y + alpha_neg1)
-            + y * np.power(mu + alpha_neg1, -1)
+            + y / (mu + alpha_neg1)
         ) + alpha_neg2 * np.sum(
             -1 * alpha_neg2 * polygamma(1, alpha_neg1)
-            + np.power(mu, 2) * alpha * np.power(1 + alpha * mu, -2)
+            + np.power(mu, 2) * alpha * np.power(1 + alphamu, -2)
             + alpha_neg2 * polygamma(1, y + alpha_neg1)
             + alpha_neg2 * y * np.power(mu + alpha_neg1, -2)
         )
@@ -355,7 +473,7 @@ def d2log_posterior(
             log_alpha,
             y,
             mu,
-            x_orig,
+            x,
             log_alpha_prior_mean,
             log_alpha_prior_sigmasq,
             False,
@@ -691,41 +809,37 @@ def fitDispGrid(
 
         ycol = y[:, i]
         mu_hat_col = mu_hat[:, i]
-        for t in range(disp_grid_n):
-            # maximize the log likelihood over the variable a, the log of alpha, the dispersion parameter
-            a = disp_grid[t]
-            logpostvec[t] = log_posterior(
-                a,
-                ycol,
-                mu_hat_col,
-                x,
-                log_alpha_prior_mean[i],
-                log_alpha_prior_sigmasq,
-                usePrior,
-                weights[:, i],
-                useWeights,
-                weightThreshold,
-                useCR,
-            )
+        # maximize the log likelihood over the variable a, the log of alpha, the dispersion parameter
+        logpostvec = log_posterior(
+            disp_grid,
+            ycol,
+            mu_hat_col,
+            x,
+            log_alpha_prior_mean[i],
+            log_alpha_prior_sigmasq,
+            usePrior,
+            weights[:, i],
+            useWeights,
+            weightThreshold,
+            useCR,
+        )
 
         idxmax = np.argmax(logpostvec)
         a_hat = disp_grid[idxmax]
         disp_grid_fine = np.linspace(a_hat - delta, a_hat + delta, disp_grid_n)
-        for t in range(disp_grid_n):
-            a = disp_grid_fine[t]
-            logpostvec[t] = log_posterior(
-                a,
-                ycol,
-                mu_hat_col,
-                x,
-                log_alpha_prior_mean[i],
-                log_alpha_prior_sigmasq,
-                usePrior,
-                weights[:, i],
-                useWeights,
-                weightThreshold,
-                useCR,
-            )
+        logpostvec = log_posterior(
+            disp_grid_fine,
+            ycol,
+            mu_hat_col,
+            x,
+            log_alpha_prior_mean[i],
+            log_alpha_prior_sigmasq,
+            usePrior,
+            weights[:, i],
+            useWeights,
+            weightThreshold,
+            useCR,
+        )
 
         idxmax = np.argmax(logpostvec)
         log_alpha[i] = disp_grid_fine[idxmax]
