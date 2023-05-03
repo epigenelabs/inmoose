@@ -24,9 +24,9 @@
 
 /* Different initialization methods for the Levenberg coefficients */
 
-extern "C" void build_QRdecomposition(QRdecomposition*);
-extern "C" void decompose_QRdecomposition(QRdecomposition*);
-extern "C" void solve_QRdecomposition(QRdecomposition*);
+void build_QRdecomposition(QRdecomposition*);
+void decompose_QRdecomposition(QRdecomposition*);
+void solve_QRdecomposition(QRdecomposition*);
 
 QRdecomposition::QRdecomposition(int nrows, int ncoefs, const double* curX) : NR(nrows), NC(ncoefs),
         X(curX), Xcopy(NR*NC), tau(NC), effects(NR), weights(NR),
