@@ -785,19 +785,19 @@ def getContrast(obj, contrast, useT, minmu):
     # use weights if they are present
     if "weights" in obj.layers:
         useWeights = True
-        weights = obj.layers["weights"]
+        weights = objNZ.layers["weights"]
         if not np.all(weights >= 0):
             raise ValueError("all weights must be positive")
         weights = weights / np.max(weights, axis=0)
     else:
         useWeights = False
-        weights = np.ones(obj.shape)
+        weights = np.ones(objNZ.shape)
 
     betaRes = fitBeta(
         y=countsMatrix,
         x=modelMatrix,
         nf=normalizationFactors,
-        alpha_hat=alpha_hat,
+        alpha_hat=alpha_hat.values,
         contrast=contrast,
         beta_mat=beta_mat.values,
         lambda_=lambda_,
