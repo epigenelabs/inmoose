@@ -28,6 +28,7 @@
 # https://github.com/mikelove/DESeq2/blob/master/src/DESeq2.cpp
 
 import numpy as np
+import pandas as pd
 from scipy.special import loggamma as lgamma
 from scipy.special import digamma, polygamma
 from scipy.special import xlog1py, xlogy
@@ -567,8 +568,12 @@ def fitDisp(
         the last second derivatives (wrt. log(alpha)) of the log posterior. Shape N.
     """
 
+    if isinstance(log_alpha, pd.Series):
+        log_alpha = log_alpha.values
     if isinstance(log_alpha, (int, float)):
         log_alpha = np.repeat(float(log_alpha), y.shape[1])
+    if isinstance(log_alpha_prior_mean, pd.Series):
+        log_alpha_prior_mean = log_alpha_prior_mean.values
     if isinstance(log_alpha_prior_mean, (int, float)):
         log_alpha_prior_mean = np.repeat(float(log_alpha_prior_mean), y.shape[1])
     assert y.shape[1] == mu_hat.shape[1]
@@ -577,147 +582,138 @@ def fitDisp(
 
     y_n = y.shape[1]
     epsilon = 1.0e-4
-    # record log posterior values
-    initial_lp = np.zeros(y_n)
-    initial_dlp = np.zeros(y_n)
-    last_lp = np.zeros(y_n)
-    last_dlp = np.zeros(y_n)
-    last_d2lp = np.zeros(y_n)
-    last_change = np.zeros(y_n)
     iter_ = np.zeros(y_n)
     iter_accept = np.zeros(y_n)
 
-    for i in range(y_n):
-        # if i % 100 == 0:
-        #    checkUserInterrupt()
+    # maximize the log likelihood over the variable a, the log of alpha, the
+    # dispersion parameter.
+    # in order to express the optimization in a typical manner, for calculating
+    # theta(kappa) we multiply the log likelihood by -1 and seek a minimum
+    # we use a line search based on the Armijo rule.
+    # define a function theta(kappa) = f(a + kappa * d) where d is the search
+    # direction
+    # in this case the search direction is given by the first derivative of the
+    # log likelihood
+    a = log_alpha.copy()
+    lp = log_posterior(
+        a,
+        y,
+        mu_hat,
+        x,
+        log_alpha_prior_mean,
+        log_alpha_prior_sigmasq,
+        usePrior,
+        weights,
+        useWeights,
+        weightThreshold,
+        useCR,
+    )
+    dlp = dlog_posterior(
+        a,
+        y,
+        mu_hat,
+        x,
+        log_alpha_prior_mean,
+        log_alpha_prior_sigmasq,
+        usePrior,
+        weights,
+        useWeights,
+        weightThreshold,
+        useCR,
+    )
 
-        ycol = y[:, i]
-        mu_hat_col = mu_hat[:, i]
-        # maximize the log likelihood over the variable a, the log of alpha, the dispersion parameter.
-        # in order to express the optimization in a typical manner,
-        # for calculating theta(kappa) we multiple the log likelihood by -1 and seek a minimum
-        a = log_alpha[i]
-        # we use a line search based on the Armijo rule.
-        # define a function theta(kappa) = f(a + kappa * d) where d is the search direction.
-        # in this case the search direction is taken by the first derivative of the log likelihood
-        lp = log_posterior(
-            a,
-            ycol,
-            mu_hat_col,
+    kappa = np.repeat(kappa_0, y_n)
+    initial_lp = lp.copy()
+    initial_dlp = dlp.copy()
+    change = np.repeat(-1.0, y_n)
+    last_change = np.repeat(-1.0, y_n)
+
+    idx = np.repeat(True, y_n)
+    for t in range(maxit):
+        # iter_ counts the number of steps taken out of maxit
+        iter_[idx] += 1
+        a_propose = a + kappa * dlp
+        # note: lgamma is unstable for values around 1e17, where there is a
+        # switch in lgamma.c
+        # we limit log alpha from going lower than -30
+        kappa = np.where(a_propose < -30.0, (-30.0 - a) / dlp, kappa)
+        # we limit log alpha from going higher than 10
+        kappa = np.where(a_propose > 10.0, (10.0 - a) / dlp, kappa)
+
+        lpost = log_posterior(
+            a[idx] + kappa[idx] * dlp[idx],
+            y[:, idx],
+            mu_hat[:, idx],
             x,
-            log_alpha_prior_mean[i],
+            log_alpha_prior_mean[idx],
             log_alpha_prior_sigmasq,
             usePrior,
-            weights[:, i],
+            weights[:, idx],
             useWeights,
             weightThreshold,
             useCR,
         )
-        dlp = dlog_posterior(
-            a,
-            ycol,
-            mu_hat_col,
+        theta_kappa = np.zeros(y_n)
+        theta_kappa[idx] = -lpost
+        theta_hat_kappa = -lp - kappa * epsilon * np.power(dlp, 2)
+
+        # if this inequality is true, we have satisfied the Armijo rule and
+        # accept the step size kappa, otherwise we halve kappa
+        armijo_idx = idx & (theta_kappa <= theta_hat_kappa)
+        # iter_accept counts the number of accepted proposals
+        iter_accept[armijo_idx] += 1
+        a[armijo_idx] = (a + kappa * dlp)[armijo_idx]
+        lpnew = np.zeros(y_n)
+        lpnew[idx] = lpost
+        # look for change in log likelihood
+        change[armijo_idx] = lpnew[armijo_idx] - lp[armijo_idx]
+        lp = np.where(armijo_idx & (change < tol), lpnew, lp)
+        idx[armijo_idx & (change < tol)] = False
+        # if log(alpha) is going to -infinity, break the loop
+        idx[armijo_idx & (a < min_log_alpha)] = False
+
+        idx2 = idx & armijo_idx
+        lp[idx2] = lpnew[idx2]
+        dlp[idx2] = dlog_posterior(
+            a[idx2],
+            y[:, idx2],
+            mu_hat[:, idx2],
             x,
-            log_alpha_prior_mean[i],
+            log_alpha_prior_mean[idx2],
             log_alpha_prior_sigmasq,
             usePrior,
-            weights[:, i],
+            weights[:, idx2],
             useWeights,
             weightThreshold,
             useCR,
         )
-        kappa = kappa_0
-        initial_lp[i] = lp
-        initial_dlp[i] = dlp
-        change = -1.0
-        last_change[i] = -1.0
-        for t in range(maxit):
-            # iter_ counts the number of steps taken out of maxit
-            iter_[i] += 1
-            a_propose = a + kappa * dlp
-            # note: lgamma is unstable for values around 1e17, where there is a switch in lgamma.c
-            # we limit log alpha from going lower than -30
-            if a_propose < -30.0:
-                kappa = (-30.0 - a) / dlp
-            # we limit log alpha from going higher than 10
-            if a_propose > 10.0:
-                kappa = (10.0 - a) / dlp
+        # instead of resetting kappa to kappa_0
+        # multiply kappa by 1.1
+        kappa[idx2] = np.minimum(kappa[idx2] * 1.1, kappa_0)
+        # every 5 accepts, halve kappa
+        # to prevent slow convergence due to overshooting
+        kappa[idx2 & (iter_accept % 5 == 0)] /= 2.0
 
-            lpost = log_posterior(
-                a + kappa * dlp,
-                ycol,
-                mu_hat_col,
-                x,
-                log_alpha_prior_mean[i],
-                log_alpha_prior_sigmasq,
-                usePrior,
-                weights[:, i],
-                useWeights,
-                weightThreshold,
-                useCR,
-            )
-            theta_kappa = -lpost
-            theta_hat_kappa = -lp - kappa * epsilon * np.power(dlp, 2)
-            # if this inequality is true, we have satisfied the Armijo rule and
-            # accept the step size kappa, otherwise we halve kappa
-            if theta_kappa <= theta_hat_kappa:
-                # iter_accept counts the number of accepted proposals
-                iter_accept[i] += 1
-                a = a + kappa * dlp
-                lpnew = lpost
-                # look for change in log likelihood
-                change = lpnew - lp
-                if change < tol:
-                    lp = lpnew
-                    break
-                # if log(alpha) is going to -infinity
-                # break the loop
-                if a < min_log_alpha:
-                    break
+        kappa[~armijo_idx] /= 2.0
 
-                lp = lpnew
-                dlp = dlog_posterior(
-                    a,
-                    ycol,
-                    mu_hat_col,
-                    x,
-                    log_alpha_prior_mean[i],
-                    log_alpha_prior_sigmasq,
-                    usePrior,
-                    weights[:, i],
-                    useWeights,
-                    weightThreshold,
-                    useCR,
-                )
-                # instead of resetting kappa to kappa_0
-                # multiply kappa by 1.1
-                kappa = np.minimum(kappa * 1.1, kappa_0)
-                # every 5 accepts, halve kappa
-                # to prevent slow convergence due to overshooting
-                if iter_accept[i] % 5 == 0:
-                    kappa = kappa / 2.0
-
-            else:
-                kappa = kappa / 2.0
-
-        last_lp[i] = lp
-        last_dlp[i] = dlp
-        last_d2lp[i] = d2log_posterior(
-            a,
-            ycol,
-            mu_hat_col,
-            x,
-            log_alpha_prior_mean[i],
-            log_alpha_prior_sigmasq,
-            usePrior,
-            weights[:, i],
-            useWeights,
-            weightThreshold,
-            useCR,
-        )
-        log_alpha[i] = a
-        # last change indicates the change for the final iteration
-        last_change[i] = change
+    last_lp = lp
+    last_dlp = dlp
+    last_d2lp = d2log_posterior(
+        a,
+        y,
+        mu_hat,
+        x,
+        log_alpha_prior_mean,
+        log_alpha_prior_sigmasq,
+        usePrior,
+        weights,
+        useWeights,
+        weightThreshold,
+        useCR,
+    )
+    log_alpha = a
+    # last change indicates the change for the final iteration
+    last_change = change
 
     return {
         "log_alpha": log_alpha,
@@ -800,50 +796,42 @@ def fitDispGrid(
     y_n = y.shape[1]
     disp_grid_n = disp_grid.shape[0]
     delta = disp_grid[1] - disp_grid[0]
-    logpostvec = np.zeros(disp_grid_n)
-    log_alpha = np.zeros(y_n)
 
-    for i in range(y_n):
-        # if i % 100 == 0:
-        #    checkUserInterrupt()
-
-        ycol = y[:, i]
-        mu_hat_col = mu_hat[:, i]
-        # maximize the log likelihood over the variable a, the log of alpha, the dispersion parameter
-        logpostvec = log_posterior(
-            disp_grid,
-            ycol,
-            mu_hat_col,
-            x,
-            log_alpha_prior_mean[i],
-            log_alpha_prior_sigmasq,
-            usePrior,
-            weights[:, i],
-            useWeights,
-            weightThreshold,
-            useCR,
-        )
-
-        idxmax = np.argmax(logpostvec)
-        a_hat = disp_grid[idxmax]
-        disp_grid_fine = np.linspace(a_hat - delta, a_hat + delta, disp_grid_n)
-        logpostvec = log_posterior(
-            disp_grid_fine,
-            ycol,
-            mu_hat_col,
-            x,
-            log_alpha_prior_mean[i],
-            log_alpha_prior_sigmasq,
-            usePrior,
-            weights[:, i],
-            useWeights,
-            weightThreshold,
-            useCR,
-        )
-
-        idxmax = np.argmax(logpostvec)
-        log_alpha[i] = disp_grid_fine[idxmax]
-
+    logpostvec = log_posterior(
+        disp_grid[:, None],
+        y,
+        mu_hat,
+        x,
+        log_alpha_prior_mean,
+        log_alpha_prior_sigmasq,
+        usePrior,
+        weights,
+        useWeights,
+        weightThreshold,
+        useCR,
+    )
+    idxmax = np.argmax(logpostvec, axis=0)
+    assert idxmax.shape == (y_n,)
+    a_hat = disp_grid[idxmax]
+    disp_grid_fine = np.linspace(a_hat - delta, a_hat + delta, disp_grid_n)
+    assert disp_grid_fine.shape == (disp_grid_n, y_n)
+    logpostvec = log_posterior(
+        disp_grid_fine,
+        y,
+        mu_hat,
+        x,
+        log_alpha_prior_mean,
+        log_alpha_prior_sigmasq,
+        usePrior,
+        weights,
+        useWeights,
+        weightThreshold,
+        useCR,
+    )
+    idxmax = np.argmax(logpostvec, axis=0)
+    assert idxmax.shape == (y_n,)
+    log_alpha = np.take_along_axis(disp_grid_fine, idxmax[None], axis=0).squeeze(0)
+    assert log_alpha.shape == (y_n,)
     return log_alpha
 
 
@@ -947,141 +935,133 @@ def fitBeta(
     y_m, y_n = y.shape
     x_p = x.shape[1]
 
+    assert not isinstance(alpha_hat, pd.Series)
+    assert alpha_hat.shape == (y_n,)
     assert beta_mat.shape == (y_n, x_p)
     assert y.shape[0] == x.shape[0]
     assert nf.shape == y.shape
+    assert weights.shape == y.shape
     assert lambda_.ndim == 1
     assert lambda_.shape[0] == x.shape[1], f"{lambda_.shape}, {x.shape}"
 
     beta_var_mat = np.zeros(beta_mat.shape)
     contrast_num = np.zeros(beta_mat.shape[0])
     contrast_denom = np.zeros(beta_mat.shape[0])
-    hat_diagonals = np.zeros(y.shape)
     # bound the estimated count, as weights include 1/mu
     large = 30.0
     iter_ = np.zeros(y_n)
-    deviance = np.zeros(y_n)
     ridge = np.diag(lambda_)
-    for i in range(y_n):
-        # if i % 100 == 0:
-        #    checkUserInterrupt()
-        nfcol = nf[:, i]
-        ycol = y[:, i]
-        beta_hat = beta_mat[i, :]
-        mu_hat = nfcol * np.exp(x @ beta_hat)
-        mu_hat = np.maximum(mu_hat, minmu)
-        dev = 0.0
-        dev_old = 0.0
+
+    mu_hat = np.maximum(nf * np.exp(x @ beta_mat.T), minmu)
+    assert mu_hat.shape == nf.shape
+    dev = np.zeros(y_n)
+    dev_old = np.zeros(y_n)
+    idx = np.repeat(True, y_n)
+
+    for t in range(maxit):
+        idx_n = np.sum(idx)
+        iter_[idx] += 1
+
+        mu_hat_idx = mu_hat[:, idx]
+        if useWeights:
+            w_vec = weights[:, idx] * mu_hat_idx / (1.0 + alpha_hat[idx] * mu_hat_idx)
+        else:
+            w_vec = mu_hat_idx / (1.0 + alpha_hat[idx] * mu_hat_idx)
+        assert w_vec.shape == (y_m, idx_n)
+        w_sqrt_vec = np.sqrt(w_vec)
+
         if useQR:
             # make an orthonormal design matrix including the ridge penalty
-            for t in range(maxit):
-                iter_[i] += 1
-                if useWeights:
-                    w_vec = weights[:, i] * mu_hat / (1.0 + alpha_hat[i] * mu_hat)
-                    w_sqrt_vec = np.sqrt(w_vec)
-                else:
-                    w_vec = mu_hat / (1.0 + alpha_hat[i] * mu_hat)
-                    w_sqrt_vec = np.sqrt(w_vec)
-                # prepare matrices
-                weighted_x_ridge = np.vstack([x * w_sqrt_vec[:, None], np.sqrt(ridge)])
-                q, r = np.linalg.qr(weighted_x_ridge)
-                big_w_diag = np.ones(y_m + x_p)
-                big_w_diag[:y_m] = w_vec
-                # big_w_sqrt = diagmat(sqrt(big_w_diag))
-                z = np.log(mu_hat / nfcol) + (ycol - mu_hat) / mu_hat
-                w_diag = w_vec.copy()
-                z_sqrt_w = z * np.sqrt(w_diag)
-                big_z_sqrt_w = np.zeros(y_m + x_p)
-                big_z_sqrt_w[:y_m] = z_sqrt_w
-                # IRLS with Q matrix for X
-                gamma_hat = q.T @ big_z_sqrt_w
-                beta_hat = np.linalg.solve(r, gamma_hat)
-                if np.sum(np.abs(beta_hat) > large) > 0:
-                    iter_[i] = maxit
-                    break
-                mu_hat = nfcol * np.exp(x @ beta_hat)
-                mu_hat = np.maximum(mu_hat, minmu)
-                dev = 0.0
-                if useWeights:
-                    dev -= 2.0 * np.sum(
-                        weights[:, i]
-                        * dnbinom_mu(ycol, 1.0 / alpha_hat[i], mu_hat, True)
-                    )
-                else:
-                    dev -= 2.0 * np.sum(
-                        dnbinom_mu(ycol, 1.0 / alpha_hat[i], mu_hat, True)
-                    )
-
-                conv_test = np.abs(dev - dev_old) / (np.abs(dev) + 0.1)
-                if np.isnan(conv_test):
-                    iter_[i] = maxit
-                    break
-                if t > 0 and conv_test < tol:
-                    break
-                dev_old = dev
-
+            # prepare matrices
+            weighted_x_ridge = np.hstack(
+                [
+                    x * w_sqrt_vec.T[:, :, None],
+                    np.broadcast_to(np.sqrt(ridge), (idx_n, x_p, x_p)),
+                ]
+            )
+            assert weighted_x_ridge.shape == (idx_n, y_m + x_p, x_p)
+            q, r = np.linalg.qr(weighted_x_ridge)
+            assert q.shape[0] == r.shape[0] == idx_n
+            big_w_diag = np.ones((idx_n, y_m + x_p))
+            big_w_diag[:, :y_m] = w_vec.T
+            z = np.log(mu_hat_idx / nf[:, idx]) + (y[:, idx] - mu_hat_idx) / mu_hat_idx
+            assert z.shape == (y_m, idx_n)
+            w_diag = w_vec.copy()
+            z_sqrt_w = z * np.sqrt(w_diag)
+            big_z_sqrt_w = np.zeros((idx_n, y_m + x_p))
+            big_z_sqrt_w[:, :y_m] = z_sqrt_w.T
+            # IRLS with Q matrix for X
+            gamma_hat = np.swapaxes(q, -1, -2) @ big_z_sqrt_w[:, :, None]
+            beta_hat = np.linalg.solve(r, gamma_hat.squeeze(-1))
         else:
-            # use the standard design matrix x and matrix inversion
-            for t in range(maxit):
-                iter_[i] += 1
-                if useWeights:
-                    w_vec = weights[:, i] * mu_hat / (1.0 + alpha_hat[i] * mu_hat)
-                    w_sqrt_vec = np.sqrt(w_vec)
-                else:
-                    w_vec = mu_hat / (1.0 + alpha_hat[i] * mu_hat)
-                    w_sqrt_vec = np.sqrt(w_vec)
+            # use the standard design matrix and matrix inversion
+            z = np.log(mu_hat_idx / nf[:, idx]) + (y[:, idx] - mu_hat_idx) / mu_hat_idx
+            assert (x.T @ (x * w_vec.T[:, :, None]) + ridge).shape == (idx_n, x_p, x_p)
+            assert ((z * w_vec).T @ x).shape == (idx_n, x_p)
+            beta_hat = np.linalg.solve(
+                x.T @ (x * w_vec.T[:, :, None]) + ridge, (z * w_vec).T @ x
+            )
 
-                z = np.log(mu_hat / nfcol) + (ycol - mu_hat) / mu_hat
-                beta_hat = np.linalg.solve(
-                    x.T @ (x.T * w_vec).T + ridge, x.T @ (z.T * w_vec).T
-                )
-                if np.sum(np.abs(beta_hat) > large) > 0:
-                    iter_[i] = maxit
-                    break
-                mu_hat = nfcol * np.exp(x @ beta_hat)
-                mu_hat = np.maximum(mu_hat, minmu)
-                dev = 0.0
-                if useWeights:
-                    dev -= 2.0 * np.sum(
-                        weights[:, i]
-                        * dnbinom_mu(ycol, 1.0 / alpha_hat[i], mu_hat, True)
-                    )
-                else:
-                    dev -= 2.0 * np.sum(
-                        dnbinom_mu(ycol, 1.0 / alpha_hat[i], mu_hat, True)
-                    )
+        assert beta_hat.shape == (idx_n, x_p), f"{beta_hat.shape} vs {(idx_n, x_p)}"
+        # easier to update beta_mat here instead than at the end of the loop
+        beta_mat[idx, :] = beta_hat
+        subidx = ~(np.sum(np.abs(beta_hat) > large, axis=1) > 0)
+        assert subidx.shape == (idx_n,)
+        newidx = idx.copy()
+        newidx[idx] = subidx
+        iter_[idx & ~newidx] = maxit
 
-                conv_test = np.abs(dev - dev_old) / (np.abs(dev) + 0.1)
-                if np.isnan(conv_test):
-                    iter_[i] = maxit
-                    break
-                if t > 0 and conv_test < tol:
-                    break
-                dev_old = dev
-
-        deviance[i] = dev
-        beta_mat[i, :] = beta_hat
-        # recalculate w so that this is identical if we start with beta_hat
+        idx = newidx
+        mu_hat[:, idx] = np.maximum(
+            nf[:, idx] * np.exp(x @ beta_hat[subidx, :].T), minmu
+        )
+        dev[idx] = 0.0
         if useWeights:
-            w_vec = weights[:, i] * mu_hat / (1.0 + alpha_hat[i] * mu_hat)
-            w_sqrt_vec = np.sqrt(w_vec)
+            dev[idx] -= 2.0 * np.sum(
+                weights[:, idx]
+                * dnbinom_mu(y[:, idx], 1.0 / alpha_hat[idx], mu_hat[:, idx], True),
+                axis=0,
+            )
         else:
-            w_vec = mu_hat / (1.0 + alpha_hat[i] * mu_hat)
-            w_sqrt_vec = np.sqrt(w_vec)
+            dev[idx] -= 2.0 * np.sum(
+                dnbinom_mu(y[:, idx], 1.0 / alpha_hat[idx], mu_hat[:, idx], True),
+                axis=0,
+            )
 
-        hat_matrix_diag = np.zeros(x.shape[0])
-        xw = x * w_sqrt_vec[:, None]
-        xtwxr_inv = np.linalg.inv(x.T @ (x * w_vec[:, None]) + ridge)
+        conv_test = np.abs(dev - dev_old) / (np.abs(dev) + 0.1)
+        nanidx = np.isnan(conv_test)
+        iter_[idx & nanidx] = maxit
+        idx &= ~nanidx
+        if t > 0:
+            idx &= ~(conv_test < tol)
+        dev_old = dev.copy()
 
-        hat_matrix = xw @ xtwxr_inv @ xw.T
-        hat_matrix_diag = np.diag(hat_matrix)
+    # recalculate w so that this is identical if we start with beta_hat
+    if useWeights:
+        w_vec = weights * mu_hat / (1.0 + alpha_hat * mu_hat)
+    else:
+        w_vec = mu_hat / (1.0 + alpha_hat * mu_hat)
+    w_sqrt_vec = np.sqrt(w_vec)
 
-        hat_diagonals[:, i] = hat_matrix_diag
-        # sigma is the covariance matrix for the betas
-        sigma = xtwxr_inv @ x.T @ (x * w_vec[:, None]) @ xtwxr_inv
-        contrast_num[i] = contrast.T @ beta_hat
-        contrast_denom[i] = np.sqrt(contrast.T @ sigma @ contrast)
-        beta_var_mat[i, :] = np.diag(sigma)
+    xw = x * w_sqrt_vec.T[:, :, None]
+    assert xw.shape == (y_n, y_m, x_p)
+    xtwxr_inv = np.linalg.inv(x.T @ (x * w_vec.T[:, :, None]) + ridge)
+    assert xtwxr_inv.shape == (y_n, x_p, x_p)
+
+    hat_diagonals = np.zeros(y.shape)
+    # this is equivalent to (for all j):
+    #   hat_diagonals[:,j] = np.diag(xw[j] @ xtwxr_inv[j] @ xw[j].T)
+    # but it avoids computing full matrix products just to retrieve the diags
+    for k in range(x_p):
+        for l in range(x_p):
+            hat_diagonals[:, :] += (xw[:, :, k] * xw[:, :, l]).T * xtwxr_inv[:, k, l]
+
+    # sigma is the covariance matrix for the betas
+    sigma = xtwxr_inv @ x.T @ (x * w_vec.T[:, :, None]) @ xtwxr_inv
+    assert sigma.shape == (y_n, x_p, x_p)
+    contrast_num = contrast @ beta_mat.T
+    contrast_denom = np.sqrt(contrast.T @ sigma @ contrast)
+    beta_var_mat = np.diagonal(sigma, axis1=-2, axis2=-1)
 
     return {
         "beta_mat": beta_mat,
@@ -1090,7 +1070,7 @@ def fitBeta(
         "hat_diagonals": hat_diagonals,
         "contrast_num": contrast_num,
         "contrast_denom": contrast_denom,
-        "deviance": deviance,
+        "deviance": dev,
     }
 
 
