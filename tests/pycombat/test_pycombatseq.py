@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from inmoose.utils import rnbinom
-from inmoose.batch import pycombat_seq
+from inmoose.pycombat import pycombat_seq
 
 class test_pycombatseq(unittest.TestCase):
 

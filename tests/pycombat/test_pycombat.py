@@ -2,12 +2,12 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from inmoose.batch.pycombat import model_matrix, all_1
-from inmoose.batch.pycombat import compute_prior, postmean, postvar, it_sol, int_eprior
-from inmoose.batch.pycombat import check_mean_only, define_batchmod, check_ref_batch, treat_batches, treat_covariates, check_NAs
-from inmoose.batch.pycombat import calculate_mean_var, calculate_stand_mean
-from inmoose.batch.pycombat import standardise_data, fit_model, adjust_data
-from inmoose.batch import pycombat
+from inmoose.pycombat.pycombat_norm import model_matrix, all_1
+from inmoose.pycombat.pycombat_norm import compute_prior, postmean, postvar, it_sol, int_eprior
+from inmoose.pycombat.pycombat_norm import check_mean_only, define_batchmod, check_ref_batch, treat_batches, treat_covariates, check_NAs
+from inmoose.pycombat.pycombat_norm import calculate_mean_var, calculate_stand_mean
+from inmoose.pycombat.pycombat_norm import standardise_data, fit_model, adjust_data
+from inmoose.pycombat import pycombat_norm
 
 class test_pycombat(unittest.TestCase):
 
@@ -22,7 +22,7 @@ class test_pycombat(unittest.TestCase):
                               np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1)])
 
         self.matrix = pd.DataFrame(data=matrix,columns=["sample_"+str(i+1) for i in range(9)],index=["gene_"+str(i+1) for i in range(1000)])
-        self.matrix_adjusted = pycombat(self.matrix, self.batch)
+        self.matrix_adjusted = pycombat_norm(self.matrix, self.batch)
 
         # useful constants for unit testing
         ref_batch = None
