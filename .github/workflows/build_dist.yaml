@@ -47,3 +47,19 @@ jobs:
         with:
           package-dir: sdist/inmoose.tar.gz
 
+  upload_pypi:
+    needs: [build_sdist, build_wheels]
+    name: Publish source distribution on PyPI
+    runs-on: ubuntu-latest
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: inmoose_sdist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@v1.8.6
+
