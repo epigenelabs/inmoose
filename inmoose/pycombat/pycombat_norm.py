@@ -592,7 +592,7 @@ def adjust_data(s_data, gamma_star, delta_star, batch_design, n_batches, var_poo
     return bayes_data
 
 
-def pycombat(data, batch, mod=[], par_prior=True, prior_plots=False, mean_only=False, ref_batch=None, precision=None, **kwargs):
+def pycombat_norm(data, batch, mod=[], par_prior=True, prior_plots=False, mean_only=False, ref_batch=None, precision=None, **kwargs):
     """Corrects batch effect in microarray expression data. Takes an gene expression file and a list of known batches corresponding to each sample.
 
     Arguments

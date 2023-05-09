@@ -77,7 +77,7 @@ setup(
     ],
     packages = [
         "inmoose",
-        "inmoose/batch",
+        "inmoose/pycombat",
         "inmoose/common_cpp",
         "inmoose/edgepy",
         "inmoose/edgepy/edgepy_cpp",

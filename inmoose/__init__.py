@@ -10,5 +10,5 @@ setdlopenflags(default_dlopen_flags)
 del default_dlopen_flags
 
 from . import edgepy
-from . import batch
+from . import pycombat
 from . import utils
