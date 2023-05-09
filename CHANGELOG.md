@@ -3,6 +3,7 @@
 ## [0.1.1-dev]
 
 - upgrade to Cython 3.0.0b2
+- fix C++ extension loading on Linux
 
 ## [0.1.0]
 
