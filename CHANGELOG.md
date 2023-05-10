@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.1.2-dev]
+
+None
+
 ## [0.1.1]
 
 - upgrade to Cython 3.0.0b2
