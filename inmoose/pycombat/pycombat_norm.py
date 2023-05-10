@@ -20,42 +20,7 @@ from functools import partial
 import mpmath as mp
 import pandas as pd
 
-from .covariates import check_confounded_covariates
-
-
-def model_matrix(info, intercept=True, drop_first=True):
-    """Creates the model_matrix from batch list
-
-    Arguments:
-        info {list} -- list info with batch or covariates data
-        intercept {bool} -- boolean for intercept in model matrix
-
-    Returns:
-        matrix -- model matrix generate from batch list
-    """
-    if not isinstance(info[0], list):
-        info = [info]
-    else:
-        info = info
-    info_dict = {}
-    for i in range(len(info)):
-        info_dict[f"col{str(i)}"] = list(map(str,info[i]))
-    df = pd.get_dummies(pd.DataFrame(info_dict), drop_first=drop_first, dtype=float)
-    if intercept:
-        df["intercept"] = 1.0
-    return df.to_numpy()
-
-
-def all_1(list_of_elements):
-    """checks if all elements in a list are 1s
-
-    Arguments:
-        list_of_elements {list} -- list of elements
-
-    Returns:
-        bool -- True iff all elements of the list are 1s
-    """
-    return((list_of_elements == 1).all())
+from .covariates import make_design_matrix
 
 
 # aprior and bprior are useful to compute "hyper-prior values"
@@ -285,103 +250,6 @@ def check_mean_only(mean_only):
         print("Using mean only version")
 
 
-def define_batchmod(batch):
-    """generates model matrix
-
-    Arguments:
-        batch {list} -- list of batch id
-
-    Returns:
-        batchmod {matrix} -- model matrix for batches
-    """
-    batchmod = model_matrix(list(batch), intercept=False, drop_first=False)
-    return(batchmod)
-
-
-def check_ref_batch(ref_batch, batch, batchmod):
-    """check ref_batch option and treat it if needed
-
-    Arguments:
-        ref_batch -- the reference batch
-        batch {list} -- list of batch id
-        batchmod {matrix} -- model matrix related to batches
-
-    Returns:
-        ref {int} -- the index of the reference batch in the batch list
-        batchmod {matrix} -- updated model matrix related to batches, with reference
-    """
-    if ref_batch is not None:
-        if ref_batch not in batch:
-            raise ValueError("Reference level ref.batch must be one of the levels of batch.")
-        print("Using batch "+str(ref_batch) +
-              " as a reference batch.")
-        # ref keeps in memory the columns concerned by the reference batch
-        ref = np.where(np.unique(batch) == ref_batch)[0][0]
-        # updates batchmod with reference
-        batchmod[:,ref] = 1
-    else:
-        ref = None  # default settings
-    return(ref, batchmod)
-
-
-def treat_batches(batch):
-    """treat batches
-
-    Arguments:
-        batch {list} -- batch list
-
-    Returns:
-        n_batch {int} -- number of batches
-        batches {int list} -- list of unique batches
-        n_batches {int list} -- list of batches lengths
-        n_array {int} -- total size of dataset
-    """
-    batch = pd.Series(batch)
-    n_batch = len(np.unique(batch))  # number of batches
-    print("Found "+str(n_batch)+" batches.")
-    batches = []  # list of lists, contains the list of position for each batch
-    for i in range(n_batch):
-        batches.append(np.where(batch == np.unique(batch)[i])[0].astype(np.int32))
-    n_batches = list(map(len, batches))
-    if 1 in n_batches:
-        #mean_only = True  # no variance if only one sample in a batch - mean_only has to be used
-        print("\nOne batch has only one sample, try setting mean_only=True.\n")
-    n_array = sum(n_batches)
-    return(n_batch, batches, n_batches, n_array)
-
-
-def treat_covariates(batchmod, mod, ref, n_batch):
-    """treat covariates
-
-    Arguments:
-        batchmod {matrix} -- model matrix for batch
-        mod {matrix} -- model matrix for other covariates
-        ref {int} -- index of reference batch
-        n_batch {int} -- number of batches
-
-    Returns:
-        check {bool list} -- a list characterising all covariates
-        design {matrix} -- model matrix for all covariates, including batch
-    """
-    # design matrix for sample conditions
-    if mod == []:
-        design = batchmod
-    else:
-        mod_matrix = model_matrix(mod, intercept=True)
-        design = np.concatenate((batchmod, mod_matrix), axis=1)
-    check = list(map(all_1, np.transpose(design)))
-    if ref is not None:  # if ref
-        check[ref] = False  # the reference batch is not considered a covariate
-    design = design[:, ~np.array(check)]
-    design = np.transpose(design)
-
-    print("Adjusting for "+str(len(design)-len(np.transpose(batchmod))) +
-          " covariate(s) or covariate level(s).")
-
-    check_confounded_covariates(design.T, n_batch)
-    return(design)
-
-
 def check_NAs(dat):
     """check if NaNs - in theory, we construct the data without NAs
 
@@ -592,7 +460,7 @@ def adjust_data(s_data, gamma_star, delta_star, batch_design, n_batches, var_poo
     return bayes_data
 
 
-def pycombat_norm(data, batch, mod=[], par_prior=True, prior_plots=False, mean_only=False, ref_batch=None, precision=None, **kwargs):
+def pycombat_norm(data, batch, mod=None, par_prior=True, prior_plots=False, mean_only=False, ref_batch=None, precision=None, **kwargs):
     """Corrects batch effect in microarray expression data. Takes an gene expression file and a list of known batches corresponding to each sample.
 
     Arguments
@@ -601,9 +469,8 @@ def pycombat_norm(data, batch, mod=[], par_prior=True, prior_plots=False, mean_o
         expression matrix (dataframe). It contains the information about the gene expression (rows) for each sample (columns).
     batch : list
         batch indices. Must have as many elements as the number of columns in the expression matrix.
-    mod : list, optional
-        list (or list of lists) of covariate(s) indexes. The mod list describes the covariate(s) for each sample.
-        Each mod list has as many elements as the number of columns in the expression matrix (default: `[]`).
+    mod : matrix, optional
+        matrix model for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
     par_prior : bool, optional
         False for non-parametric estimation of batch effects (default: `True`).
     prior_plots : bool, optional
@@ -627,10 +494,10 @@ def pycombat_norm(data, batch, mod=[], par_prior=True, prior_plots=False, mean_o
 
     check_mean_only(mean_only)
 
-    batchmod = define_batchmod(batch)
-    ref, batchmod = check_ref_batch(ref_batch, batch, batchmod)
-    n_batch, batches, n_batches, n_array = treat_batches(batch)
-    design = treat_covariates(batchmod, mod, ref, n_batch)
+    design, batchmod, mod, batches, n_batches, n_batch, n_array, ref = \
+            make_design_matrix(dat, batch, None, mod, True, ref_batch)
+    design = np.transpose(design)
+
     NAs = check_NAs(dat)
     if not(NAs):
         B_hat, grand_mean, var_pooled = calculate_mean_var(

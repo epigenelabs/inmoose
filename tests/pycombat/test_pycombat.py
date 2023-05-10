@@ -2,9 +2,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from inmoose.pycombat.pycombat_norm import model_matrix, all_1
+from inmoose.pycombat.covariates import make_design_matrix
+from inmoose.pycombat.pycombat_norm import check_mean_only, check_NAs
 from inmoose.pycombat.pycombat_norm import compute_prior, postmean, postvar, it_sol, int_eprior
-from inmoose.pycombat.pycombat_norm import check_mean_only, define_batchmod, check_ref_batch, treat_batches, treat_covariates, check_NAs
 from inmoose.pycombat.pycombat_norm import calculate_mean_var, calculate_stand_mean
 from inmoose.pycombat.pycombat_norm import standardise_data, fit_model, adjust_data
 from inmoose.pycombat import pycombat_norm
@@ -14,9 +14,6 @@ class test_pycombat(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.batch = np.asarray([1,1,1,2,2,3,3,3,3])
-        # matrix = np.transpose(np.asmatrix([np.random.normal(size=1000,loc=3,scale=1),np.random.normal(size=1000,loc=3,scale=1),np.random.normal(size=1000,loc=3,scale=1),
-        #                       np.random.normal(size=1000,loc=2,scale=0.6),np.random.normal(size=1000,loc=2,scale=0.6),
-        #                       np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1)]))
         matrix = np.transpose([np.random.normal(size=1000,loc=3,scale=1),np.random.normal(size=1000,loc=3,scale=1),np.random.normal(size=1000,loc=3,scale=1),
                               np.random.normal(size=1000,loc=2,scale=0.6),np.random.normal(size=1000,loc=2,scale=0.6),
                               np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1),np.random.normal(size=1000,loc=4,scale=1)])
@@ -29,13 +26,11 @@ class test_pycombat(unittest.TestCase):
         mean_only = False
         par_prior = False
         precision = None
-        mod = []
+        mod = None
         self.dat = self.matrix.values
-        #batchmod = define_batchmod(batch)
-        batchmod = model_matrix(list(self.batch), intercept=False, drop_first=False)
-        ref,self.batchmod = check_ref_batch(ref_batch,self.batch,batchmod)
-        self.n_batch, self.batches, self.n_batches, self.n_array = treat_batches(self.batch)
-        self.design = treat_covariates(self.batchmod, mod, ref, self.n_batch)
+        design, self.batchmod, _, self.batches, self.n_batches, self.n_batch, self.n_array, ref = make_design_matrix(self.dat, self.batch, None, mod, True, ref_batch)
+        self.design = np.transpose(design)
+
         NAs = check_NAs(self.dat)
         self.B_hat, self.grand_mean, self.var_pooled = calculate_mean_var(self.design, self.batches, ref, self.dat, NAs, self.n_batches, self.n_batch, self.n_array)
         self.stand_mean = calculate_stand_mean(self.grand_mean, self.n_array, self.design, self.n_batch,self.B_hat)
@@ -61,47 +56,12 @@ class test_pycombat(unittest.TestCase):
     #def test_int_eprior(self):
     #    ()
 
-    def test_model_matrix(self):
-        model_matrix_test = model_matrix([1,1,0,1,0])
-        self.assertEqual(np.shape(model_matrix_test), (5,2))
-        self.assertEqual(list(model_matrix_test[0]), [1.0,1.0])
-
-    def test_all_1(self):
-        self.assertTrue(all_1(np.array([1,1,1,1,1])))
-
-        self.assertFalse(all_1(np.array([1,1,1,1,0])))
-        self.assertFalse(all_1(np.array([0,0,0,0,0])))
-
-        # this test to show the limit of the method we use
-        self.assertFalse(all_1(np.array([1.5,0.5,1,1,1])))
-
 
     @unittest.skip("automate the verification")
     def test_check_mean_only(self):
         check_mean_only(True)
         check_mean_only(False)
         print("Only one line of text should have been printed above.")
-
-    def test_define_batchmod(self):
-        self.assertEqual(np.shape(define_batchmod(self.batch)), (9,3))
-
-    def test_check_ref_batch(self):
-        self.assertEqual(check_ref_batch(1,self.batch,self.batchmod), (0, self.batchmod))
-        self.assertEqual(check_ref_batch(2,self.batch,self.batchmod), (1, self.batchmod))
-        print("Using batch 1 then 2. Above lines should inform on that.")
-        self.assertEqual(check_ref_batch(None,self.batch,self.batchmod), (None, self.batchmod))
-
-    def test_treat_batches(self):
-        self.assertEqual(self.n_batch, 3)
-        self.assertEqual(self.batches[0].tolist(), [0,1,2])
-        self.assertEqual(self.batches[1].tolist(), [3,4])
-        self.assertEqual(self.batches[2].tolist(), [5,6,7,8])
-        self.assertEqual(self.n_batches, [3,2,4])
-        self.assertEqual(self.n_array, 9)
-
-    def test_treat_covariates(self):
-        batchmod = define_batchmod(self.batch)
-        self.assertEqual(np.sum(self.design - np.transpose(batchmod)), 0)
 
     def test_check_NAs(self):
         self.assertFalse(check_NAs([0,1,2]))
