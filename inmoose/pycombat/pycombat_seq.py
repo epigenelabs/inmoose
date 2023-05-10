@@ -19,13 +19,10 @@
 # This file is based on the file 'R/ComBat_seq.R' of the Bioconductor sva package (version 3.44.0).
 
 import numpy as np
-from pandas import DataFrame
-from patsy import dmatrix
-from warnings import warn
 
 from ..edgepy import DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
 from ..utils import asfactor
-from .covariates import check_confounded_covariates
+from .covariates import make_design_matrix
 from .helper_seq import vec2mat, match_quantiles
 
 def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
@@ -35,9 +32,9 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     ---------
     counts : matrix
         raw count matrix from genomic studies (dimensions gene x sample)
-    batch : vector or list or :obj:`inmoose.utils.factor.Factor`
+    batch : array or list or :obj:`inmoose.utils.factor.Factor`
         Batch indices. Must have as many elements as the number of columns in the expression matrix.
-    group : vector or list or :obj:`inmoose.utils.factor.Factor`, optional
+    group : array or list or :obj:`inmoose.utils.factor.Factor`, optional
         vector/factor for biological condition of interest (default: `None`)
     covar_mod : matrix, optional
         model matrix for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
@@ -49,7 +46,7 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
         whether to apply shrinkage on dispersion
     gene_subset_n : int, optional
         number of genes to use in emprirical Bayes estimation, only useful when shrink = True
-    ref_batch, optional
+    ref_batch : any, optional
         batch id of the batch to use as reference (default: `None`)
 
     Returns
@@ -59,8 +56,8 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     """
 
     ####### Preparation #######
+    # make sure batch is a factor
     batch = asfactor(batch)
-    # TODO No support for single-sample batch yet
 
     # Remove genes with only 0 counts in any batch
     keep = np.full((counts.shape[0],), True)
@@ -73,65 +70,9 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
 
     dge_obj = DGEList(counts=counts)
 
-    # Prepare characteristics on batches
-    n_batch = batch.nlevels()
-    # list of samples in each batch
-    batches_ind = [(batch == batch.categories[i]).nonzero()[0] for i in range(n_batch)]
-    n_batches = [len(i) for i in batches_ind]
-    n_sample = np.sum(n_batches)
-    print("Found", n_batch, "batches")
-
-    # Make design matrix
-    # batch
-    batchmod = dmatrix("~-1 + C(batch)")
-    # reference batch
-    if ref_batch is not None:
-        if ref_batch not in batch.categories:
-            raise ValueError("Reference batch must identify one of the batches")
-        print("Using batch", ref_batch, "as reference batch")
-        # ref_batch_index is the index of the reference batch in batch.categories
-        ref_batch_index = np.where(batch.categories == ref_batch)[0][0]
-        # update batchmod with reference
-        batchmod[:,ref_batch_index] = 1
-    else:
-        ref_batch_index = None
-
-    # covariate
-    group = asfactor([] if group is None else group)
-    # handle missing covariates, by creating a distinct covariate per batch where a missing covariate appears
-    nan_group = group.isna()
-    if nan_group.any():
-        warn(f"{nan_group.sum()} missing covariates in group. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates.")
-        nan_batch_group = [f"nan_batch_{batch[i]}" for i in range(len(group)) if nan_group[i]]
-        group = group.add_categories(np.unique(nan_batch_group))
-        for i,j in enumerate(np.where(nan_group)[0]):
-            group[j] = nan_batch_group[i]
-
-    if full_mod and group.nlevels() > 1:
-        print("Using full model in pycombat_seq")
-        mod = dmatrix("~group")
-    else:
-        print("Using null model in pycombat_seq")
-        mod = dmatrix("~1", DataFrame(counts.T))
-    # drop intercept in covariate model
-    if covar_mod is not None:
-        check = [(covar_mod[:,i] == 1).all() for i in range(covar_mod.shape[1])]
-        covar_mod = covar_mod[:, np.logical_not(check)]
-        # bind with biological condition of interest
-        mod = np.concatenate((mod, covar_mod), axis=1)
-    # combine
-    design = dmatrix("~-1 + batchmod + mod")
-
-    # Check for intercept in covariates, and drop if present
-    check = [(design[:,i] == 1).all() for i in range(design.shape[1])]
-    if ref_batch_index is not None:
-        # the reference batch is not considered as a covariate
-        check[ref_batch_index] = False
-    design = design[:, np.logical_not(check)]
-    print("Adjusting for", design.shape[1]-batchmod.shape[1], "covariate(s) or covariate level(s)")
-
-    # Check if the design is confounded
-    check_confounded_covariates(design, n_batch)
+    # Handle batches, covariates and prepare design matrix
+    design, batchmod, mod, batches_ind, n_batches, n_batch, n_sample, ref_batch_index = \
+        make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch)
 
     # Check for missing values in count matrix
     nas = np.isnan(counts).any()

@@ -6,6 +6,8 @@
 - refactor module for batch effect correction. It is now named `pycombat`
   (instead of `batch`), and the function to correct batch effect on microarray
   data is now `pycombat_norm` (instead of `pycombat`).
+- refactor design matrix computation, to share the code between `pycombat_norm`
+  and `pycombat_seq`
 
 ## [0.1.1]
 
