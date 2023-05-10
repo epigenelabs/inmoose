@@ -20,7 +20,10 @@ import numpy as np
 class ConfoundingVariablesError(Exception):
     """Exception raised when confounding variables are detected.
 
-    :param message: explanation of the error
+    Arguments
+    ---------
+    message : str
+        explanation of the error
     """
 
     def __init__(self, message):
@@ -32,10 +35,12 @@ def check_confounded_covariates(design, n_batch):
     """Detect confounded covariates.
     This function returns nothing, but raises exception if confounded covariates are detected.
 
-    :param design: design matrix
-    :type design: 2D ndarray
-    :param n_batch: number of batches
-    :type n_batch: int
+    Arguments
+    ---------
+    design : matrix
+        the design matrix
+    n_batch : int
+        the number of batches
     """
 
     # if matrix is not invertible, different cases
