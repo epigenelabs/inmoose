@@ -3,8 +3,6 @@
 InMoose is the **In**tegrated **M**ulti **O**mic **O**pen **S**ource **E**nvironment.
 It is a collection of tools for the analysis of omic data.
 
-Currently it focuses on transcriptomic data.
-
 # Installation
 
 You can install InMoose directly with:
@@ -20,15 +18,15 @@ effects, in transcriptomic data:
 - for microarray data, InMoose supersedes pyCombat [1], a Python 3
   implementation of ComBat [2], one of the most widely used tool for batch effect
   correction on microarray data.
-- for RNASeq, InMoose features a port to Python3 of ComBat-Seq [3], one the most
-  widely used tool for batch effect correction on RNASeq data.
+- for RNASeq, InMoose features a port to Python3 of ComBat-Seq [3], one of the
+  most widely used tool for batch effect correction on RNASeq data.
 
 To use these functions, simply import them and call them with default
 parameters:
 ```python
-from inmoose.batch import pycombat, pycombat_seq
+from inmoose.pycombat import pycombat_norm, pycombat_seq
 
-microarray_corrected = pycombat(microarray_data, microarray_batches)
+microarray_corrected = pycombat_norm(microarray_data, microarray_batches)
 rnaseq_corrected = pycombat_seq(rnaseq_data, rnaseq_batches)
 ```
 
