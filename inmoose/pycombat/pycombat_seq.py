@@ -76,9 +76,8 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
         make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch)
 
     # Check for missing values in count matrix
-    nas = np.isnan(counts).any()
-    if nas:
-        raise RuntimeError(f"found {np.isnan(counts).sum()} missing values (NaN) in count matrix")
+    if np.isnan(counts).any():
+        raise ValueError(f"Found {np.isnan(counts).sum()} missing values (NaN) in count matrix. NaN values are not accepted. Please remove them before proceeding with pycombat_seq.")
 
     ####### Estimate gene-wise dispersions within each batch #######
     logging.info("Estimating dispersions")
