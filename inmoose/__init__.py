@@ -12,3 +12,6 @@ del default_dlopen_flags
 from . import edgepy
 from . import pycombat
 from . import utils
+
+import logging
+logging.basicConfig(level=logging.INFO, format="[{levelname}] {message}", style='{')

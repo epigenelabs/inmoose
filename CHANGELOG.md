@@ -8,6 +8,7 @@
   data is now `pycombat_norm` (instead of `pycombat`).
 - refactor design matrix computation, to share the code between `pycombat_norm`
   and `pycombat_seq`
+- improved logging: no more `print`s, better log formatting
 
 ## [0.1.1]
 

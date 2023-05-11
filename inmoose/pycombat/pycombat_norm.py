@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------
 
+import logging
 import numpy as np
 from functools import partial
 import mpmath as mp
@@ -168,7 +169,7 @@ def int_eprior(sdat, g_hat, d_hat, precision):
         LH = np.nan_to_num(LH)  # corrects NaNs in likelihood
         if np.sum(LH) == 0 and test_approximation == 0:
             test_approximation = 1  # this message won't appear again
-            print("###\nValues too small, approximation applied to avoid division by 0.\nPrecision mode can correct this problem, but increases computation time.\n###")
+            logging.info("###\nValues too small, approximation applied to avoid division by 0.\nPrecision mode can correct this problem, but increases computation time.\n###")
 
         if np.sum(LH) == 0: # correction for LH full of 0.0
             LH[LH == 0] = np.exp(-745)
@@ -247,7 +248,7 @@ def check_mean_only(mean_only):
         ()
     """
     if mean_only == True:
-        print("Using mean only version")
+        logging.info("Using mean only version")
 
 
 def check_NAs(dat):
@@ -262,7 +263,7 @@ def check_NAs(dat):
     # NAs = True in (np.isnan(dat))
     NAs = np.isnan(np.sum(dat))  # Check if NaN exists
     if NAs:
-        print("Found missing data values. Please remove all missing values before proceeding with pyComBat.")
+        logging.error("Found missing data values. Please remove all missing values before proceeding with pyComBat.")
     return(NAs)
 
 
@@ -283,7 +284,7 @@ def calculate_mean_var(design, batches, ref, dat, NAs, n_batches, n_batch, n_arr
         grand_mean {matrix} -- Mean for each gene and each batch
         var_pooled {matrix} -- Variance for each gene and each batch
     """
-    print("Standardizing Data across genes.")
+    logging.info("Standardizing Data across genes.")
     if not(NAs):  # NAs not supported
         # B_hat is the vector of regression coefficients corresponding to the design matrix
         B_hat = np.linalg.solve(np.dot(design, np.transpose(
@@ -349,7 +350,7 @@ def standardise_data(dat, stand_mean, var_pooled, n_array):
 
 
 def fit_model(design, n_batch, s_data, batches, mean_only, par_prior, precision, ref, NAs):
-    print("Fitting L/S model and finding priors.")
+    logging.info("Fitting L/S model and finding priors.")
 
     # fraction of design matrix related to batches
     batch_design = design[0:n_batch]
@@ -385,7 +386,7 @@ def fit_model(design, n_batch, s_data, batches, mean_only, par_prior, precision,
 
     if par_prior:
         # use param_fun function for parametric adjustments (cf. function definition)
-        print("Finding parametric adjustments.")
+        logging.info("Finding parametric adjustments.")
         results = list(map(partial(param_fun,
                                    s_data=s_data,
                                    batches=batches,
@@ -398,7 +399,7 @@ def fit_model(design, n_batch, s_data, batches, mean_only, par_prior, precision,
                                    b_prior=b_prior), range(n_batch)))
     else:
         # use nonparam_fun for non-parametric adjustments (cf. function definition)
-        print("Finding nonparametric adjustments")
+        logging.info("Finding nonparametric adjustments")
         results = list(map(partial(nonparam_fun, mean_only=mean_only, delta_hat=delta_hat,
                                    s_data=s_data, batches=batches, gamma_hat=gamma_hat, precision=precision), range(n_batch)))
 
@@ -437,7 +438,7 @@ def adjust_data(s_data, gamma_star, delta_star, batch_design, n_batches, var_poo
     # Now we adjust the data:
     # 1. substract additive batch effect (gamma_star)
     # 2. divide by multiplicative batch effect (delta_star)
-    print("Adjusting the Data")
+    logging.info("Adjusting the Data")
     bayes_data = np.transpose(s_data)
     j = 0
     for i in batches:  # for each batch, specific correction
