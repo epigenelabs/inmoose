@@ -467,7 +467,7 @@ def pycombat_norm(data, batch, mod=None, par_prior=True, prior_plots=False, mean
     Arguments
     ---------
     data : matrix
-        expression matrix (dataframe). It contains the information about the gene expression (rows) for each sample (columns).
+        expression matrix (dataframe or numpy array). It contains the information about the gene expression (rows) for each sample (columns).
     batch : list
         batch indices. Must have as many elements as the number of columns in the expression matrix.
     mod : matrix, optional
@@ -485,13 +485,17 @@ def pycombat_norm(data, batch, mod=None, par_prior=True, prior_plots=False, mean
 
     Returns
     -------
-    dataframe
+    matrix
         the input expression matrix adjusted for batch effects.
+        same type as the input `data`
     """
 
-    list_samples = data.columns
-    list_genes = data.index
-    dat = data.values
+    if isinstance(data, pd.DataFrame):
+        list_samples = data.columns
+        list_genes = data.index
+        dat = data.values
+    else:
+        dat = data
 
     check_mean_only(mean_only)
 
@@ -514,8 +518,9 @@ def pycombat_norm(data, batch, mod=None, par_prior=True, prior_plots=False, mean
     bayes_data = adjust_data(s_data, gamma_star, delta_star, batch_design,
                             n_batches, var_pooled, stand_mean, n_array, ref, batches, dat)
 
-    bayes_data_df = pd.DataFrame(bayes_data,
-                columns = list_samples,
-                index = list_genes)
-
-    return(bayes_data_df)
+    if isinstance(data, pd.DataFrame):
+        return pd.DataFrame(bayes_data,
+                            columns = list_samples,
+                            index = list_genes)
+    else:
+        return bayes_data

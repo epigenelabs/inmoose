@@ -20,19 +20,20 @@
 
 import logging
 import numpy as np
+import pandas as pd
 
 from ..edgepy import DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
 from ..utils import asfactor
 from .covariates import make_design_matrix
 from .helper_seq import vec2mat, match_quantiles
 
-def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
+def pycombat_seq(data, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
     """pycombat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
 
     Arguments
     ---------
-    counts : matrix
-        raw count matrix from genomic studies (dimensions gene x sample)
+    data : matrix
+        raw count matrix (dataframe or numpy array) from genomic studies (dimensions gene x sample)
     batch : array or list or :obj:`inmoose.utils.factor.Factor`
         Batch indices. Must have as many elements as the number of columns in the expression matrix.
     group : array or list or :obj:`inmoose.utils.factor.Factor`, optional
@@ -53,8 +54,16 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     Returns
     -------
     matrix
-        the input expression matrix adjusted for batch effects
+        the input expression matrix adjusted for batch effects.
+        same type as the input `data`
     """
+
+    if isinstance(data, pd.DataFrame):
+        list_samples = data.columns
+        list_genes = data.index
+        counts = data.values
+    else:
+        counts = data
 
     ####### Preparation #######
     # make sure batch is a factor
@@ -155,4 +164,10 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     adjust_counts_whole = np.full(countsOri.shape, np.nan)
     adjust_counts_whole[keep,:] = adjust_counts
     adjust_counts_whole[rm,:] = countsOri[rm,:]
-    return adjust_counts_whole
+
+    if isinstance(data, pd.DataFrame):
+        return pd.DataFrame(adjust_counts_whole,
+                            columns = list_samples,
+                            index = list_genes)
+    else:
+        return adjust_counts_whole
