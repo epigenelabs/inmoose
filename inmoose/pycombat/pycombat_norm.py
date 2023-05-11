@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# Copyright (C) 2019-2023 A. Behdenna, A. Nordor, J. Haziza and A. Gema
+# Copyright (C) 2019-2023 A. Behdenna, A. Nordor, J. Haziza, A. Gema and M. Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -499,22 +499,23 @@ def pycombat_norm(data, batch, mod=None, par_prior=True, prior_plots=False, mean
             make_design_matrix(dat, batch, None, mod, True, ref_batch)
     design = np.transpose(design)
 
-    NAs = check_NAs(dat)
-    if not(NAs):
-        B_hat, grand_mean, var_pooled = calculate_mean_var(
-            design, batches, ref, dat, NAs, n_batches, n_batch, n_array)
-        stand_mean = calculate_stand_mean(
-            grand_mean, n_array, design, n_batch, B_hat)
-        s_data = standardise_data(dat, stand_mean, var_pooled, n_array)
-        gamma_star, delta_star, batch_design = fit_model(
-            design, n_batch, s_data, batches, mean_only, par_prior, precision, ref, NAs)
-        bayes_data = adjust_data(s_data, gamma_star, delta_star, batch_design,
-                                n_batches, var_pooled, stand_mean, n_array, ref, batches, dat)
+    # Check for missing values in count matrix
+    NAs = np.isnan(dat).any()
+    if NAs:
+        raise ValueError(f"Found {np.isnan(dat).sum()} missing values (NaN) in count matrix. NaN values are not accepted. Please remove them before proceeding with pycombat_norm.")
 
-        bayes_data_df = pd.DataFrame(bayes_data,
-                    columns = list_samples,
-                    index = list_genes)
+    B_hat, grand_mean, var_pooled = calculate_mean_var(
+        design, batches, ref, dat, NAs, n_batches, n_batch, n_array)
+    stand_mean = calculate_stand_mean(
+        grand_mean, n_array, design, n_batch, B_hat)
+    s_data = standardise_data(dat, stand_mean, var_pooled, n_array)
+    gamma_star, delta_star, batch_design = fit_model(
+        design, n_batch, s_data, batches, mean_only, par_prior, precision, ref, NAs)
+    bayes_data = adjust_data(s_data, gamma_star, delta_star, batch_design,
+                            n_batches, var_pooled, stand_mean, n_array, ref, batches, dat)
 
-        return(bayes_data_df)
-    else:
-        raise ValueError("NaN value is not accepted")
+    bayes_data_df = pd.DataFrame(bayes_data,
+                columns = list_samples,
+                index = list_genes)
+
+    return(bayes_data_df)
