@@ -83,5 +83,5 @@ def dispCoxReid(y, design=None, offset=None, weights=None, AveLogCPM=None, inter
     y = np.asarray(y, order='F')
     offset = _compressOffsets(y, offset=offset)
     weights = _compressWeights(y, weights)
-    out = minimize_scalar(sumAPL, args=(y, design, offset, weights), bounds=(interval[0]**0.25, interval[1]**0.25), tol=tol)
+    out = minimize_scalar(sumAPL, args=(y, design, offset, weights), bounds=(interval[0]**0.25, interval[1]**0.25), options={'xatol': tol})
     return out.x**4
