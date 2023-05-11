@@ -18,6 +18,7 @@
 
 # This file is based on the file 'R/ComBat_seq.R' of the Bioconductor sva package (version 3.44.0).
 
+import logging
 import numpy as np
 
 from ..edgepy import DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
@@ -77,11 +78,10 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     # Check for missing values in count matrix
     nas = np.isnan(counts).any()
     if nas:
-        print("Found", np.isnan(counts).sum(), "missing data values")
-        raise RuntimeError("missing values in count matrix")
+        raise RuntimeError(f"found {np.isnan(counts).sum()} missing values (NaN) in count matrix")
 
     ####### Estimate gene-wise dispersions within each batch #######
-    print("Estimating dispersions")
+    logging.info("Estimating dispersions")
     # Estimate common dispersion within each batch as an initial value
     def disp_common_helper(i):
         if n_batches[i] <= design.shape[1]-batchmod.shape[1]+1 or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]:
@@ -107,7 +107,7 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
         phi_matrix[:, batches_ind[k]] = vec2mat(genewise_disp_lst[k], n_batches[k])
 
     ####### Estimate parameters from NB GLM #######
-    print("Fitting the GLM model")
+    logging.info("Fitting the GLM model")
     # no intercept - nonEstimable; compute offset (library sizes) within function
     glm_f = dge_obj.glmFit(design=design, dispersion=phi_matrix, prior_count=1e-4)
     # compute intercept as batch-size-weighted average from batches
@@ -125,10 +125,10 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
 
     ####### In each batch, compute posterior estimation through Monte-Carlo integration #######
     if shrink:
-        print("Apply shrinkage - computing posterior estimates for parameters")
+        logging.info("Apply shrinkage - computing posterior estimates for parameters")
         raise NotImplementedError
     else:
-        print("shrinkage off - using GLM estimates for parameters")
+        logging.info("shrinkage off - using GLM estimates for parameters")
         gamma_star_mat = gamma_hat
         phi_star_mat = phi_hat
 
@@ -139,7 +139,7 @@ def pycombat_seq(counts, batch, group=None, covar_mod=None, full_mod=True, shrin
     phi_star = phi_star_mat.mean(axis=1)
 
     ####### Ajust the data #######
-    print("Adjusting the data")
+    logging.info("Adjusting the data")
     adjust_counts = np.full(counts.shape, np.nan)
     for kk in range(n_batch):
         counts_sub = counts[:, batches_ind[kk]]
