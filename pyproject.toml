@@ -19,6 +19,12 @@ dependencies = [
   "scipy",
 ]
 
+[project.optional-dependencies]
+doc = [
+  "sphinx",
+  "sphinx_rtd_theme",
+]
+
 [build-system]
 requires = ["setuptools", "numpy", "scipy", "Cython==3.0.0b2", "wheel"]
 
