@@ -1,3 +1,24 @@
+[project]
+name = "inmoose"
+version = "0.1.2-dev"
+description = "InMoose: the Integrated Multi Omic Open Source Environment"
+readme = "README.md"
+authors = [
+  {name = "Maximilien Colange", email = "maximilien@epigenelabs.com"}
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+  "mpmath>=1.1.0",
+  "numpy>=1.18.5",
+  "pandas",
+  "patsy",
+  "scipy",
+]
+
 [build-system]
 requires = ["setuptools", "numpy", "scipy", "Cython==3.0.0b2", "wheel"]
 
