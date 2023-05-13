@@ -1,12 +1,19 @@
-pycombat_norm
-=============
+pycombat_norm: batch effect corrections for microarray data
+===========================================================
 
-ComBat (Johnson et al, 2007) is one of the most widely used tool for batch
+.. currentmodule:: inmoose.pycombat
+
+ComBat (Johnson et al, 2007) [1]_ is one of the most widely used tool for batch
 effect correction for microarray transcriptomic data.
-pycombat_norm is a Python implementation of ComBat. Strictly following the same
-mathematical framework, pycombat_norm has results similar to those of ComBat in
-terms of batch effects correction. Additionally, pycombat_norm is as fast, if
-not faster, than the original implementation in R.
+:func:`pycombat_norm` is a Python implementation of ComBat. Strictly following
+the same mathematical framework, :func:`pycombat_norm` has results similar to
+those of ComBat in terms of batch effects correction. Additionally,
+:func:`pycombat_norm` is as fast, if not faster, than the original
+implementation in R.
+
+.. [1] W. E. Johnson, C. Li, A. Rabinovic. 2007. Adjusting batch effects in
+   microarray expression data using empirical Bayes methods. *Biostatistics*, 8,
+   118–12.  :doi:`10.1093/biostatistics/kxj037`
 
 Minimal usage example
 ---------------------
@@ -95,4 +102,4 @@ two clusters, corresponding respectively to tumor and healthy samples.
 Code documentation
 ------------------
 
-.. autofunction:: inmoose.pycombat.pycombat_norm
+.. autofunction:: pycombat_norm

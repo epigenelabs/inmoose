@@ -3,12 +3,8 @@ from scipy.stats import nbinom
 def rnbinom(n, size, mu, seed=None):
     """mimic R rnbinom function, to draw samples from a Negative Binomial distribution.
 
-    The (size, prob) parameterization used in R is the same as in scipy.stats:
-        mu = size * (1 - prob) / prob = size * (1/prob - 1)
-    so
-        mu / size + 1 = 1/prob
-    hence
-        prob = 1 / (1 + mu/size) = size / (size + mu)
+    The (:math:`size`, :math:`p`) parameterization used in R is the same as in scipy.stats:
+    :math:`p = 1 / (1 + \mu/size) = size / (size + \mu)`.
 
     Arguments
     ---------
