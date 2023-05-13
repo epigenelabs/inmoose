@@ -8,8 +8,8 @@ also called batch effects.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Batch effect correction per type of data:
 
-   pycombatnorm
-   pycombatseq
+   for microarray data <pycombatnorm>
+   for RNASeq data <pycombatseq>
 

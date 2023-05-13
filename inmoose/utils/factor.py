@@ -20,32 +20,37 @@ import numpy as np
 from pandas import Categorical
 
 class Factor(Categorical):
-    """A class to represent a factor, as in R.
+    """
+    A class to represent a factor, as in R.
 
-    It is essentially a :obj:`pandas.Categorical` object, with additional methods to mimic R API.
+    It is essentially a :obj:`pandas.Categorical` object, with additional
+    methods to mimic R API.
     """
 
     def __init__(self, arr):
-        """Constructs a Factor instance from an array
         """
-        super().__init__(arr)
+        Constructs a Factor instance from an array
 
-#    def __len__(self):
-#        return len(self.arr)
-#
-#    def __eq__(self, other):
-#        if type(other) is type(self):
-#            return np.array_equal(self.arr, other.arr)
-#        else:
-#            return NotImplemented
+        Arguments
+        ---------
+        arr : array_like
+            a list of factors
+        """
+
+        super().__init__(arr)
 
     def droplevels(self):
         """
         drop unused levels
         """
+
         return Factor(self.__array__())
 
     def nlevels(self):
+        """
+        the number of levels
+        """
+
         return len(self.categories)
 
 def asfactor(g):

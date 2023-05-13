@@ -27,6 +27,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx.ext.extlinks',
     'sphinx_rtd_theme',
 ]
 
@@ -37,6 +38,11 @@ napoleon_numpy_docstring = True
 
 # Turn on autosummary
 autosummary_generate = True
+
+# Add a doi role
+extlinks = {
+    'doi': ('https://dx.doi.org/%s', 'doi:%s'),
+}
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
