@@ -1,4 +1,5 @@
-from .__version__ import __version__
+import importlib.metadata
+__version__ = importlib.metadata.version(__package__)
 
 # force RTLD_GLOBAL when loading common_cpp
 from sys import getdlopenflags, setdlopenflags
