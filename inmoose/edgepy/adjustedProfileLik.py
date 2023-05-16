@@ -118,7 +118,6 @@ def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True,
 
     # Deciding what to return
     if get_coef:
-        # TODO
-        raise RuntimeError("unimplemented")
+        return (apl, fit.coefficients)
     else:
         return apl

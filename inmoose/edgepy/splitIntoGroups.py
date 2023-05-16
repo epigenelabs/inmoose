@@ -19,8 +19,8 @@
 # This file is based on the file 'R/splitIntoGroups.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
-from .dropEmptyLevels import dropEmptyLevels
 import numpy as np
+from ..utils import asfactor
 
 def splitIntoGroups_DGEList(self):
     """
@@ -75,7 +75,7 @@ def splitIntoGroups(y, group=None):
         group = np.ones(nlibs)
     if len(group) != nlibs:
         raise ValueError("Incorrect length of group.")
-    group = dropEmptyLevels(group)
+    group = asfactor(group).droplevels()
 
     out = [y.T[group == i].T for i in np.unique(group)]
     return out
