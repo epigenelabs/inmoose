@@ -15,7 +15,7 @@ help:
 .PHONY: help Makefile
 
 clean-generated:
-	@rm -rf "$(SOURCEDIR)/_autosummary"
+	@rm -rf "$(SOURCEDIR)/_autosummary" "$(SOURCEDIR)/generated"
 
 clean: clean-generated
 
