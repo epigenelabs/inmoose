@@ -29,7 +29,29 @@ from .edgepy_cpp import cxx_ave_log_cpm
 
 def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion=None):
     """
-    log2(AveCOM)
+    Compute average log2 counts per million for each row of counts.
+
+    See also
+    --------
+    This function calls :func:`aveLogCPM`.
+
+    Arguments
+    ---------
+    self : DGEList
+        DGEList object
+    normalized_lib_sizes : bool, optional
+        whether to use normalized library sizes. Defaults to :code:`True`.
+    prior_count : float or array_like, optional
+        scalar or vector of length :code:`self.counts.shape[0]`, containing the
+        average value(s) to be added to each count to avoid infinite value on
+        the log-scale. Defaults to :code:`2`.
+    dispersion : float or array_like, optional
+        scalar or vector of negative binomial dispersions.
+
+    Returns
+    -------
+    ndarray
+        numeric vector giving :code:`log2(AveCPM)` for each row of :code:`y`
     """
     # Library sizes should be stored in y but are sometimes missing
     lib_size = self.samples.lib_size
@@ -51,9 +73,47 @@ def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion
 
 def aveLogCPM(y, lib_size=None, offset=None, prior_count=2, dispersion=None, weights=None):
     """
-    Compute average log2-cpm for each gene over all samples.
-    This measure is designed to be used as the x-axis for all abundance-dependent trend analyses in edgeR.
-    It is generally held fixed through an edgeR analysis.
+    Compute average log2 counts per million for each row of counts.
+
+    This function uses :func:`mglmOneGroup` to compute average counts per
+    million (AveCPM) for each row of counts, and returns :code:`log2(AveCPM)`.
+    An average value of :code:`prior_count` is added to the counts before
+    running :func:`mglmOneGroup`. If :code:`prior_count` is a vector, each entry
+    will be added to all counts in the corresponding row of :code:`y`, as
+    described in :func:`addPriorCount`.
+
+    This function is similar to :code:`log2(rowMeans(cpm(y, ...)))`, but with
+    the refinement that larger library sizes are given more weight in the
+    average. The two version will agree for large value of the dispersion.
+
+    See also
+    --------
+    cpm : for individual logCPM values, rather than genewise averages
+    addPriorCount : uses the same strategy to add the prior counts
+    mglmOneGroup : computations for this function rely on :func:`mglmOneGroup`
+
+    Arguments
+    ---------
+    y : matrix
+        matrix of counts. Rows for genes and columns for libraries.
+    lib_size : array_like, optional
+        vector of library sizes. Defaults to :code:`np.sum(y, axis=0)`. Ignored
+        if :code:`offset` is not :code:`None`.
+    offset : matrix, optional
+        matrix of offsets for the log-linear models. Defaults to :code:`None`.
+    prior_count : float or array_like, optional
+        scalar or vector of length :code:`y.shape[0]`, containing the average
+        value(s) to be added to each count to avoid infinite value on the
+        log-scale. Defaults to :code:`2`.
+    dispersion : float or array_like, optional
+        scalar or vector of negative binomial dispersions.
+    weights : matrix, optional
+        matrix of observation weights
+
+    Returns
+    -------
+    ndarray
+        numeric vector giving :code:`log2(AveCPM)` for each row of :code:`y`
     """
     y = np.asarray(y, order='F')
     if len(y.shape) != 2:

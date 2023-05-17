@@ -23,8 +23,20 @@ import numpy as np
 
 def _isAllZero(y):
     """
-    Check whether all counts are zero.
-    Also check and stop with an informative message if negative, NaN or infinite counts are present.
+    Check for all-zero, negative, Nan and infinite counts
+
+    This function check if :code:`y` is all zero, and raises an error if it
+    contains negative, NaN or infinite values.
+
+    Arguments
+    ---------
+    y : array_like
+        matrix of counts
+
+    Returns
+    -------
+    bool
+        whether :code:`y` only contains zeroes
     """
     if len(y) == 0:
         return False

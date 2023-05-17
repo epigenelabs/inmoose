@@ -24,8 +24,19 @@ from math import floor
 
 def systematicSubset(n, order_by):
     """
-    Take a systematic subset of indices,
-    stratified by a ranking variable
+    Take a systematic subset of indices stratified by a ranking variable
+
+    Arguments
+    ---------
+    n : int
+        the size of the subset
+    order_by : array_like
+        vector of the values by which the indices are ordered
+
+    Returns
+    -------
+    ndarray
+        a vector of size :code:`n`
     """
     ntotal = len(order_by)
     sampling_ratio = floor(ntotal / n)

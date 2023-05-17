@@ -25,8 +25,31 @@ from .edgepy_cpp import cxx_maximize_interpolant
 
 def maximizeInterpolant(x,y):
     """
-    This function takes an ordered set of spline points and a likelihood matrix where each row corresponds to a tag and each column corresponds to a spline point.
-    It then calculates the position at which the maximum interpolated likelihood occurs for each by solving the derivative of the spline function.
+    Maximize a function given a table of values by spline interpolation.
+
+    Calculate the cubic spline interpolant for each row with the method of
+    Forsythe et al. (1977) [1]_, then calculate the derivatives of the spline
+    segments adjacent to the input with the maximum function value. This allows
+    identification of the maximum of the interpolating spline.
+
+    Arguments
+    ---------
+    x : array_like
+        vector of inputs for the function
+    y : array_like
+        matrix of function values at the values of :code:`x`. Columns correspond
+        to :code:`x` values and each row corresponds to a different function to
+        be maximized.
+
+    Returns
+    -------
+    ndarray
+        vector of input values at which the function maxima occur
+
+    References
+    ----------
+    .. [1] G. E. Forsythe, M. A. Malcolm, C. B. Moler. 1977. Computer Methods
+       for Mathematical Computations. Prentice-Hall.
     """
     x = np.asarray(x, order='F', dtype='double')
     y = np.asarray(y, order='F', dtype='double')

@@ -26,7 +26,30 @@ from .validDGEList import validDGEList
 
 def estimateGLMCommonDisp_DGEList(self, design=None, method="CoxReid", subset=10000, verbose=False):
     """
-    Modifies self in place
+    Estimate a common negative binomial dispersion parameter for a DGE dataset
+    with a general experimental design.
+
+    NB: modifies :code:`self` in place
+
+    Arguments
+    ---------
+    self : DGEList
+        the DGEList containing the matrix of counts, as in :func:`glmFit`
+    design : matrix, optional
+        design matrix, as in :func:`glmFit`
+    method : str
+        method for estimating the dispersion. Possible values are "CoxReid",
+        "Pearson" or "deviance". Defaults to "CoxReid".
+    subset : int
+        maximum number of rows of :code:`y` to use in the calculation. Rows
+        used are chosen evenly spaced by :code:`AveLogCPM` using
+        :func:`systematicSubset`.
+
+    Returns
+    -------
+    DGEList
+        :code:`self` updated with :code:`common_dispersion`, and :code:`AveLogCPM`
+        if it was not alread present in input :code:`self`.
     """
     y = validDGEList(self)
     AveLogCPM = y.aveLogCPM(dispersion=0.05)
@@ -39,8 +62,50 @@ def estimateGLMCommonDisp_DGEList(self, design=None, method="CoxReid", subset=10
 
 def estimateGLMCommonDisp(y, design=None, offset=None, method="CoxReid", subset=10000, AveLogCPM=None, verbose=False, weights=None):
     """
-    Estimate common dispersion in a GLM
+    Estimate a common negative binomial dispersion parameter for a DGE dataset
+    with a general experimental design.
+
+    This function calls :func:`dispCoxReid`, :func:`dispPearson` or
+    :func:`dispDeviance` depending on the :code:`method` specified. See
+    :func:`dispCoxReid` for details of the three methods and a discussion of
+    their relative performance.
+
+    See also
+    --------
+    dispCoxReid
+    estimateGLMTrendedDisp : for trended dipsersions
+    estimateGLMTagwiseDisp : for genewise dispersions in the context of a GLM
+    estimateCommonDisp : for the common dispersion
+    estimateTagwiseDisp : for genewise dispersion in the context of a multiple
+        group experiment (one-way layout)
+
+    Arguments
+    ---------
+    y : matrix
+        matrix of counts, as in :func:`glmFit`
+    design : matrix, optional
+        design matrix, as in :func:`glmFit`
+    offset : array_like, optional
+        vector or matrix of offsets for the log-linear models, as in
+        :func:`glmFit`
+    method : str
+        method for estimating the dispersion. Possible values are "CoxReid",
+        "Pearson" or "deviance". Defaults to "CoxReid".
+    subset : int
+        maximum number of rows of :code:`y` to use in the calculation. Rows
+        used are chosen evenly spaced by :code:`AveLogCPM` using
+        :func:`systematicSubset`.
+    AveLogCPM : array_like
+        vector of log2 average counts per million for each gene
+    weights : matrix, optional
+        observation weights
+
+    Returns
+    -------
+    float
+        estimated common dispersion
     """
+
     #Check design
     if design is None:
         design = np.ones((y.shape[1], 1))

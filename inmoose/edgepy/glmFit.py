@@ -32,6 +32,39 @@ from .predFC import predFC
 from patsy import dmatrix
 
 def glmFit_DGEList(self, design=None, dispersion=None, prior_count=0.125, start=None):
+    """
+    Fit a negative binomial generalized log-linear model to the read counts for
+    each gene. Conduct genewise statistical tests for a given coefficient or
+    coefficient contrast.
+
+    See also
+    --------
+    glmFit
+
+    Arguments
+    ---------
+    design : matrix, optional
+        design matrix for the genewise linear models. Must be of full column
+        rank. Defaults to a single column of ones, equivalent to treating the
+        columns as replicate libraries.
+    dispersion : float or array_like
+        scalar, vector or matrix of negative binomial dispersions. Can be a
+        common value for all genese, a vector of dispersion values with one for
+        each gene, or a matrix of dispersion values with one for each observation.
+        If :code:`None`, it will be extracted from :code:`y`, with order of
+        precedence: genewise dispersion, trended dispersion, common dispersion.
+    prior_count : float
+        average prior count to be added to observation to shrink the estimated
+        log-fold-change towards zero.
+    start : matrix, optional
+        initial estimates for the linear model coefficients
+
+    Returns
+    -------
+    DGEList
+        object containing the data about the fit
+    """
+
     # The design matrix defaults to the oneway layout defined by self.samples.group
     # If there is only one group, then the design matrix is left None so that a matrix with a single intercept column will be set later by glmFit.
     if design is None:
@@ -59,7 +92,89 @@ def glmFit_DGEList(self, design=None, dispersion=None, prior_count=0.125, start=
 
 def glmFit(y, design=None, dispersion=None, offset=None, lib_size=None, weights=None, prior_count=0.125, start=None):
     """
-    Fit negative binomial generalized linear model for each transcript to a series of digital expression libraries
+    Fit a negative binomial generalized log-linear model to the read counts for
+    each gene. Conduct genewise statistical tests for a given coefficient or
+    coefficient contrast.
+
+    This function implements one of the GLM methods developed by McCarthy et al.
+    (2012) [1]_.
+
+    :code:`glmFit` fits genewise negative binomial GLMs, all with the same
+    design matrix but possibly different dispersions, offsets and weights.
+    When the design matrix defines a one-way layout, or can be re-parameterized
+    to a one-way layout, the GLMs are fitting very quickly using
+    :func:`mglmOneGroup`. Otherwise the default fitting method, implemented in
+    :func:`mglmLevenberg`, uses a Fisher scoring algorithm with Levenberg-style
+    damping.
+
+    Positive :code:`prior_count` cause the returned coefficients to be shrunk in
+    such a way that fold-changes between the treatment conditions are decreased.
+    In particular, infinite fold-changes are avoided. Larger values cause more
+    shrinkage. The returned coefficients are affected but not the likelihood
+    ratio tests or p-values.
+
+    See also
+    --------
+    mglmOneGroup : low-level computations
+    mglmLevenberg : low-level computations
+
+    Arguments
+    ---------
+    y : matrix
+        matrix of counts
+    design : matrix, optional
+        design matrix for the genewise linear models. Must be of full column
+        rank. Defaults to a single column of ones, equivalent to treating the
+        columns as replicate libraries.
+    dispersion : float or array_like
+        scalar, vector or matrix of negative binomial dispersions. Can be a
+        common value for all genese, a vector of dispersion values with one for
+        each gene, or a matrix of dispersion values with one for each
+        observation.
+    offset : float or array_like, optional
+        matrix of the same shape as :code:`y` giving offsets for the log-linear
+        models. Can be a scalar or a vector of length :code:`y.shape[1]`, in
+        which case it is broadcasted to the shape of :code:`y`.
+    lib_size : array_like, optional
+        vector of length :code:`y.shape[1]` giving library sizes. Only used if
+        :code:`offset=None`, in which case :code:`offset` is set to
+        :code:`log(lib_size)`. Defaults to :code:`colSums(y)`.
+    weights : matrix, optional
+        prior weights for the observations (for each library and gene) to be
+        used in the GLM calculations
+    prior_count : float
+        average prior count to be added to observation to shrink the estimated
+        log-fold-change towards zero.
+    start : matrix, optional
+        initial estimates for the linear model coefficients
+
+    Returns
+    -------
+    DGEGLM
+        object containing:
+
+        - :code:`counts`, the input matrix of counts
+        - :code:`design`, the input design matrix
+        - :code:`weights`, the input weights matrix
+        - :code:`offset`, matrix of linear model offsets
+        - :code:`dispersion`, vector of dispersions used for the fit
+        - :code:`coefficients`, matrix of estimated coefficients from the GLM
+          fits, on the natural log scale, of size :code:`y.shape[0]` by
+          :code:`design.shape[1]`.
+        - :code:`unshrunk_coefficients`, matrix of estimated coefficients from
+          the GLM fits when no log-fold-changes shrinkage is applied, on the
+          natural log scale, of size :code:`y.shape[0]` by
+          :code:`design.shape[1]`. It exists only when :code:`prior_count` is
+          not 0.
+        - :code:`fitted_values`, matrix of fitted values from GLM fits, same
+          shape as :code:`y`
+        - :code:`deviance`, numeric vector of deviances, one for each gene
+
+    References
+    ----------
+    .. [1] D. J. McCarthy, Y. Chen, G. K. Smyth. 2012. Differential expression
+       analysis of multifactor RNA-Seq experiments with respect to biological
+       variation. Nucleic Acids Research 40, 4288-4297. :doi:`10.1093/nar/gks042`
     """
     # Check y
     y = np.asarray(y, order='F')
