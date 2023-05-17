@@ -26,8 +26,38 @@ from .edgepy_cpp import cxx_compute_nbdev_sum, cxx_compute_nbdev_nosum
 def nbinomDeviance(y, mean, dispersion=0, weights=None):
     """
     Residual deviances for row-wise negative binomial GLMs.
-    y is a matrix and a deviance is computed for each row.
-    A vector y is taken to be a matrix with one row; in this case mean and dispersion must also be vectors
+
+    This function computes the total residual deviance for each row of :code:`y`,
+    i.e. weighted row sums of the unit deviances.
+
+    Care is taken to ensure accurate computation in limiting cases when the
+    dispersion is near zero of :code:`mean * dispersion` is very large.
+
+    See also
+    --------
+    nbinomUnitDeviance
+
+    Arguments
+    ---------
+    y : array_like
+        matrix containing the negative binomial counts, with rows for genes and
+        columns for libraries. A vector will be treated as a matrix with one row.
+    mean : array_like
+        matrix of expected values, of same shape as :code:`y`. A vector will be
+        treated as a matrix with one row.
+    dispersion : array_like
+        vector or matrix of negative binomial dispersions, as in :code:`glmFit`.
+        Can be a scalar, a vector of length equal to the number of rows in
+        :code:`y`, or a matrix of same shape as :code:`y`.
+    weights : array_like, optional
+        vector or matrix of non-negative weights, as in :code:`glmFit`. Can be
+        a scalar, a vector of length equal to the number of columns in :code:`y`,
+        or a matrix of same shape as :code:`y`.
+
+    Returns
+    -------
+    ndarray
+        vector of length equal to the number of rows in :code:`y`
     """
     out = _compute_nbdeviance(y=y, mean=mean, dispersion=dispersion, weights=weights, dosum=True)
     return out

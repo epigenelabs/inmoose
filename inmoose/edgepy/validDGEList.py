@@ -25,7 +25,18 @@ from ..utils import gl
 def validDGEList(y):
     """
     Check for standard components of DGEList object
-    Modifies y in place
+
+    NB: Modifies :code:`y` in place.
+
+    Arguments
+    ---------
+    y : DGEList
+        the object to check for validity
+
+    Returns
+    -------
+    DGEList
+        the input :code:`y`, with missing components added
     """
     if y.counts is None:
         raise RuntimeError("No count matrix")

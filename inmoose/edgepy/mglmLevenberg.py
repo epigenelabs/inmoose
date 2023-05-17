@@ -27,7 +27,70 @@ from .utils import _isAllZero
 
 def mglmLevenberg(y, design, dispersion=0, offset=0, weights=None, coef_start=None, start_method="null", maxit=200, tol=1e-6):
     """
-    Fit genewise negative binomial GLMs with log-link using Levenberg damping to ensure convergence
+    Fit genewise negative binomial GLMs with log-link using Levenberg damping to
+    ensure convergence.
+
+    This is a low-level work-horse used by higher-level functions, especially
+    :func:`glmFit`. Most users will not need to call this function directly.
+
+    This function fits a negative binomial GLM to each row of :code:`y`. The
+    row-wise GLMs all have the same design matrix but possibly different
+    dispersions, offsets and weights. It is low-level in that it
+    operates on atomic objects (matrices and vectors).
+
+    This function fits an arbitrary log-linear model to each response vector.
+    It implements a Levenberg-Marquardt modification of the GLM scoring
+    algorithm to prevent divergence. The main computation is implemented in C++.
+    It treats the dispersion parameter of the negative binomial distribution
+    as a known input.
+
+    Arguments
+    ---------
+    y : array_like
+        matrix of negative binomial counts. Rows for genes and columns for
+        libraries.
+    design : array_like
+        design matrix of the GLM. Assumed to be full column rank
+    dispersion : float or array_like
+        scalar or vector giving the dispersion parameter for each GLM. Can be a
+        scalar giving one value for all genes, or a vector of length equal to
+        the number of genes giving genewise dispersions.
+    offset : array_like
+        vector or matrix giving the offset that is to be included in the log
+        linear model predictor. Can be a scalar, a vector of length equal to the
+        number of libraries, or a matrix of the same shape as :code:`y`.
+    weights : matrix, optional
+        vector or matrix of non-negative quantitative weights. Can be a vector
+        of length equal to the number of libraries, or a matrix of the same
+        shape as :code:`y`.
+    coef_start : array_like, optional
+        matrix of starting values for the linear model coefficient. Number of
+        rows should agree with :code:`y` and number of columns should agree with
+        :code:`design`. This argument does not usually need to be set as the
+        automatic starting values perform well.
+    start_method : str
+        method used to generate starting values when :code:`coef_start = None`.
+        Possible values are "null" to start from the null model of equal
+        expression levels or :code:`y` to use the data as starting value for the
+        mean.
+    maxit : int
+        the maximum number of iterations for the Fisher scoring algorithm. The
+        iteration will be stopped when this limit is reached even if the
+        convergence criterion has not been satisfied.
+    tol : float
+        the convergence tolerance.
+
+    Returns
+    -------
+    tuple
+        tuple wit the following components:
+
+        - matrix of estimated coefficients for the linear models
+        - matrix of fitted values
+        - vector of residual deviances
+        - number of iterations used
+        - Boolean vector indicating genes for which the maximum damping was
+          exceeded before convergence was achieved
     """
     # Check arguments
     y = np.asarray(y, order='F')
@@ -60,5 +123,4 @@ def mglmLevenberg(y, design, dispersion=0, offset=0, weights=None, coef_start=No
     output = cxx_fit_levenberg(y, offset, dispersion, weights, design, beta, tol, maxit)
 
     # Name the output and return it
-    # TODO
     return output

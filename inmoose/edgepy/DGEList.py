@@ -27,6 +27,36 @@ from ..utils import Factor
 from .utils import _isAllZero
 
 class DGEList(object):
+    """
+    A class for storing read counts and associated information from digital
+    gene expression or sequencing technologies.
+
+    Attributes
+    ----------
+    counts : ndarray
+        matrix of read counts, one row per gene and one column per sample
+    samples : DataFrame
+        dataframe with a row for each sample and columns :code:`group`,
+        :code:`lib_size` and :code:`norm_factors` containing the group labels,
+        library sizes and normalization factors.
+        Other columns can be optionally added to give more detailed sample
+        information.
+    common_dispersion : float, optional
+        the overall dispersion estimate
+    tagwise_dispersion : ndarray, optional
+        genewise dispersion estimates for each gene ("tag" and "gene" are
+        synonymous here)
+    trended_dispersion : ndarray, optional
+        trended dispersion estimates for each gene
+    offset : array_like, optional
+        matrix of same shape as :code:`counts` giving offsets for log-linear
+        models
+    genes : DataFrame, optional
+        annotation information for each gene. Same number of rows as
+        :code:`counts`
+    AveLogCPM : ndarray, optional
+        average log2 counts per million for each gene
+    """
 
     from .aveLogCPM import aveLogCPM_DGEList as aveLogCPM
     from .estimateGLMCommonDisp import estimateGLMCommonDisp_DGEList as estimateGLMCommonDisp
@@ -38,6 +68,24 @@ class DGEList(object):
     def __init__(self, counts, lib_size=None, norm_factors=None, samples=None, group=None, genes=None, remove_zeroes=False):
         """
         Construct DGEList object from components with some checking
+
+        Arguments
+        ---------
+        counts : array_like
+            matrix of counts
+        lib_size : array_like, optional
+            vector of total counts (sequence depth) for each library
+        norm_factors : array_like, optional
+            vector of normalization factors that modify the library sizes
+        samples : DataFrame, optional
+            information for each sample
+        group : array_like or Factor, optional
+            vector or factor giving the experimental group/condition for each
+            sample/library
+        genes : DataFrame, optional
+            annotation information for each gene
+        remove_zeroes : bool
+            whether to remove rows that have 0 total count
         """
 
         # Check counts

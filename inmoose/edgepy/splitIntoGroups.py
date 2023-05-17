@@ -23,10 +23,50 @@ from .dropEmptyLevels import dropEmptyLevels
 import numpy as np
 
 def splitIntoGroups_DGEList(self):
+    """
+    Split the counts according to group
+
+    See also
+    --------
+    splitIntoGroups
+
+    Arguments
+    ---------
+    self : DGEList
+        DGEList object, from which the matrix of counts is taken
+    group : array_like or :obj:`Factor`
+        vector or factor giving the experimental group/condition for each
+        library
+
+    Returns
+    -------
+    list
+        list in which each element is a matrix of counts for an individual group.
+    """
     group = self.samples.group
     return splitIntoGroups(self.counts, group=group)
 
 def splitIntoGroups(y, group=None):
+    """
+    Split the counts according to group
+
+    Split the counts from a matrix of counts according to a group, creating a
+    list where each element consists of a numeric matrix of counts for a
+    particular experimental group.
+
+    Arguments
+    ---------
+    y : array_like
+        matrix of counts
+    group : array_like or :obj:`Factor`
+        vector or factor giving the experimental group/condition for each
+        library
+
+    Returns
+    -------
+    list
+        list in which each element is a matrix of counts for an individual group.
+    """
     # Check y
     (ntags, nlibs) = y.shape
 

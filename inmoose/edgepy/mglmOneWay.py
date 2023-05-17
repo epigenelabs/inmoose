@@ -28,7 +28,21 @@ from scipy.linalg import solve
 
 def designAsFactor(design):
     """
-    Construct a factor from the unique rows of a matrix
+    Convert a general design matrix into a oneway layout if that is possible.
+
+    This function determines how many distinct row values the design matrix is
+    capable of computing and returns a factor with a level for each possible
+    distinct value.
+
+    Arguments
+    ---------
+    design : matrix
+        the design matrix. Assumed to be full column rank.
+
+    Returns
+    -------
+    Factor
+        factor of length equal to the number of rows in :code:`design`
     """
     design = np.asarray(design, order='F')
     z = (np.e + np.pi) / 5
@@ -42,7 +56,68 @@ def designAsFactor(design):
 
 def mglmOneWay(y, design=None, group=None, dispersion=0, offset=0, weights=None, coef_start=None, maxit=50, tol=1e-10):
     """
-    Fit multiple negative binomial GLMs with log link by Fisher scoring with a single explanatory factor in the model
+    Fit multiple negative binomial GLMs with log-link by Fisher scoring with a
+    single explanatory factor in the model.
+
+    This is a low-level work-horse used by higher-level functions, especially
+    :func:`glmFit`. Most users will not need to call this function directly.
+
+    This function fits a negative binomial GLM to each row of :code:`y`. The
+    row-wise GLMs all have the same design matrix but possibly different
+    dispersions, offsets and weights. It is low-level in that it
+    operates on atomic objects (matrices and vectors).
+
+    This function fits a oneway layout to each response vector. It treats the
+    libraries as belonging to a number of groups and calls :func:`mglmOneGroup`
+    for each group. It treats the dispersion parameter of the negative binomial
+    distribution as a known input.
+
+    Arguments
+    ---------
+    y : array_like
+        matrix of negative binomial counts. Rows for genes and columns for
+        libraries.
+    design : array_like, optional
+        design matrix of the GLM. Assumed to be full column rank. Defaults to
+        :code:`~ 0 + group` if :code:`group` is specified, otherwise to
+        :code:`~ 1`.
+    group : :obj:`Factor`
+        group memberships for oneway layout. If both :code:`design` and
+        :code:`group` are specified, then they must agree in terms of
+        :func:`designAsFactor`. If :code:`design = None`, then a group-means
+        design matrix is implied.
+    dispersion : float or array_like
+        scalar or vector giving the dispersion parameter for each GLM. Can be a
+        scalar giving one value for all genes, or a vector of length equal to
+        the number of genes giving genewise dispersions.
+    offset : array_like
+        vector or matrix giving the offset that is to be included in the log
+        linear model predictor. Can be a scalar, a vector of length equal to the
+        number of libraries, or a matrix of the same shape as :code:`y`.
+    weights : matrix, optional
+        vector or matrix of non-negative quantitative weights. Can be a vector
+        of length equal to the number of libraries, or a matrix of the same
+        shape as :code:`y`.
+    coef_start : array_like, optional
+        matrix of starting values for the linear model coefficient. Number of
+        rows should agree with :code:`y` and number of columns should agree with
+        :code:`design`. This argument does not usually need to be set as the
+        automatic starting values perform well.
+    maxit : int
+        the maximum number of iterations for the Fisher scoring algorithm. The
+        iteration will be stopped when this limit is reached even if the
+        convergence criterion has not been satisfied.
+    tol : float
+        the convergence tolerance.
+
+    Returns
+    -------
+    tuple
+        tuple with the following components:
+
+        - matrix of estimated coefficients for the linear models. Rows
+          corrspond to row of :code:`y` and columns to columns of :code:`design`
+        - matrix of fitted values. Same shape as :code:`y`.
     """
     y = np.asarray(y, order='F')
     (ngenes, nlibs) = y.shape

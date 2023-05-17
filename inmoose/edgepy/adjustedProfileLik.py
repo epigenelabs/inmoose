@@ -26,12 +26,75 @@ from .edgepy_cpp import cxx_compute_apl
 
 def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True, start=None, get_coef=False):
     """
-    Tagwise Cox-Reid adjusted log-likelihoods for the dispersion.
-    Dispersion can be a scalar or a tagwise vector.
-    Computationally, dispersion can also be a matrix, but the APL is still computed tagwise.
-    y is a matrix: rows are genes/tags/transcripts, columns are samples/libraries.
-    offset is a matrix of the same dimension as y.
+    Compute adjusted profile log-likelihoods for the dispersion parameters of genewise negative binomial GLMs.
+
+    For each row of data, compute the adjusted profile log-likelihood for the
+    dispersion parameter of the negative binomial GLM. The adjusted log likelihood
+    is described by McCarthy et al. (2012) [2]_ and is based on the method of Cox
+    and Reid (1987) [1]_.
+
+    The adjusted profile likelihood is an approximation to the log-likelihood
+    function, conditional on the estimated values of the coefficients in the NB
+    log-linear models. The conditions likelihood approach is a technique for
+    adjusting the likelihood function to allow for the fact that nuisance
+    parameters have to be estimated in order to evaluate the likelihood. When
+    estimating the dispersion, the nuisance parameters are the coefficients in
+    the log-linear models.
+
+    This implementation calls the LAPACK library to perform the Cholesky
+    decomposition during adjustment estimation.
+
+    The purpose of `start` and `get_coef` is to allow hot-starting for multiple
+    calls to `adjustedProfileLik`, when only `dispersion` is altered. Specifically,
+    the returned GLM coefficients from one call with :code:`get_coef=True` can
+    be used as the :code:`start` values for the next call.
+
+    The :code:`weights` argument is interpreted in terms of averages. Each value
+    of :code:`y` is assumed to be the average of :code:`n` i.i.d NB counts,
+    where :code:`n` is given by the weight. This assumption can be generalized
+    to fractional weights.
+
+    Arguments
+    ---------
+    dispersion : float or array
+        vector of dispersions
+    y : matrix
+        matrix of counts
+    design : matrix
+        design matrix
+    offset : matrix or vector or float
+        matrix of same shape as `y` giving offsets for the log-linear models.
+        Can also be scalar or a vector of length `y.shape[1]`, in which case
+        it is broadcasted to the same shape as `y`.
+    weights : matrix, optional
+        numeric matrix giving observation weights
+    adjust : bool, optional
+        if `True` then Cox-Reid adjustment is made to the log-likelihood.
+        if `False` then the log-likelihood is returned without adjustment.
+    start : matrix, optional
+        numeric matrix of starting values for the GLM coefficients, to be passed
+        to :func:`glmFit`.
+    get_coef : bool, optional
+        specifying whether fitted GLM coefficients should be returned
+
+    Returns
+    -------
+    array
+        vector of adjusted profile log-likelihood values is returned containing
+        one element for each row of `y`.
+    matrix (only if `get_coef` is `True`)
+        the matrix of fitted GLM coefficients
+
+    References
+    ----------
+    .. [1] D. R. Cox, N. Reid. 1987. Parameter orthogonality and approximate
+       conditional inference. Journal of the Royal Statistical Society Series B
+       49, 1-39.
+    .. [2] D. J. McCarthy, Y. Chen, G. K. Smyth. 2012. Differential expression
+       analysis of multifactor RNA-Seq experiments with respect to biological
+       variation. Nucleic Acids Research 40, 4288-4297. :doi:`10.1093/nar/gks042`
     """
+
     # Checking counts
     y = np.asarray(y, order='F')
 

@@ -25,7 +25,23 @@ from math import ceil, floor
 
 def movingAverageByCol(x, width=5, full_length=True):
     """
-    Moving average smoother for columns of a matrix
+    Moving average smoother for matrix columns.
+
+    Arguments
+    ---------
+    x : array_like
+        numeric matrix
+    width : int
+        width of window of rows to be averaged
+    full_length : bool
+        whether the output should have the same number of rows as the input
+
+    Returns
+    -------
+    ndarray
+        numeric matrix with smoothed values. If :code:`full_length = True`, of
+        same shape as :code:`x`. If :code:`full_length = False`, has
+        :code:`width-1` fewer rows than :code:`x`.
     """
     x = np.asanyarray(x, order='F')
     width = int(width)
