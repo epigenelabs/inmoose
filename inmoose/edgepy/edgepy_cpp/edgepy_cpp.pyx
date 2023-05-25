@@ -37,14 +37,6 @@ from scipy.special.cython_special cimport gammaln as lgamma
 from scipy.linalg.lapack import get_lapack_funcs
 
 
-cdef public object make_levenberg_result "make_levenberg_result"(
-        ndarray[double, ndim=2] coefficients,
-        ndarray[double, ndim=2] fitted_values,
-        vector.vector[double] deviance,
-        vector.vector[long] iter,
-        vector.vector[char] failed):
-    return (coefficients, fitted_values, deviance, iter, failed)
-
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data):
     return np.asarray(data, order='F')
 
