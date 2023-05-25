@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/inmoose/badge/?version=latest)](https://inmoose.readthedocs.io/en/latest/?badge=latest)
+
 # InMoose
 
 InMoose is the **In**tegrated **M**ulti **O**mic **O**pen **S**ource **E**nvironment.
