@@ -56,16 +56,4 @@ private:
 
 double compute_unit_nb_deviance(double, double, double);
 
-class adj_coxreid {
-public:
-	adj_coxreid(int, int, const double*);
-	std::pair<double, bool> compute(const double* wptr);
-private:
-	const int ncoefs, nlibs;
-    const double* design;
-    std::vector<double> xtwx, work;
-    std::vector<int> pivots;
-    int info, lwork;
-};
-
 #endif

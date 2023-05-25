@@ -100,16 +100,6 @@ cdef extern from "fit_levenberg.h":
             double tol,
             long maxit) except +
 
-cdef extern from "compute_apl.cpp":
-    # y dtype is either int or double
-    cpdef vector.vector[double] cxx_compute_apl "compute_apl"(
-            ndarray y,
-            ndarray[double] means,
-            ndarray[double] disps,
-            ndarray[double] weights,
-            bool adjust,
-            ndarray[double] design) except +
-
 cdef extern from "initialize_levenberg.cpp":
     # y dtype is either int or double
     cpdef ndarray cxx_get_levenberg_start "get_levenberg_start"(

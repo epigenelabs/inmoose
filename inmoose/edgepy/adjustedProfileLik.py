@@ -21,7 +21,7 @@
 
 import numpy as np
 
-from .edgepy_cpp import cxx_compute_apl
+from .edgepy_cpp import compute_apl
 from .glmFit import glmFit
 from .makeCompressedMatrix import (
     _compressDispersions,
@@ -132,7 +132,7 @@ def adjustedProfileLik(
     assert mu.flags.f_contiguous
 
     # Compute adjusted log-likelihood
-    apl = cxx_compute_apl(y, mu, dispersion, weights, adjust, design)
+    apl = compute_apl(y, mu, dispersion, weights, adjust, design)
 
     # Deciding what to return
     if get_coef:
