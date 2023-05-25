@@ -21,8 +21,8 @@
 
 import numpy as np
 
-from .edgepy_cpp import cxx_compute_nbdev_nosum, cxx_compute_nbdev_sum
 from .makeCompressedMatrix import _compressDispersions, _compressWeights
+from .nbdev import compute_unit_nb_deviance, nb_deviance
 
 
 def nbinomDeviance(y, mean, dispersion=0, weights=None):
@@ -108,6 +108,6 @@ def _compute_nbdeviance(y, mean, dispersion, weights, dosum):
 
     # Compute matrix of unit deviances, or residual deviance per gene, depending on `dosum`
     if dosum:
-        return cxx_compute_nbdev_sum(y, mean, dispersion, weights)
+        return nb_deviance(y, mean, weights, dispersion)
     else:
-        return cxx_compute_nbdev_nosum(y, mean, dispersion, weights)
+        return compute_unit_nb_deviance(y, mean, dispersion)

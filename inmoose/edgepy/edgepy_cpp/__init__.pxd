@@ -35,20 +35,6 @@ cdef extern from "add_prior_count.h":
             ndarray[double] prior,
             ) except +
 
-cdef extern from "compute_nbdev.cpp":
-    # y dtype is either int or double
-    cpdef vector.vector[double] cxx_compute_nbdev_sum "compute_nbdev_sum"(
-            ndarray y,
-            ndarray[double] mu,
-            ndarray[double] phi,
-            ndarray[double] weights) except +
-    # y dtype is either int or double
-    cpdef ndarray[double] cxx_compute_nbdev_nosum "compute_nbdev_nosum"(
-            ndarray y,
-            ndarray[double] mu,
-            ndarray[double] phi,
-            ndarray[double] weights) except +
-
 cdef extern from "maximize_interpolant.cpp":
     cpdef vector.vector[double] cxx_maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, ndarray[double] likelihoods) except +
 
@@ -79,26 +65,6 @@ cdef extern from "ave_log_cpm.cpp":
             ndarray[double] weights,
             long max_iterations,
             double tolerance) except +
-
-# Helper function to return from C++ fit_levenberg function
-cdef public object make_levenberg_result "make_levenberg_result"(
-        ndarray[double, ndim=2] coefficients,
-        ndarray[double, ndim=2] fitted_values,
-        vector.vector[double] deviance,
-        vector.vector[long] iter,
-        vector.vector[char] failed)
-
-cdef extern from "fit_levenberg.h":
-    # y dtype is either int or double
-    cpdef object cxx_fit_levenberg "fit_levenberg"(
-            ndarray y,
-            ndarray[double] offset,
-            ndarray[double] disp,
-            ndarray[double] weights,
-            ndarray[double] design,
-            ndarray[double] beta,
-            double tol,
-            long maxit) except +
 
 cdef extern from "initialize_levenberg.cpp":
     # y dtype is either int or double

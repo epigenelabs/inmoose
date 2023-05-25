@@ -21,7 +21,8 @@
 
 import numpy as np
 
-from .edgepy_cpp import cxx_fit_levenberg, cxx_get_levenberg_start
+from .edgepy_cpp import cxx_get_levenberg_start
+from .glm_levenberg import fit_levenberg
 from .makeCompressedMatrix import (
     _compressDispersions,
     _compressOffsets,
@@ -55,9 +56,8 @@ def mglmLevenberg(
 
     This function fits an arbitrary log-linear model to each response vector.
     It implements a Levenberg-Marquardt modification of the GLM scoring
-    algorithm to prevent divergence. The main computation is implemented in C++.
-    It treats the dispersion parameter of the negative binomial distribution
-    as a known input.
+    algorithm to prevent divergence. It treats the dispersion parameter of the
+    negative binomial distribution as a known input.
 
     Arguments
     ---------
@@ -137,7 +137,7 @@ def mglmLevenberg(
 
     assert beta.shape == (y.shape[0], design.shape[1])
     # Check the arguments and call the C++ method
-    output = cxx_fit_levenberg(y, offset, dispersion, weights, design, beta, tol, maxit)
+    output = fit_levenberg(y, offset, dispersion, weights, design, beta, tol, maxit)
 
     # Name the output and return it
     return output
