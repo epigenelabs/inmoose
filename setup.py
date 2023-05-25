@@ -44,7 +44,6 @@ edgepy_cpp = Extension(
 
 
 setup(
-    url = "https://github.com/epigenelabs/inmoose",
     packages = [
         "inmoose",
         "inmoose/pycombat",
