@@ -2,6 +2,7 @@
 
 ## [0.1.2-dev]
 
+- `inmoose` now requires Python >= 3.8
 - reorganize tests directory
 - refactor module for batch effect correction. It is now named `pycombat`
   (instead of `batch`), and the function to correct batch effect on microarray
