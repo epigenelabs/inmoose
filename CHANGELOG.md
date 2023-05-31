@@ -9,7 +9,10 @@
   data is now `pycombat_norm` (instead of `pycombat`).
 - refactor design matrix computation, to share the code between `pycombat_norm`
   and `pycombat_seq`
+- batch effect correction functions now accept both `numpy` arrays and `pandas`
+  dataframes as input for the counts matrix
 - improved logging: no more `print`s, better log formatting
+- `inmoose` doc is now on `readthedocs.org`
 
 ## [0.1.1]
 
