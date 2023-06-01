@@ -97,9 +97,3 @@ cdef public void build_QRdecomposition "build_QRdecomposition"(QRdecomposition* 
 cdef public void decompose_QRdecomposition "decompose_QRdecomposition"(QRdecomposition* self)
 cdef public void solve_QRdecomposition "solve_QRdecomposition"(QRdecomposition* self)
 
-# Re-expose in C BLAS/LAPACK functions exposed in Cython by scipy
-cdef public void f77_dgemv "f77_dgemv"(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x, const int *incx, const double *beta, double *y, const int *incy) nogil
-cdef public void f77_dpotrf "f77_dpotrf"(const char *uplo, const int *n, double *a, const int *lda, int *info) nogil
-cdef public void f77_dpotrs "f77_dpotrs"(const char *uplo, const int *n, const int *nrhs, const double *a, const int *lda, double *b, const int *ldb, int *info) nogil
-cdef public void f77_dsytrf "f77_dsytrf"(const char *uplo, const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info) nogil
-
