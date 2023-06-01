@@ -29,7 +29,7 @@ import numpy as np
 cimport cython
 from libcpp.cmath cimport abs, log, isfinite
 
-from scipy.linalg.cython_lapack cimport dormqr, dgeqrf, dtrtrs, dpotrf, dpotrs, dsytrf
+from scipy.linalg.cython_lapack cimport dormqr, dgeqrf, dtrtrs
 from scipy.linalg.cython_blas cimport dgemv
 from libc.math cimport sqrt
 from scipy.special cimport cython_special as sp
@@ -77,15 +77,6 @@ cdef void solve_QRdecomposition(QRdecomposition* self):
     dtrtrs(&uplo, &trans_trtrs, &diag, &self.NC, &unity, self.Xcopy.data(), &self.NR, self.effects.data(), &self.NR, &self.info)
     if self.info:
         raise RuntimeError("failed to solve the triangular system")
-
-cdef public void f77_dgemv "f77_dgemv"(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x, const int *incx, const double *beta, double *y, const int *incy) nogil:
-    dgemv(<char*>trans, <int*>m, <int*>n, <double*>alpha, <double*>a, <int*>lda, <double*>x, <int*>incx, <double*>beta, y, <int*>incy)
-cdef public void f77_dpotrf "f77_dpotrf"(const char *uplo, const int *n, double *a, const int *lda, int *info) nogil:
-    dpotrf(<char*>uplo, <int*>n, a, <int*>lda, info)
-cdef public void f77_dpotrs "f77_dpotrs"(const char *uplo, const int *n, const int *nrhs, const double *a, const int *lda, double *b, const int *ldb, int *info) nogil:
-    dpotrs(<char*>uplo, <int*>n, <int*>nrhs, <double*>a, <int*>lda, b, <int*>ldb, info)
-cdef public void f77_dsytrf "f77_dsytrf"(const char *uplo, const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info) nogil:
-    dsytrf(<char*>uplo, <int*>n, a, <int*>lda, ipiv, work, <int*>lwork, info)
 
 
 ctypedef fused count_type:
