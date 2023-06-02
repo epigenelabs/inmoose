@@ -21,8 +21,8 @@
 
 import numpy as np
 
-from .edgepy_cpp import cxx_get_levenberg_start
 from .glm_levenberg import fit_levenberg
+from .initialize_levenberg import get_levenberg_start
 from .makeCompressedMatrix import (
     _compressDispersions,
     _compressOffsets,
@@ -98,7 +98,7 @@ def mglmLevenberg(
     Returns
     -------
     tuple
-        tuple wit the following components:
+        tuple with the following components:
 
         - matrix of estimated coefficients for the linear models
         - matrix of fitted values
@@ -129,15 +129,12 @@ def mglmLevenberg(
     if coef_start is None:
         if start_method not in ["null", "y"]:
             raise ValueError(f"invalid start_method {start_method}")
-        beta = cxx_get_levenberg_start(
+        beta = get_levenberg_start(
             y, offset, dispersion, weights, design, start_method == "null"
         )
     else:
         beta = np.asarray(coef_start, order="F", dtype="double")
 
     assert beta.shape == (y.shape[0], design.shape[1])
-    # Check the arguments and call the C++ method
-    output = fit_levenberg(y, offset, dispersion, weights, design, beta, tol, maxit)
-
-    # Name the output and return it
-    return output
+    # Call the actual fit
+    return fit_levenberg(y, offset, dispersion, weights, design, beta, tol, maxit)

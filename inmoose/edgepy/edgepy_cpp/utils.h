@@ -43,7 +43,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "initialize_levenberg.h"
 #include "edgepy_cpp.h"
 
 /* Py-accessible functions are defined in file __init__.pxd */
