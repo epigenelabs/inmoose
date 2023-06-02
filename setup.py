@@ -86,8 +86,6 @@ setup(
             "fit_one_group.cpp",
             "get_one_way_fitted.cpp",
             "glm.h",
-            "initialize_levenberg.cpp",
-            "initialize_levenberg.h",
             "interpolator.h",
             "maximize_interpolant.cpp",
             "objects.h",

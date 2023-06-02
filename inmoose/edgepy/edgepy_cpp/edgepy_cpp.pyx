@@ -29,8 +29,6 @@ import numpy as np
 cimport cython
 from libcpp.cmath cimport abs, log, isfinite
 
-from scipy.linalg.cython_lapack cimport dormqr, dgeqrf, dtrtrs
-from scipy.linalg.cython_blas cimport dgemv
 from libc.math cimport sqrt
 from scipy.special cimport cython_special as sp
 from scipy.special.cython_special cimport gammaln as lgamma
@@ -39,44 +37,6 @@ from scipy.linalg.lapack import get_lapack_funcs
 
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data):
     return np.asarray(data, order='F')
-
-cdef char side = b'L'
-cdef char trans_ormqr = b'T'
-cdef char uplo = b'U'
-cdef char trans_trtrs = b'N'
-cdef char diag = b'N'
-cdef int unity = 1
-
-cdef public void build_QRdecomposition(QRdecomposition* self):
-    # Setting up the workspace for dgeqrf
-    cdef double tmpwork
-    dgeqrf(&self.NR, &self.NC, self.Xcopy.data(), &self.NR, self.tau.data(), &tmpwork, &self.lwork_geqrf, &self.info)
-
-    # Loading up the optimal WORK
-    self.lwork_geqrf = <int>(tmpwork + 0.5)
-    if self.lwork_geqrf < 1:
-        self.lwork_geqrf = 1
-    self.work_geqrf.resize(self.lwork_geqrf)
-
-    # Repeating for dormqr
-    dormqr(&side, &trans_ormqr, &self.NR, &unity, &self.NC, self.Xcopy.data(), &self.NR, self.tau.data(), self.effects.data(), &self.NR, &tmpwork, &self.lwork_ormqr, &self.info)
-
-    self.lwork_ormqr = <int>(tmpwork + 0.5)
-    if self.lwork_ormqr < 1:
-        self.lwork_ormqr = 1
-    self.work_ormqr.resize(self.lwork_ormqr)
-
-cdef void decompose_QRdecomposition(QRdecomposition* self):
-    dgeqrf(&self.NR, &self.NC, self.Xcopy.data(), &self.NR, self.tau.data(), self.work_geqrf.data(), &self.lwork_geqrf, &self.info)
-
-cdef void solve_QRdecomposition(QRdecomposition* self):
-    dormqr(&side, &trans_ormqr, &self.NR, &unity, &self.NC, self.Xcopy.data(), &self.NR, self.tau.data(), self.effects.data(), &self.NR, self.work_ormqr.data(), &self.lwork_ormqr, &self.info)
-    if self.info:
-        raise RuntimeError("Q**T multiplication failed")
-
-    dtrtrs(&uplo, &trans_trtrs, &diag, &self.NC, &unity, self.Xcopy.data(), &self.NR, self.effects.data(), &self.NR, &self.info)
-    if self.info:
-        raise RuntimeError("failed to solve the triangular system")
 
 
 ctypedef fused count_type:

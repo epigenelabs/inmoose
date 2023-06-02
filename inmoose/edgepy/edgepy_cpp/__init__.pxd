@@ -66,34 +66,3 @@ cdef extern from "ave_log_cpm.cpp":
             long max_iterations,
             double tolerance) except +
 
-cdef extern from "initialize_levenberg.cpp":
-    # y dtype is either int or double
-    cpdef ndarray cxx_get_levenberg_start "get_levenberg_start"(
-            ndarray y,
-            ndarray[double] offset,
-            ndarray[double] disp,
-            ndarray[double] weights,
-            ndarray[double] design,
-            bool use_null) except +
-
-cdef extern from "initialize_levenberg.h":
-    cdef cppclass QRdecomposition:
-        int NR
-        int NC
-        double* X
-        vector.vector[double] Xcopy
-        vector.vector[double] tau
-        vector.vector[double] effects
-        vector.vector[double] weights
-        vector.vector[double] work_geqrf
-        vector.vector[double] work_ormqr
-        int lwork_geqrf
-        int lwork_ormqr
-        int info
-
-# Indicate the C name to workaround a Cython bug
-# see https://github.com/cython/cython/issues/2940
-cdef public void build_QRdecomposition "build_QRdecomposition"(QRdecomposition* self)
-cdef public void decompose_QRdecomposition "decompose_QRdecomposition"(QRdecomposition* self)
-cdef public void solve_QRdecomposition "solve_QRdecomposition"(QRdecomposition* self)
-
