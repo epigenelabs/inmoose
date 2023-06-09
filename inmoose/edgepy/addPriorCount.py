@@ -28,22 +28,22 @@ def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
     Add a library size-adjusted prior count to each observation.
 
     This function adds a positive prior count to each observation, often useful
-    to avoid zeroes during calculation of log-values. For example, :func:`predFC`
-    will call this function to calculate shrunken log-fold changes. :func:`aveLogCPM`
-    and :func:`cpm` also use the same underlying code to calculate (average)
-    log-counts per million.
+    to avoid zeroes during calculation of log-values. For example,
+    :func:`predFC` will call this function to calculate shrunken log-fold
+    changes. :func:`aveLogCPM` and :func:`cpm` also use the same underlying
+    code to calculate (average) log-counts per million.
 
-    The actual value added to the counts for each library is scaled according to
-    the library size. This ensures that the relatives contribution of the prior
-    is the same for each library. Otherwise, a fixed prior would have little
-    effect on a large library, but a big effect on a small library.
+    The actual value added to the counts for each library is scaled according
+    to the library size. This ensures that the relatives contribution of the
+    prior is the same for each library. Otherwise, a fixed prior would have
+    little effect on a large library, but a big effect on a small library.
 
-    The library sizes are also modified, with twice the scales prior being added
-    to the library size for each library. To understand the motication for this,
-    consider that each observation is, effectively, a proportion of the total
-    count in the library. The addition scheme implemented here represents an
-    empirical logistic transform and ensures that the proportion can never be
-    zero or one.
+    The library sizes are also modified, with twice the scales prior being
+    added to the library size for each library. To understand the motication
+    for this, consider that each observation is, effectively, a proportion of
+    the total count in the library. The addition scheme implemented here
+    represents an empirical logistic transform and ensures that the proportion
+    can never be zero or one.
 
     If :code:`offset` is supplied, this is used in favor of :code:`lib_size`,
     where :code:`exp(offset)` is defined as the vector/matrix of library sizes.

@@ -26,9 +26,9 @@ implementation ideas for enhancements, reproduction steps and possible
 workarounds for bugs, ...
 
 Once an issue is mature enough for implementation, fork the github repo, and
-create a dedicated for the issue. Once your work is ready for review, please
-open a pull request (PR) to merge your branch into the master branch. Note that
-your code will be reviewed before merging, which may trigger further
+create a dedicated branch for the issue. Once your work is ready for review,
+please open a pull request (PR) to merge your branch into the master branch.
+Note that your code will be reviewed before merging, which may trigger further
 discussions or change requests on your code. Once the review process has
 converged towards approval, your PR (*i.e.* your contribution) will be merged in
 InMoose. Voilà!

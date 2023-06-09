@@ -26,12 +26,13 @@ from .edgepy_cpp import cxx_compute_apl
 
 def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True, start=None, get_coef=False):
     """
-    Compute adjusted profile log-likelihoods for the dispersion parameters of genewise negative binomial GLMs.
+    Compute adjusted profile log-likelihoods for the dispersion parameters of
+    genewise negative binomial GLMs.
 
     For each row of data, compute the adjusted profile log-likelihood for the
-    dispersion parameter of the negative binomial GLM. The adjusted log likelihood
-    is described by McCarthy et al. (2012) [2]_ and is based on the method of Cox
-    and Reid (1987) [1]_.
+    dispersion parameter of the negative binomial GLM. The adjusted log
+    likelihood is described by McCarthy et al. (2012) [2]_ and is based on the
+    method of Cox and Reid (1987) [1]_.
 
     The adjusted profile likelihood is an approximation to the log-likelihood
     function, conditional on the estimated values of the coefficients in the NB
@@ -44,15 +45,16 @@ def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True,
     This implementation calls the LAPACK library to perform the Cholesky
     decomposition during adjustment estimation.
 
-    The purpose of `start` and `get_coef` is to allow hot-starting for multiple
-    calls to `adjustedProfileLik`, when only `dispersion` is altered. Specifically,
-    the returned GLM coefficients from one call with :code:`get_coef=True` can
-    be used as the :code:`start` values for the next call.
+    The purpose of :code:`start` and :code:`get_coef` is to allow hot-starting
+    for multiple calls to `adjustedProfileLik`, when only :code:`dispersion` is
+    altered.  Specifically, the returned GLM coefficients from one call with
+    :code:`get_coef=True` can be used as the :code:`start` values for the next
+    call.
 
-    The :code:`weights` argument is interpreted in terms of averages. Each value
-    of :code:`y` is assumed to be the average of :code:`n` i.i.d NB counts,
-    where :code:`n` is given by the weight. This assumption can be generalized
-    to fractional weights.
+    The :code:`weights` argument is interpreted in terms of averages. Each
+    value of :code:`y` is assumed to be the average of :code:`n` i.i.d NB
+    counts, where :code:`n` is given by the weight. This assumption can be
+    generalized to fractional weights.
 
     Arguments
     ---------
@@ -63,17 +65,17 @@ def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True,
     design : matrix
         design matrix
     offset : matrix or vector or float
-        matrix of same shape as `y` giving offsets for the log-linear models.
-        Can also be scalar or a vector of length `y.shape[1]`, in which case
-        it is broadcasted to the same shape as `y`.
+        matrix of same shape as :code:`y` giving offsets for the log-linear
+        models.  Can also be scalar or a vector of length :code:`y.shape[1]`,
+        in which case it is broadcasted to the same shape as :code:`y`.
     weights : matrix, optional
         numeric matrix giving observation weights
     adjust : bool, optional
         if `True` then Cox-Reid adjustment is made to the log-likelihood.
         if `False` then the log-likelihood is returned without adjustment.
     start : matrix, optional
-        numeric matrix of starting values for the GLM coefficients, to be passed
-        to :func:`glmFit`.
+        numeric matrix of starting values for the GLM coefficients, to be
+        passed to :func:`glmFit`.
     get_coef : bool, optional
         specifying whether fitted GLM coefficients should be returned
 

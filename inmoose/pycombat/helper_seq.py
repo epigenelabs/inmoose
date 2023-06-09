@@ -32,21 +32,27 @@ def vec2mat(vec, n_times):
 
 def match_quantiles(counts_sub, old_mu, old_phi, new_mu, new_phi):
     """
-    Match quantiles from a source negative binomial distribution to a target negative binomial distribution.
+    Match quantiles from a source negative binomial distribution to a target
+    negative binomial distribution.
 
-    :param counts_sub: the original data following the source distribution
-    :type counts_sub: matrix
-    :param old_mu: the mean of the source distribution
-    :type old_mu: matrix
-    :param old_phi: the dispersion of the source distribution
-    :type old_phi: vector
-    :param new_mu: the mean of the target distribution
-    :type new_mu: matrix
-    :param new_phi: the dispersion of the target distribution
-    :type new_phi: vector
+    Arguments
+    ---------
+    counts_sub : array_like
+        the original data following the source distribution
+    old_mu : array_like
+        the mean of the source distribution
+    old_phi : array_like
+        the dispersion of the source distribution
+    new_mu : array_like
+        the mean of the target distribution
+    new_phi : array_like
+        the dispersion of the target distribution
 
-    :return: adjusted data, corresponding in the target distribution to the same quantiles as the input data has in the source distribution
-    :rtype: matrix
+    Returns
+    -------
+    ndarray
+        adjusted data, corresponding in the target distribution to the same
+        quantiles as the input data in the source distribution
     """
     new_counts_sub = np.full(counts_sub.shape, np.nan)
 
