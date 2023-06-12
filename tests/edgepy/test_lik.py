@@ -4,7 +4,7 @@ import numpy as np
 from inmoose.utils import rnbinom
 from inmoose.edgepy import DGEList, adjustedProfileLik
 
-class test_dispersion(unittest.TestCase):
+class test_APL(unittest.TestCase):
     def setUp(self):
         y = np.array(rnbinom(80, size=5, mu=20, seed=42)).reshape((20,4))
         y = np.vstack(([0,0,0,0], [0,0,2,2], y))

@@ -3,7 +3,7 @@ import numpy as np
 
 from inmoose.edgepy.makeCompressedMatrix import makeCompressedMatrix
 
-class test_DGEList(unittest.TestCase):
+class Test(unittest.TestCase):
     def test_makeCompressedMatrix(self):
         self.assertTrue(np.array_equal(makeCompressedMatrix(42, dims=(2,3), byrow=True), np.full((2,3), 42)))
         self.assertTrue(np.array_equal(makeCompressedMatrix(42, dims=(2,3), byrow=False), np.full((2,3), 42)))
