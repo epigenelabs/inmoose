@@ -47,7 +47,6 @@ edgepy_cpp = Extension(
     "inmoose.edgepy.edgepy_cpp",
     [
         "inmoose/edgepy/edgepy_cpp/edgepy_cpp.pyx",
-        "inmoose/edgepy/edgepy_cpp/glm_one_group.cpp",
         "inmoose/edgepy/edgepy_cpp/interpolator.cpp",
         "inmoose/edgepy/edgepy_cpp/objects.cpp",
     ],

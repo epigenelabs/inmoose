@@ -22,7 +22,4 @@
 
 #include "utils.h"
 
-std::pair<double,bool> glm_one_group(size_t, const double*, const double*,
-        const double*, const double*, long, double, double);
-
 #endif
