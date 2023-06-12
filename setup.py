@@ -83,7 +83,6 @@ setup(
             "add_prior_count.h",
             "ave_log_cpm.cpp",
             "edgepy_cpp.h",
-            "fit_one_group.cpp",
             "get_one_way_fitted.cpp",
             "glm.h",
             "interpolator.h",

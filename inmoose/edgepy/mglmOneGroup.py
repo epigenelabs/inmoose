@@ -23,7 +23,7 @@ import logging
 
 import numpy as np
 
-from .edgepy_cpp import cxx_fit_one_group
+from .glm_one_group import fit_one_group
 from .makeCompressedMatrix import (
     _compressDispersions,
     _compressOffsets,
@@ -114,7 +114,7 @@ def mglmOneGroup(
     weights = _compressWeights(y, weights)
 
     # Fisher scoring iteration
-    output = cxx_fit_one_group(y, offset, dispersion, weights, maxit, tol, coef_start)
+    output = fit_one_group(y, offset, dispersion, weights, maxit, tol, coef_start)
 
     # Convergence achieved for all tags?
     if np.count_nonzero(output[1]) > 0:
