@@ -27,13 +27,6 @@ cdef public double compute_unit_nb_deviance(double, double, double)
 cdef extern from "objects.h":
     cpdef bool is_integer_array(ndarray arr) except +
 
-cdef extern from "add_prior_count.h":
-    # y dtype is either int or double
-    cpdef object cxx_add_prior_count "add_prior_count"(
-            ndarray y,
-            ndarray[double] offset,
-            ndarray[double] prior,
-            ) except +
 
 cdef extern from "maximize_interpolant.cpp":
     cpdef vector.vector[double] cxx_maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, ndarray[double] likelihoods) except +
