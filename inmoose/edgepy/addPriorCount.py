@@ -16,13 +16,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-# This file is based on the file 'R/addPriorCount.R' of the Bioconductor edgeR package (version 3.38.4).
+# This file is based on the file 'R/addPriorCount.R'of the Bioconductor edgeR
+# package (version 3.38.4).
+# This file contains a Python port of the original C++ code from the files
+# 'src/R_add_prior_count.cpp' and 'src/add_prior.cpp' of the Bioconductor edgeR
+# package (version 3.38.4).
 
 
 import numpy as np
 
-from .edgepy_cpp import cxx_add_prior_count
-from .makeCompressedMatrix import _compressOffsets, _compressPrior, makeCompressedMatrix
+from .makeCompressedMatrix import _compressOffsets, _compressPrior
 
 
 def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
@@ -71,14 +74,13 @@ def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
 
     Returns
     -------
-    matrix
+    ndarray
         matrix of counts with the added priors
-    CompressedMatrix
+    ndarray
         the log-transformed modified library sizes
     """
 
     # Check y
-    y = np.asarray(y, order="F")
     if not np.issubdtype(y.dtype, np.number):
         raise ValueError("count matrix must be numeric")
 
@@ -91,6 +93,40 @@ def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
     offset = _compressOffsets(y, lib_size=lib_size, offset=offset)
 
     # Adding the prior count
-    (out_y, out_offset) = cxx_add_prior_count(y, offset, prior_count)
-    out_offset = makeCompressedMatrix(out_offset, y.shape, byrow=True)
-    return (out_y, out_offset)
+    return add_prior_count(y, offset, prior_count)
+
+
+def add_prior_count(y, offset, prior):
+    """
+    Add a library size-adjusted prior count to each observation.
+
+    This is the low-level function called by :func:`addPriorCount`.
+
+    Arguments
+    ---------
+    y : matrix
+        a numeric count matrix, with rows corresponding to genes and columns to
+        libraries
+    offset : array, optional
+        a numeric vector or matrix of offsets
+    prior : float or array
+        a constant or gene-specific vector of prior counts to be added genes
+
+    Returns
+    -------
+    ndarray
+        matrix of counts with the added priors
+    ndarray
+        the log-transformed modified library sizes
+    """
+    # unlogging to get library sizes
+    adj_libs = np.exp(offset)
+    ave_lib = adj_libs.mean(axis=1)
+
+    # computing the adjusted prior counts
+    adj_prior = prior * adj_libs / ave_lib[:, None]
+
+    # adding it twice back to the library size and log-transforming
+    adj_libs = np.log(adj_libs + 2 * adj_prior)
+
+    return (y + adj_prior, adj_libs)
