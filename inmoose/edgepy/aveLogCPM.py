@@ -16,14 +16,18 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-# This file is based on the file 'R/aveLogCPM.R' of the Bioconductor edgeR package (version 3.38.4).
+# This file is based on the file 'R/aveLogCPM.R' of the Bioconductor edgeR
+# package (version 3.38.4).
+# This file contains a Python port of the original C++ code from the file
+# 'src/R_ave_log_cpm.cpp' of the Bioconductor edgeR package (version 3.38.4).
 
 
 from inspect import signature
 
 import numpy as np
 
-from .edgepy_cpp import cxx_ave_log_cpm
+from .addPriorCount import add_prior_count
+from .glm_one_group import glm_one_group
 from .makeCompressedMatrix import (
     _compressDispersions,
     _compressOffsets,
@@ -207,5 +211,16 @@ def aveLogCPM(
     maxit = signature(mglmOneGroup).parameters["maxit"].default
     tol = signature(mglmOneGroup).parameters["tol"].default
 
-    # Calling the C++ code
-    return cxx_ave_log_cpm(y, offset, prior_count, dispersion, weights, maxit, tol)
+    # adding the current set of priors
+    (prior_y, prior_offsets) = add_prior_count(y, offset, prior_count)
+    # fitting a one-way layout
+    fit = glm_one_group(
+        prior_y,
+        prior_offsets,
+        dispersion,
+        weights,
+        maxit,
+        tol,
+        np.repeat(np.nan, y.shape[0]),
+    )
+    return (fit[0] + np.log(1e6)) / np.log(2)
