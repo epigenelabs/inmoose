@@ -23,11 +23,13 @@
 #   `compute_unit_nb_deviance`)
 # - 'src/R_compute_apl.cpp' and 'src/adj_coxreid.cpp' (functions `compute_apl`
 #   and `acr_compute`)
+# - 'src/glm_one_group.cpp' (function `glm_one_group_cython`)
 # - 'R/q2qnbinom.R' (function _q2qnbinom)
 
 import numpy as np
 cimport cython
-from libcpp.cmath cimport abs, log, isfinite
+from libcpp.cmath cimport abs, log, isfinite, exp, isnan
+from numpy.math cimport INFINITY
 
 from libc.math cimport sqrt
 from scipy.special cimport cython_special as sp
@@ -330,3 +332,95 @@ cdef double acr_compute(const double[:] wptr, ndarray design, long lwork):
 
     return 0.5*res
 
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cpdef (double, bool) glm_one_group_cython(Py_ssize_t nlibs,
+                                          const count_type[:] counts, const double[:] offset,
+                                          const double[:] disp, const double[:] weights,
+                                          long maxit, double tolerance, double cur_beta):
+    """
+    Simplified fit for negative binomial GLM when the design matrix is one group
+
+    This is the low-level function ultimately called by :func:`fit_one_group`.
+
+    See Also
+    --------
+    glm_one_group
+    fit_one_group
+
+    Arguments
+    ---------
+    nlibs : Py_ssize_t
+        number of libraries
+    counts : array_like
+        vector of counts for a given gene, of size `nlibs`
+    offset : array_like
+        vector of offsets for a given gene, of size `nlibs`
+    disp : array_like
+        vector of dispersions for a given gene, of size `nlibs`
+    weights : array_like
+        vector of observation weights for a given gene, of size `nlibs`
+    maxit : long
+        maximum number of Newton-Raphson iterations
+    tol : float
+        tolerance for convergence in the Newton-Raphson iteration
+    cur_beta : float
+        initial beta coefficient
+
+    Returns
+    -------
+    float
+        fitted coefficient
+    bool
+        whether the fit converged
+    """
+
+    cdef Py_ssize_t j
+    cdef long i
+    cdef double totweight, dl, info, mu, cur_val
+
+    # Setting up initial values for beta as the log of the mean of the ratio of
+    # counts to offsets. This is the exact solution for the gamma distribution
+    # (which is the limit of the NB as the dispersion goes to infinity).
+    # However, if cur_beta is not NA, then we assume it is good.
+    nonzero = False
+    if isnan(cur_beta):
+        cur_beta = 0
+        totweight = 0
+        for j in range(nlibs):
+            cur_val = counts[j]
+            if cur_val > low_value:
+                cur_beta += cur_val / exp(offset[j]) * weights[j]
+                nonzero = True
+            totweight += weights[j]
+        cur_beta = log(cur_beta / totweight)
+    else:
+        for j in range(nlibs):
+            if counts[j] > low_value:
+                nonzero = True
+                break
+
+    # skipping to a result for all-zero rows
+    if not nonzero:
+        return (-INFINITY, True)
+
+    # Newton-Raphson iteration to converge to mean
+    has_converged = False
+    for i in range(maxit):
+        dl = 0
+        info = 0
+
+        for j in range(nlibs):
+            mu = exp(cur_beta + offset[j])
+            denom = 1 + mu*disp[j]
+            dl += (counts[j] - mu) / denom * weights[j]
+            info += mu / denom * weights[j]
+        step = dl / info
+        cur_beta += step
+        if abs(step) < tolerance:
+            has_converged = True
+            break
+
+    return (cur_beta, has_converged)

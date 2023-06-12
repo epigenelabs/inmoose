@@ -44,17 +44,6 @@ cdef extern from "get_one_way_fitted.cpp":
             ndarray[double] offset,
             vector.vector[int] groups) except +
 
-cdef extern from "fit_one_group.cpp":
-    # y dtype is either int or double
-    cpdef pair.pair[vector.vector[double], vector.vector[char]] cxx_fit_one_group "fit_one_group"(
-            ndarray y,
-            ndarray[double] offsets,
-            ndarray[double] disp,
-            ndarray[double] weights,
-            long max_iterations,
-            double tolerance,
-            vector.vector[double] beta) except +
-
 cdef extern from "ave_log_cpm.cpp":
     # y dtype is either int or double
     cpdef vector.vector[double] cxx_ave_log_cpm "ave_log_cpm"(
