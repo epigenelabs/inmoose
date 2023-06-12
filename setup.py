@@ -47,8 +47,6 @@ edgepy_cpp = Extension(
     "inmoose.edgepy.edgepy_cpp",
     [
         "inmoose/edgepy/edgepy_cpp/edgepy_cpp.pyx",
-        "inmoose/edgepy/edgepy_cpp/add_prior.cpp",
-        "inmoose/edgepy/edgepy_cpp/add_prior_count.cpp",
         "inmoose/edgepy/edgepy_cpp/glm_one_group.cpp",
         "inmoose/edgepy/edgepy_cpp/interpolator.cpp",
         "inmoose/edgepy/edgepy_cpp/objects.cpp",
@@ -79,8 +77,6 @@ setup(
         "inmoose/edgepy/edgepy_cpp": [
             "edgepy_cpp.pyx",
             "__init__.pxd",
-            "add_prior.h",
-            "add_prior_count.h",
             "edgepy_cpp.h",
             "get_one_way_fitted.cpp",
             "glm.h",
