@@ -44,14 +44,3 @@ cdef extern from "get_one_way_fitted.cpp":
             ndarray[double] offset,
             vector.vector[int] groups) except +
 
-cdef extern from "ave_log_cpm.cpp":
-    # y dtype is either int or double
-    cpdef vector.vector[double] cxx_ave_log_cpm "ave_log_cpm"(
-            ndarray y,
-            ndarray[double] offset,
-            ndarray[double] prior,
-            ndarray[double] disp,
-            ndarray[double] weights,
-            long max_iterations,
-            double tolerance) except +
-

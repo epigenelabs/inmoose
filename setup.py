@@ -81,7 +81,6 @@ setup(
             "__init__.pxd",
             "add_prior.h",
             "add_prior_count.h",
-            "ave_log_cpm.cpp",
             "edgepy_cpp.h",
             "get_one_way_fitted.cpp",
             "glm.h",
