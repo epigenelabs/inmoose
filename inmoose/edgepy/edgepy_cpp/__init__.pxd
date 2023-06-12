@@ -31,9 +31,3 @@ cdef extern from "objects.h":
 cdef extern from "maximize_interpolant.cpp":
     cpdef vector.vector[double] cxx_maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, ndarray[double] likelihoods) except +
 
-cdef extern from "get_one_way_fitted.cpp":
-    cpdef ndarray[double] cxx_get_one_way_fitted "get_one_way_fitted"(
-            ndarray[double] beta,
-            ndarray[double] offset,
-            vector.vector[int] groups) except +
-

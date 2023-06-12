@@ -16,14 +16,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-# This file is based on the file 'R/mglmOneWay.R' of the Bioconductor edgeR package (version 3.38.4).
+# This file is based on the file 'R/mglmOneWay.R' of the Bioconductor edgeR
+# package (version 3.38.4).
+# This file contains a Python port of the original C++ code from the file
+# 'src/R_get_one_way_fitted.cpp' of the Bioconductor edgeR package (version
+# 3.38.4).
 
 
 import numpy as np
 from scipy.linalg import solve
 
 from ..utils import Factor, asfactor
-from .edgepy_cpp import cxx_get_one_way_fitted
 from .makeCompressedMatrix import (
     _compressDispersions,
     _compressOffsets,
@@ -147,7 +150,7 @@ def mglmOneWay(
     # However, if group is supplied, we can avoid creating a design matrix altogether.
     if group is None:
         if design is None:
-            group = Factor(np.ones((nlibs,)))
+            group = Factor(np.ones((nlibs,), dtype=np.int64))
         else:
             design = np.asarray(design, order="F")
             group = designAsFactor(design)
@@ -199,10 +202,43 @@ def mglmOneWay(
     beta = np.where(beta > -1e8, beta, -1e8)
 
     # Fitted values from group-wise beta's
-    mu = cxx_get_one_way_fitted(beta, offset, i - 1)
+    mu = get_one_way_fitted(beta, offset, i - 1)
 
     # If necessary, reformat the beta's to reflect the original design.
     if design is not None:
         beta = solve(designunique, beta.T).T
 
     return (beta, mu)
+
+
+def get_one_way_fitted(beta, offset, groups):
+    """
+    Get fitted values from a one-way layout
+
+    Arguments
+    ---------
+    beta : array_like
+        matrix of coefficients
+    offset : array_like
+        matrix of offsets
+    groups : array_like
+        vector of groups: one element per library, giving the index of the
+        corresponding column of :code:`beta`
+
+    Returns
+    -------
+    ndarray
+        reconstructed fitted values. Same shape as :code:`offset`
+    """
+
+    num_groups = beta.shape[1]
+
+    if np.min(groups) < 0:
+        raise ValueError("smallest value of group vector should be non-negative")
+    if np.max(groups) >= num_groups:
+        raise ValueError(
+            "largest value of group vector should be less than the number of groups"
+        )
+
+    # output[i,j] = exp(offset[i,j] + beta[i,groups[j]])
+    return np.exp(offset + beta[:, groups])

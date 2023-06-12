@@ -77,8 +77,6 @@ setup(
             "edgepy_cpp.pyx",
             "__init__.pxd",
             "edgepy_cpp.h",
-            "get_one_way_fitted.cpp",
-            "glm.h",
             "interpolator.h",
             "maximize_interpolant.cpp",
             "objects.h",
