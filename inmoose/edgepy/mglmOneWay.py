@@ -164,7 +164,7 @@ def mglmOneWay(y, design=None, group=None, dispersion=0, offset=0, weights=None,
     # Cycle through groups
     beta = np.zeros((ngenes, ngroups), order='F', dtype='double')
     for g in range(ngroups):
-        j = np.nonzero(i == (g+1))[0]
+        j = np.nonzero(i == levg[g])[0]
         beta[:, g] = mglmOneGroup(y[:,j], dispersion=dispersion[:,j], offset=offset[:,j], weights=weights[:,j] if weights is not None else None, coef_start=coef_start[:,g] if coef_start is not None else None, maxit=maxit, tol=tol)
 
     # Reset -inf values to finite values to simplify calculations downstream
