@@ -50,6 +50,7 @@ setup(
         "inmoose/common_cpp",
         "inmoose/edgepy",
         "inmoose/edgepy/edgepy_cpp",
+        "inmoose/sim",
         "inmoose/utils",
     ],
     package_data = {
