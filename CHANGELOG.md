@@ -2,7 +2,7 @@
 
 ## [0.2.1-dev]
 
-None
+- add a function to generate simulated RNA-Seq and scRNA-Seq data
 
 ## [0.2.0]
 
