@@ -192,7 +192,7 @@ def glmFit(
         - :code:`deviance`, numeric vector of deviances, one for each gene
     """
     # Check y
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
     (ntag, nlib) = y.shape
 
     # Check design
@@ -215,7 +215,7 @@ def glmFit(
     # Check dispersion
     if dispersion is None:
         raise ValueError("No dispersion values provided")
-    dispersion = np.asanyarray(dispersion, order="F")
+    dispersion = np.asanyarray(dispersion)
     # TODO check dispersion for NaN and non-numeric values
     if dispersion.shape not in [(), (1,), (ntag,), y.shape]:
         raise ValueError("Dimensions of dispersion do not agree with dimensions of y")
@@ -224,14 +224,14 @@ def glmFit(
     # Check offset
     if offset is not None:
         # TODO check that offset is numeric
-        offset = np.asanyarray(offset, order="F")
+        offset = np.asanyarray(offset)
         if offset.shape not in [(), (1,), (nlib,), y.shape]:
             raise ValueError("Dimensions of offset do not agree with dimensions of y")
 
     # Check lib_size
     if lib_size is not None:
         # TODO check that lib_size is numeric
-        lib_size = np.asarray(lib_size, order="F")
+        lib_size = np.asarray(lib_size)
         if lib_size.shape not in [(), (1,), (nlib,)]:
             raise ValueError("lib_size has wrong length, should agree with ncol(y)")
 

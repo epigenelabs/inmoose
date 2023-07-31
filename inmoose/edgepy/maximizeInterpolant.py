@@ -54,7 +54,7 @@ def maximizeInterpolant(x, y):
     """
     x = np.asarray(x, order="F", dtype="double")
     y = np.asarray(y, order="F", dtype="double")
-    if len(y.shape) != 2:
+    if y.ndim != 2:
         raise ValueError("y is not a matrix: cannot perform interpolation")
     if len(x) != y.shape[1]:
         raise ValueError("number of columns must equal number of spline points")

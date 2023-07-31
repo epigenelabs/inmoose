@@ -123,7 +123,7 @@ def predFC(y, design, prior_count=0.125, offset=None, dispersion=0, weights=None
     (out_y, out_offset) = addPriorCount(y, offset=offset, prior_count=prior_count)
 
     # Check design
-    design = np.asarray(design, order="F")
+    design = np.asarray(design)
 
     # Return matrix of coefficients on log2 scale
     g = glmFit(

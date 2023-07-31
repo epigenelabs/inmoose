@@ -45,7 +45,7 @@ def movingAverageByCol(x, width=5, full_length=True):
         same shape as :code:`x`. If :code:`full_length = False`, has
         :code:`width-1` fewer rows than :code:`x`.
     """
-    x = np.asanyarray(x, order="F")
+    x = np.asanyarray(x)
     width = int(width)
     if width <= 1:
         return x

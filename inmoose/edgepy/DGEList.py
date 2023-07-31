@@ -109,8 +109,8 @@ class DGEList(object):
         """
 
         # Check counts
-        counts = np.asarray(counts, order="F")
-        if len(counts.shape) != 2:
+        counts = np.asarray(counts)
+        if counts.ndim != 2:
             raise ValueError("'counts' is not a matrix!")
         try:
             is_integer_array(counts)
@@ -127,7 +127,7 @@ class DGEList(object):
         # Check lib_size
         if lib_size is None:
             lib_size = counts.sum(axis=0)
-        lib_size = np.asarray(lib_size, order="F")
+        lib_size = np.asarray(lib_size)
         # TODO check that lib_size is numeric
         if nlibs != len(lib_size):
             raise ValueError(

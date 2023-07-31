@@ -53,12 +53,12 @@ def designAsFactor(design):
     Factor
         factor of length equal to the number of rows in :code:`design`
     """
-    design = np.asarray(design, order="F")
+    design = np.asarray(design)
     z = (np.e + np.pi) / 5
-    col = np.full(design.shape, np.arange(design.shape[1]), order="F")
+    col = np.full(design.shape, np.arange(design.shape[1]))
     means = (design * z**col).mean(axis=1)
     uniq = np.unique(means)
-    fact = np.zeros(means.shape, dtype="int64", order="F")
+    fact = np.zeros(means.shape, dtype="int64")
     for i in range(len(uniq)):
         fact[means == uniq[i]] = i + 1
     return Factor(fact)
@@ -139,7 +139,7 @@ def mglmOneWay(
           corrspond to row of :code:`y` and columns to columns of :code:`design`
         - matrix of fitted values. Same shape as :code:`y`.
     """
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
     (ngenes, nlibs) = y.shape
 
     offset = _compressOffsets(y, offset=offset)
@@ -152,7 +152,7 @@ def mglmOneWay(
         if design is None:
             group = Factor(np.ones((nlibs,), dtype=np.int64))
         else:
-            design = np.asarray(design, order="F")
+            design = np.asarray(design)
             group = designAsFactor(design)
     else:
         group = asfactor(group)
@@ -185,7 +185,7 @@ def mglmOneWay(
         coef_start = coef_start @ designunique.T
 
     # Cycle through groups
-    beta = np.zeros((ngenes, ngroups), order="F", dtype="double")
+    beta = np.zeros((ngenes, ngroups), dtype="double")
     for g in range(ngroups):
         j = np.nonzero(i == levg[g])[0]
         beta[:, g] = mglmOneGroup(
