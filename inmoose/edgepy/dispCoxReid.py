@@ -98,26 +98,26 @@ def dispCoxReid(
        variation. Nucleic Acids Research 40, 4288-4297. :doi:`10.1093/nar/gks042`
     """
     # Check y
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
 
     # Check design
     if design is None:
-        design = np.ones((y.shape[1], 1), order="F")
+        design = np.ones((y.shape[1], 1))
     else:
-        design = np.asarray(design, order="F")
+        design = np.asarray(design)
 
     # Check offset
     if offset is None:
         offset = np.log(y.sum(axis=0))
-    if len(offset.shape) == 1:
-        offset = np.full(y.shape, offset, order="F")
+    if offset.ndim == 1:
+        offset = np.broadcast_to(offset, y.shape)
     assert offset.shape == y.shape
 
     if interval[0] < 0:
         raise ValueError("please give a non-negative interval for the dispersion")
 
     if AveLogCPM is not None:
-        AveLogCPM = np.asarray(AveLogCPM, order="F")
+        AveLogCPM = np.asarray(AveLogCPM)
 
     # Apply min row count
     small_row_sum = y.sum(axis=1) < min_row_sum
@@ -146,7 +146,7 @@ def dispCoxReid(
         return -sum(adjustedProfileLik(par**4, y, design, offset, weights=weights))
 
     # anticipate the calls to _compress* in adjustedProfileLik
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
     offset = _compressOffsets(y, offset=offset)
     weights = _compressWeights(y, weights)
     out = minimize_scalar(

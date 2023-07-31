@@ -108,7 +108,7 @@ def mglmLevenberg(
           exceeded before convergence was achieved
     """
     # Check arguments
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
     (ngenes, nlibs) = y.shape
     if nlibs == 0 or ngenes == 0:
         raise ValueError("no data")
@@ -117,7 +117,7 @@ def mglmLevenberg(
     _isAllZero(y)
 
     # Check the design matrix
-    design = np.asarray(design, order="F", dtype="double")
+    design = np.asarray(design, dtype="double")
     # TODO check that all entries in design matrix are finite
 
     # Check dispersions, offsets, and weights
@@ -133,7 +133,7 @@ def mglmLevenberg(
             y, offset, dispersion, weights, design, start_method == "null"
         )
     else:
-        beta = np.asarray(coef_start, order="F", dtype="double")
+        beta = np.asarray(coef_start, dtype="double")
 
     assert beta.shape == (y.shape[0], design.shape[1])
     # Call the actual fit

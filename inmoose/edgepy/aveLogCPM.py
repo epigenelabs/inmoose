@@ -172,8 +172,8 @@ def aveLogCPM(
     ndarray
         numeric vector giving :code:`log2(AveCPM)` for each row of :code:`y`
     """
-    y = np.asarray(y, order="F")
-    if len(y.shape) != 2:
+    y = np.asarray(y)
+    if y.ndim != 2:
         raise ValueError("y should be a matrix")
     if y.shape[0] == 0:
         return 0
@@ -193,7 +193,7 @@ def aveLogCPM(
     if isna.all():
         dispersion = 0.05
     elif isna.any():
-        dispersion = np.asanyarray(dispersion, order="F")
+        dispersion = np.asanyarray(dispersion)
         dispersion[isna] = np.nanmean(dispersion)
 
     dispersion = _compressDispersions(y, dispersion)

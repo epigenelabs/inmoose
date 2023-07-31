@@ -38,7 +38,7 @@ from scipy.linalg.lapack import get_lapack_funcs
 
 
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data):
-    return np.asarray(data, order='F')
+    return np.asarray(data)
 
 
 ctypedef fused count_type:

@@ -175,20 +175,20 @@ def estimateGLMTagwiseDisp(
     """
 
     # Check y
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
     (ntags, nlibs) = y.shape
     if ntags == 0:
         return 0
 
     # Check design
     if design is None:
-        design = np.ones((y.shape[1], 1), order="F")
+        design = np.ones((y.shape[1], 1))
     else:
-        design = np.asarray(design, order="F")
+        design = np.asarray(design)
 
     if design.shape[1] >= y.shape[1]:
         logging.warnings.warn("No residual df: setting dispersion to NA")
-        return np.full((ntags,), np.nan, order="F")
+        return np.full((ntags,), np.nan)
 
     # Check offset
     if offset is None:

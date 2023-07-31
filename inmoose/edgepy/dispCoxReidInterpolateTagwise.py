@@ -111,11 +111,11 @@ def dispCoxReidInterpolateTagwise(
         the input matrix of counts
     """
     # Check y
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
     (ntags, nlibs) = y.shape
 
     # Check design
-    design = np.asarray(design, order="F")
+    design = np.asarray(design)
     if np.linalg.matrix_rank(design) != design.shape[1]:
         raise ValueError("design matrix must be full column rank")
     ncoefs = design.shape[1]
@@ -127,19 +127,19 @@ def dispCoxReidInterpolateTagwise(
     if offset is None:
         lib_size = y.sum(axis=0)
         offset = np.log(lib_size)
-    if len(offset.shape) == 1:
-        offset = np.full(y.shape, offset, order="F")
+    if offset.ndim == 1:
+        offset = np.broadcast_to(offset, y.shape)
     assert offset.shape == y.shape
 
     # Check AveLogCPM
     if AveLogCPM is None:
         AveLogCPM = aveLogCPM(y, lib_size=lib_size)
-    AveLogCPM = np.asarray(AveLogCPM, order="F")
+    AveLogCPM = np.asarray(AveLogCPM)
 
     # Check dispersion
-    dispersion = np.asanyarray(dispersion, order="F")
-    if len(dispersion.shape) == 0:
-        dispersion = np.full((ntags,), dispersion, order="F")
+    dispersion = np.asanyarray(dispersion)
+    if dispersion.ndim == 0:
+        dispersion = np.broadcast_to(dispersion, (ntags,))
     else:
         if len(dispersion) != ntags:
             raise ValueError("length of dispersion does not match nrow(y)")
@@ -148,6 +148,8 @@ def dispCoxReidInterpolateTagwise(
     i = y.sum(axis=1) >= min_row_sum
     if np.logical_not(i).any():
         if i.any():
+            if not dispersion.flags.writeable:
+                dispersion = dispersion.copy()
             dispersion[i] = dispCoxReidInterpolateTagwise(
                 y=y[i, :],
                 design=design,
@@ -169,9 +171,9 @@ def dispCoxReidInterpolateTagwise(
         grid_range[0] + i * (grid_range[1] - grid_range[0]) / (grid_npts - 1)
         for i in range(grid_npts)
     ]
-    apl = np.zeros((ntags, grid_npts), order="F")
+    apl = np.zeros((ntags, grid_npts))
     # anticipate the calls to _compress* in adjustedProfileLik
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
     offset = _compressOffsets(y, offset=offset)
     weights = _compressWeights(y, weights)
     for i in range(grid_npts):
@@ -186,10 +188,10 @@ def dispCoxReidInterpolateTagwise(
         width = floor(span * ntags)
         apl_smooth = movingAverageByCol(apl[o, :], width=width)[oo, :]
     else:
-        apl_smooth = np.full((ntags, grid_npts), apl.mean(axis=0), order="F")
+        apl_smooth = np.full((ntags, grid_npts), apl.mean(axis=0))
     apl_smooth = (apl + prior_n * apl_smooth) / (1 + prior_n)
 
     # Tagwise maximization
     d = maximizeInterpolant(spline_pts, apl_smooth)
-    d = np.asarray(d, order="F")
+    d = np.asarray(d)
     return dispersion * 2**d

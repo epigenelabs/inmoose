@@ -106,7 +106,7 @@ def adjustedProfileLik(
     """
 
     # Checking counts
-    y = np.asarray(y, order="F")
+    y = np.asarray(y)
 
     # Checking offsets
     offset = _compressOffsets(y, offset=offset)
@@ -129,7 +129,6 @@ def adjustedProfileLik(
     )
     mu = fit.fitted_values
     assert mu.dtype == np.dtype("double")
-    assert mu.flags.f_contiguous
 
     # Compute adjusted log-likelihood
     apl = compute_apl(y, mu, dispersion, weights, adjust, design)

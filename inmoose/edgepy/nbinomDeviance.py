@@ -68,18 +68,18 @@ def nbinomDeviance(y, mean, dispersion=0, weights=None):
 
 
 def _compute_nbdeviance(y, mean, dispersion, weights, dosum):
-    y = np.asarray(y, order="F")
-    mean = np.asanyarray(mean, order="F", dtype="double")
-    dispersion = np.asanyarray(dispersion, order="F", dtype="double")
+    y = np.asarray(y)
+    mean = np.asanyarray(mean, dtype="double")
+    dispersion = np.asanyarray(dispersion, dtype="double")
 
     # Check y. May be matrix or vector
-    if len(y.shape) == 2:
-        if len(mean.shape) != 2:
+    if y.ndim == 2:
+        if mean.ndim != 2:
             raise ValueError("y is a matrix but mean is not")
     else:
         n = y.shape[0]
         y = y.reshape((1, n))
-        if len(mean.shape) == 2:
+        if mean.ndim == 2:
             raise ValueError("mean is a matrix but y is not")
         else:
             if mean.shape[0] == n:
@@ -87,10 +87,10 @@ def _compute_nbdeviance(y, mean, dispersion, weights, dosum):
             else:
                 raise ValueError("length of mean differs from that of y")
 
-        if len(dispersion.shape) == 2:
+        if dispersion.ndim == 2:
             raise ValueError("dispersion is a matrix but y is not")
         else:
-            if len(dispersion.shape) > 0 and dispersion.shape[0] == n:
+            if dispersion.ndim > 0 and dispersion.shape[0] == n:
                 dispersion = dispersion.reshape((1, n))
             else:
                 raise ValueError("length of dispersion differs from that of y")

@@ -108,7 +108,7 @@ def mglmOneGroup(
     # Check starting values
     if coef_start is None:
         coef_start = np.NaN
-    coef_start = np.full((y.shape[0],), coef_start, dtype="double", order="F")
+    coef_start = np.full((y.shape[0],), coef_start, dtype="double")
 
     # Check weights
     weights = _compressWeights(y, weights)
