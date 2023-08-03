@@ -1,1 +1,2 @@
 recursive-include tests *.py
+include tests/consensus_clustering/*.csv

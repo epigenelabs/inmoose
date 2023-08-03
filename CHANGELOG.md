@@ -4,6 +4,8 @@
 
 - add a function to generate simulated RNA-Seq and scRNA-Seq data
 - drop support of Python 3.8 due to memory management issues in extensions
+- add a module to perform consensus clustering and select the optimal number of
+  clusters
 
 ## [0.2.0]
 
