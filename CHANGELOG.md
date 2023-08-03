@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.2.1-dev]
+
+None
+
 ## [0.2.0]
 
 - `inmoose` now requires Python >= 3.8
