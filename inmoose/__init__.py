@@ -13,6 +13,7 @@ del default_dlopen_flags
 from . import edgepy
 from . import pycombat
 from . import utils
+from . import consensus_clustering
 
 import logging
 logging.basicConfig(level=logging.INFO, format="[{levelname}] {message}", style='{')

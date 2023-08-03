@@ -46,6 +46,7 @@ edgepy_cpp = Extension(
 setup(
     packages = [
         "inmoose",
+        "inmoose/consensus_clustering",
         "inmoose/pycombat",
         "inmoose/common_cpp",
         "inmoose/edgepy",

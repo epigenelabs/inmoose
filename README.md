@@ -38,6 +38,20 @@ rnaseq_corrected = pycombat_seq(rnaseq_data, rnaseq_batches)
   batch for each sample. The list of batches should contain as many elements as
   the number of samples in the expression matrix.
 
+# Consensus clustering
+InMoose provides features to compute consensus clustering, a resampling based algorithm compatible with any clustering algorithms which class implementation is instantiated with parameter `n_clusters`, and possess a `fit_predict` method, which is invoked on data.
+Consensus clustering helps determining the best number of clusters to use and output confidence metrics and plots.
+
+
+To use these functions, import the consensusClustering class and a clustering algorithm class:
+```python
+from inmoose.consensus_clustering.consensus_clustering import consensusClustering
+from sklearn.cluster import AgglomerativeClustering
+
+CC = consensusClustering(AgglomerativeClustering)
+CC.compute_consensus_clustering(numpy_ndarray)
+```
+
 # How to contribute
 
 Please refer to [CONTRIBUTING.md](https://github.com/epigenelabs/inmoose/blob/master/CONTRIBUTING.md) to learn more about the contribution guidelines.

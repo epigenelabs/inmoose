@@ -18,6 +18,8 @@ dependencies = [
   "pandas",
   "patsy",
   "scipy",
+  "seaborn",
+  "scikit-learn",
 ]
 
 [project.urls]
