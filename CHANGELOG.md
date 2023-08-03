@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.1.2-dev]
+## [0.2.0]
 
 - `inmoose` now requires Python >= 3.8
 - reorganize tests directory
