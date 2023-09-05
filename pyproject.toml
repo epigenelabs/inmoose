@@ -11,7 +11,7 @@ classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
   "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
   "mpmath>=1.1.0",
   "numpy>=1.18.5",

@@ -41,7 +41,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.12.3
         env:
           CIBW_BUILD_FRONTEND: "build"
-          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
+          CIBW_BUILD: "cp39-* cp310-* cp311-*"
           CIBW_SKIP: "*-musllinux* *i686"
           CIBW_TEST_COMMAND: "python -m unittest discover -s {package}/tests"
         with:

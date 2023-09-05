@@ -3,6 +3,7 @@
 ## [0.2.1-dev]
 
 - add a function to generate simulated RNA-Seq and scRNA-Seq data
+- drop support of Python 3.8 due to memory management issues in extensions
 
 ## [0.2.0]
 
