@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.2.2-dev]
+
+None
+
 ## [0.2.1]
 
 - add a function to generate simulated RNA-Seq and scRNA-Seq data
