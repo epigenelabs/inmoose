@@ -2,7 +2,7 @@
 
 ## [0.2.2-dev]
 
-None
+- proper documentation for the `sim` module
 
 ## [0.2.1]
 

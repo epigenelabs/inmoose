@@ -18,6 +18,7 @@ namely ComBat [1]_ and ComBat-Seq [2]_.
    :caption: API
 
    edgepy
+   sim
    utils
 
 Contributing to InMoose
