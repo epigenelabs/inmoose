@@ -494,8 +494,10 @@ def pycombat_norm(data, batch, mod=None, par_prior=True, prior_plots=False, mean
         list_samples = data.columns
         list_genes = data.index
         dat = data.values
-    else:
+    elif isinstance(data, np.ndarray):
         dat = data
+    else:
+        raise ValueError(f"unsupported type {type(data)} for the count matrix. Should be either a pandas DataFrame or a numpy array.")
 
     check_mean_only(mean_only)
 

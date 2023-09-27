@@ -62,8 +62,10 @@ def pycombat_seq(data, batch, group=None, covar_mod=None, full_mod=True, shrink=
         list_samples = data.columns
         list_genes = data.index
         counts = data.values
-    else:
+    elif isinstance(data, np.ndarray):
         counts = data
+    else:
+        raise ValueError(f"unsupported type {type(data)} for the count matrix. Should be either a pandas DataFrame or a numpy array.")
 
     ####### Preparation #######
     # make sure batch is a factor
