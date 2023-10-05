@@ -54,12 +54,16 @@ class MetaDataBase:
         if len([x for x in [items, like, regex] if x is not None]) != 1:
             raise ValueError("pass exactly one argument to filter")
         if items is not None:
+            if isinstance(items, str):
+                items = [items]
             cols = [k for k, v in self.obj.attrs[self.name].items() if v in items]
         if like is not None:
             cols = [k for k, v in self.obj.attrs[self.name].items() if like in v]
         if regex is not None:
             cols = [
-                k for k, v in self.obj.attrs[self.name].items() if re.search(regex, v)
+                k
+                for k, v in self.obj.attrs[self.name].items()
+                if v is not None and re.search(regex, v)
             ]
 
         return self.obj.filter(cols)
