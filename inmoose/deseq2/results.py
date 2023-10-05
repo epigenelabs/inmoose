@@ -362,7 +362,7 @@ def results_dds(
 
     if saveCols is not None:
         try:
-            obj.obs[saveCols]
+            obj.var[saveCols]
         except:
             raise ValueError(f"invalid value for saveCols: {saveCols}")
 
@@ -580,8 +580,7 @@ def results_dds(
         raise NotImplementedError()
 
     if saveCols is not None:
-        mrows2Save = obj.obs[saveRows, :]
-        deseqRes.mrows2Save = mrows2Save
+        deseqRes.mrows2Save = obj.var[saveCols]
 
     return deseqRes
 
