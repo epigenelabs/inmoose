@@ -270,14 +270,29 @@ class Test(unittest.TestCase):
             )
         )
 
-    @unittest.skip("not sure what to test")
     def test_results_basics(self):
         """test that results basics regarding format, saveCols, tidy, MLE, remove are working"""
         dds = makeExampleDESeqDataSet(n=100)
         dds.var["score"] = np.arange(1, 101)
         dds = DESeq(dds)
 
-        raise NotImplementedError()
+        # try saving metadata columns
+        res = dds.results(saveCols="score")  # string
+
+        # check tidy-ness (unimplemented)
+        with self.assertRaises(NotImplementedError):
+            res = dds.results(tidy=True)
+            self.assertTrue(res.columns[0] == "rows")
+
+        # test MLE and 'name'
+        dds2 = DESeq(dds, betaPrior=True)
+        dds2.results(addMLE=True)
+        with self.assertRaises(ValueError):
+            dds2.results(name="condition_B_vs_A", addMLE=True)
+
+        # test remove results
+        dds = dds.removeResults()
+        self.assertTrue(dds.var.description.filter("results").empty)
 
     @unittest.skip("not sure what to test")
     def test_results_custom_filters(self):
