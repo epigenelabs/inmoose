@@ -6,6 +6,7 @@ from inmoose.deseq2 import makeExampleDESeqDataSet, collapseReplicates
 
 class Test(unittest.TestCase):
     def test_collapse(self):
+        """test that collapse replicates works"""
         dds = makeExampleDESeqDataSet(n=10, m=8)
         dds.obs["sample"] = np.repeat([1, 2, 3, 4], 2)
         dds.obs["run"] = np.arange(8)
