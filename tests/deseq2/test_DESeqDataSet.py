@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from pandas.api.types import is_categorical_dtype
 
 from inmoose.deseq2 import DESeqDataSet
 
@@ -26,3 +27,26 @@ class Test(unittest.TestCase):
         )
         res = dds.counts(normalized=True)
         self.assertTrue(np.allclose(res, ref))
+
+    def test_design(self):
+        """test that categorical variable in the design are properly accounted for"""
+        dds = DESeqDataSet(np.arange(24).reshape(4, 6))
+        dds.obs["x"] = ["A", "A", "B", "B"]
+        dds.obs["y"] = [1, 2, 1, 2]
+        dds.design = "x + y"
+        self.assertTrue("C(x)" in dds.obs)
+        self.assertTrue("C(y)" not in dds.obs)
+        self.assertFalse(is_categorical_dtype(dds.obs["x"].dtype))
+        self.assertTrue(is_categorical_dtype(dds.obs["C(x)"].dtype))
+        self.assertFalse(is_categorical_dtype(dds.obs["y"].dtype))
+
+        dds = DESeqDataSet(np.arange(24).reshape(4, 6))
+        dds.obs["x"] = ["A", "A", "B", "B"]
+        dds.obs["y"] = [1, 2, 1, 2]
+        dds.design = "C(x) + C(y)"
+        self.assertTrue("C(x)" in dds.obs)
+        self.assertTrue("C(y)" in dds.obs)
+        self.assertFalse(is_categorical_dtype(dds.obs["x"].dtype))
+        self.assertTrue(is_categorical_dtype(dds.obs["C(x)"].dtype))
+        self.assertFalse(is_categorical_dtype(dds.obs["y"].dtype))
+        self.assertTrue(is_categorical_dtype(dds.obs["C(y)"].dtype))

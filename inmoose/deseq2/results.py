@@ -30,7 +30,7 @@ from statsmodels.nonparametric.smoothers_lowess import lowess
 from ..utils import pnorm, pt
 from .. import __version__
 from .deseq2_cpp import fitBeta
-from .misc import buildDataFrameWithNACols
+from .misc import buildDataFrameWithNACols, getFactorName
 
 
 def p_adjust(*args, **kwargs):
@@ -382,8 +382,11 @@ def results_dds(
     ):
         designVars = [v for v in obj.design.design_info.factor_infos.values()]
         lastVarName = designVars[-1].factor.name()
-        lastVar = obj.obs[lastVarName]
         if designVars[-1].type == "categorical":
+            if lastVarName.startswith("C("):
+                lastVar = obj.obs[lastVarName]
+            else:
+                lastVar = obj.obs[f"C({lastVarName})"]
             contrast = [
                 lastVarName,
                 f"{lastVar.dtype.categories[-1]}",
@@ -849,12 +852,17 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
 
     if all(isinstance(c, str) for c in contrast):
         contrastFactor = contrast[0]
-        if contrastFactor not in obj.obs:
+        if not contrastFactor.startswith("C("):
+            contrastFactor = f"C({contrastFactor})"
+        contrastFactorName = getFactorName(contrastFactor)
+        if contrastFactorName not in obj.obs:
             raise ValueError(
-                f"{contrastFactor} should be the name of a factor in the obs data of the DESeqDataSet"
+                f"{contrastFactorName} should be the name of a factor in the obs data of the DESeqDataSet"
             )
-        if not isinstance(obj.obs[contrastFactor].dtype, pd.CategoricalDtype):
-            raise ValueError(f"{contrastFactor} is not a factor")
+        if contrastFactor not in obj.obs or not pd.api.types.is_categorical_dtype(
+            obj.obs[contrastFactor]
+        ):
+            raise ValueError(f"{contrastFactorName} is not a factor")
 
         contrastNumLevel = contrast[1]
         contrastDenomLevel = contrast[2]
@@ -864,7 +872,7 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
         # check for intercept
         hasIntercept = 0 in [len(t.factors) for t in obj.design.design_info.terms]
         firstVar = (
-            contrastFactor
+            contrast[0]
             == [t.name() for t in obj.design.design_info.terms if len(t.factors) > 0][0]
         )
 
@@ -883,25 +891,23 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
         # output: contrastNumColumn and contrastDenomColumn
         if not expanded and (hasIntercept or noInterceptPullCoef):
             contrastNumColumn = (
-                f"{contrastFactor}_{contrastNumLevel}_vs_{contrastBaseLevel}"
+                f"{contrastFactorName}_{contrastNumLevel}_vs_{contrastBaseLevel}"
             )
             contrastDenomColumn = (
-                f"{contrastFactor}_{contrastDenomLevel}_vs_{contrastBaseLevel}"
+                f"{contrastFactorName}_{contrastDenomLevel}_vs_{contrastBaseLevel}"
             )
             # check that the desired contrast is already available in obj.var,
             # and then we can either take it directly or multiply the log fold
             # change and Wald stat by -1
             if contrastDenomLevel == contrastBaseLevel:
                 cleanName = (
-                    f"{contrastFactor} {contrastNumLevel} vs {contrastDenomLevel}"
+                    f"{contrastFactorName} {contrastNumLevel} vs {contrastDenomLevel}"
                 )
                 # the results can be pulled directly from obj.var
                 if hasIntercept or not firstVar:
-                    name = (
-                        f"{contrastFactor}_{contrastNumLevel}_vs_{contrastDenomLevel}"
-                    )
+                    name = f"{contrastFactorName}_{contrastNumLevel}_vs_{contrastDenomLevel}"
                 else:
-                    name = f"{contrastFactor}[{contrastNumLevel}]"
+                    name = f"{contrastFactorName}[{contrastNumLevel}]"
 
                 if name not in resNames:
                     raise ValueError(
@@ -931,14 +937,12 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
                 # fetch the results for denom vs num
                 # and multiply the log fold change and stat by -1
                 cleanName = (
-                    f"{contrastFactor} {contrastNumLevel} vs {contrastDenomLevel}"
+                    f"{contrastFactorName} {contrastNumLevel} vs {contrastDenomLevel}"
                 )
                 if hasIntercept or not firstVar:
-                    swapName = (
-                        f"{contrastFactor}_{contrastDenomLevel}_vs_{contrastNumLevel}"
-                    )
+                    swapName = f"{contrastFactorName}_{contrastDenomLevel}_vs_{contrastNumLevel}"
                 else:
-                    swapName = f"{contrastFactor}[{contrastDenomLevel}]"
+                    swapName = f"{contrastFactorName}[{contrastDenomLevel}]"
 
                 if swapName not in resNames:
                     raise ValueError(
@@ -980,7 +984,7 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
                     contrastNumColumn in resNames and contrastDenomColumn in resNames
                 ):
                     raise ValueError(
-                        f"{contrastNumLevel} and {contrastDenomLevel} should be levels of {contrastFactor} such that {contrastNumLevel} and {contrastDenomLevel} are contained in 'resultsNames(obj)'"
+                        f"{contrastNumLevel} and {contrastDenomLevel} should be levels of {contrastFactorName} such that {contrastNumLevel} and {contrastDenomLevel} are contained in 'resultsNames(obj)'"
                     )
 
         # case 2: expanded model matrices or no intercept and first variable
@@ -990,18 +994,18 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
         else:
             # we only need to check validity
             if hasIntercept:
-                contrastNumColumn = f"{contrastFactor}[T.{contrastNumLevel}]"
-                contrastDenomColumn = f"{contrastFactor}[T.{contrastDenomLevel}]"
+                contrastNumColumn = f"{contrastFactorName}[T.{contrastNumLevel}]"
+                contrastDenomColumn = f"{contrastFactorName}[T.{contrastDenomLevel}]"
             elif not firstVar:
                 contrastNumColumn = (
-                    f"{contrastFactor}_{contrastNumLevel}_vs_{contrastBaseLevel}"
+                    f"{contrastFactorName}_{contrastNumLevel}_vs_{contrastBaseLevel}"
                 )
                 contrastDenomColumn = (
-                    f"{contrastFactor}_{contrastDenomLevel}_vs_{contrastBaseLevel}"
+                    f"{contrastFactorName}_{contrastDenomLevel}_vs_{contrastBaseLevel}"
                 )
             else:
-                contrastNumColumn = f"{contrastFactor}[{contrastNumLevel}]"
-                contrastDenomColumn = f"{contrastFactor}[{contrastDenomLevel}]"
+                contrastNumColumn = f"{contrastFactorName}[{contrastNumLevel}]"
+                contrastDenomColumn = f"{contrastFactorName}[{contrastDenomLevel}]"
             if not (contrastNumColumn in resNames and contrastDenomColumn in resNames):
                 raise ValueError(
                     f"{contrastNumColumn} and {contrastDenomColumn} are expected to be in resultsNames(obj): {resNames}"
@@ -1033,7 +1037,7 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
             contrastNumeric[resNames == contrastDenomColumn] = -1
             contrast = contrastNumeric
             contrastName = (
-                f"{contrastFactor} {contrastNumLevel} vs {contrastDenomLevel}"
+                f"{contrastFactorName} {contrastNumLevel} vs {contrastDenomLevel}"
             )
         else:
             # interpret 2-list contrast into numeric and make a name for the contrast
