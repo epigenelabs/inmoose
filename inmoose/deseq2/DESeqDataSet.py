@@ -20,6 +20,7 @@
 # Bioconductor DESeq2 package (version 3.16).
 
 
+from collections import OrderedDict
 import logging
 import numpy as np
 import pandas as pd
@@ -29,7 +30,7 @@ from scipy.stats import median_abs_deviation as mad
 from scipy.stats import norm
 
 from ..utils import Factor, rnbinom
-from .misc import buildVectorWithNACols, checkFullRank
+from .misc import buildVectorWithNACols, checkFullRank, cleanCategoricalColumnName
 
 
 class MetaDataBase:
@@ -167,7 +168,26 @@ class DESeqDataSet(AnnData):
     def design(self, d):
         # if d is already a design matrix, then this is a no-op
         # if design is already a matrix, then it is normalized (if needed) and other metadata specific to a design matrix are added. The `data=self.obs` part is ignored.
-        self.obsm["design"] = patsy.dmatrix(d, data=self.obs, NA_action="raise")
+        design = patsy.dmatrix(d, data=self.obs, NA_action="raise")
+
+        # ensure all categorical factors are encapsulated in a "C"
+        for f in design.design_info.factor_infos.values():
+            if f.type == "categorical":
+                factor_name = f.factor.name()
+                if not factor_name.startswith("C("):
+                    factor_name = patsy.EvalFactor(f"C({factor_name})").name()
+                cat_data = patsy.categorical.C(f.factor.eval(f.state, self.obs)).data
+                self.obs[factor_name] = pd.Categorical(cat_data)
+
+        # clean up the column names of the design matrix
+        design.design_info.column_name_indexes = OrderedDict(
+            [
+                (cleanCategoricalColumnName(n), v)
+                for n, v in design.design_info.column_name_indexes.items()
+            ]
+        )
+
+        self.obsm["design"] = design
 
     @property
     def sizeFactors(self):

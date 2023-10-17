@@ -75,3 +75,22 @@ def renameModelMatrixColumns(data, design):
         for f in factors
         for lvl in f.categories[1:]
     }
+
+
+def getFactorName(name):
+    """convenience function to extract the name of a categorical factor"""
+    if name.startswith("C("):
+        end = name.find(",")
+        if end < 0:
+            end = name.find(")")
+        return name[2:end]
+    return name
+
+
+def cleanCategoricalColumnName(name):
+    """convenience function to remove the "C(" part of a categorical factor in a column name"""
+    bracket = name.find("[")
+    if bracket >= 0:
+        return getFactorName(name[:bracket]) + name[bracket:]
+    else:
+        return name
