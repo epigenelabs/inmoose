@@ -23,7 +23,7 @@ from patsy import dmatrix
 from ..utils import asfactor
 
 
-def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
+def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
     """Make design matrix for batch effect correction. Handles covariates as
     well as reference batch.
 
@@ -33,16 +33,13 @@ def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
         raw count matrix from genomic studies (dimensions gene x sample)
     batch : array or list or :obj:`inmoose.utils.factor.Factor`
         batch indices
-    group : array or list or :obj:`inmoose.utils.factor.Factor`
-        vector/factor for biological condition of interest
-    covar_mod : matrix
-        model matrix for multiple covariates to include in linear model (signal
-        from these variables are kept in data after adjustment)
-    full_mod : bool
-        if True, include condition of interest in model
+    covar_mod : list or matrix, optional
+        model matrix (dataframe, list or numpy array) for one or multiple covariates to include in linear model (signal
+        from these variables are kept in data after adjustment). Covariates have to be categorial,
+        they can not be continious values (default: `None`).
     ref_batch : any
         batch id of the batch to use as reference. Must be one of the element of
-        `batch`
+        `batch` (default: `None`).
 
     Returns
     -------
@@ -92,34 +89,22 @@ def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
     else:
         ref_batch_idx = None
 
+    mod = dmatrix("~1", pd.DataFrame(counts.T))
     # covariate
-    group = asfactor([] if group is None else group)
-    # handle missing covariates, by creating a distinct covariate per batch
-    # where a missing covariate appears
-    nan_group = group.isna()
-    if nan_group.any():
-        logging.warnings.warn(
-            f"{nan_group.sum()} missing covariates in group. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
-        )
-        nan_batch_group = [
-            f"nan_batch_{batch[i]}" for i in range(len(group)) if nan_group[i]
-        ]
-        group = group.add_categories(np.unique(nan_batch_group))
-        for i, j in enumerate(np.where(nan_group)[0]):
-            group[j] = nan_batch_group[i]
-
-    if full_mod and group.nlevels() > 1:
-        logging.info("Using full model")
-        mod = dmatrix("~group")
-    else:
-        logging.info("Using null model")
-        mod = dmatrix("~1", pd.DataFrame(counts.T))
-    # drop intercept in covariate model
     if covar_mod is not None:
+        covar_mod = format_covar_mod(covar_mod)
+        # check for nan in covariates
+        nan_covar_mod = covar_mod.isna()
+        if nan_covar_mod.any().any():
+            logging.warnings.warn(
+                f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. You may want to double check your covariates."
+            )
+        # drop intercept in covariate model
         check = [(covar_mod[:, i] == 1).all() for i in range(covar_mod.shape[1])]
         covar_mod = covar_mod[:, np.logical_not(check)]
         # bind with biological condition of interest
         mod = np.concatenate((mod, covar_mod), axis=1)
+
     # combine
     design = dmatrix("~ 0 + batchmod + mod")
 
@@ -161,6 +146,34 @@ class ConfoundingVariablesError(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+
+def format_covar_mod(covar_mod):
+    """Format the covariate table in dataframe.
+    Transforms categorical variables into integers.
+
+    Arguments
+    ---------
+    covar_mod : list or matrix
+        model matrix (dataframe, list or numpy array) contaning one or multiple covariates
+
+    Returns
+    -------
+    covar_mod : dataframe
+        model matrix (dataframe) contaning covariates in interger format
+    """
+    if (type(covar_mod) == list) | (type(covar_mod) == np.ndarray):
+        if (type(covar_mod[0]) == list) | (type(covar_mod[0]) == np.ndarray):
+            covar_mod = pd.DataFrame(covar_mod).transpose()
+        else:
+            covar_mod = pd.DataFrame(covar_mod)
+        covar_mod.columns = ["col_" + str(col_nb) for col_nb in list(covar_mod.columns)]
+
+    covar_mod = dmatrix("+".join(covar_mod.columns), data=covar_mod)
+    check = [(covar_mod[:, i] == 1).all() for i in range(covar_mod.shape[1])]
+    covar_mod = covar_mod[:, np.logical_not(check)]
+
+    return covar_mod
 
 
 def check_confounded_covariates(design, n_batch):

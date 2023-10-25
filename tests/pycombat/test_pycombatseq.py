@@ -67,7 +67,7 @@ class test_pycombatseq(unittest.TestCase):
                 [19, 21, 22, 17],
             ]
         )
-        res = pycombat_seq(self.y, self.batch, group=[1, 1, 1, 2])
+        res = pycombat_seq(self.y, self.batch, covar_mod=[1, 1, 1, 2])
         self.assertTrue(np.array_equal(res, ref))
 
         # test with reference batch
@@ -84,10 +84,10 @@ class test_pycombatseq(unittest.TestCase):
         self.assertTrue(np.array_equal(res, res2))
 
         # test with incomplete group
-        ref = pycombat_seq(self.y, self.batch, group=[1, 2, 1, 3])
+        ref = pycombat_seq(self.y, self.batch, covar_mod=[1, 2, 1, 3])
         with self.assertWarnsRegex(
             UserWarning,
-            r"\d+ missing covariates in group. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates.",
+            r"2 missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates.",
         ):
-            res = pycombat_seq(self.y, self.batch, group=[1, np.nan, 1, np.nan])
+            res = pycombat_seq(self.y, self.batch, covar_mod=[1, np.nan, 1, np.nan])
         self.assertTrue(np.array_equal(res, ref))

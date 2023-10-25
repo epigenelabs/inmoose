@@ -31,9 +31,7 @@ from .helper_seq import vec2mat, match_quantiles
 def pycombat_seq(
     data,
     batch,
-    group=None,
     covar_mod=None,
-    full_mod=True,
     shrink=False,
     shrink_disp=False,
     gene_subset_n=None,
@@ -47,12 +45,10 @@ def pycombat_seq(
         raw count matrix (dataframe or numpy array) from genomic studies (dimensions gene x sample)
     batch : array or list or :obj:`inmoose.utils.factor.Factor`
         Batch indices. Must have as many elements as the number of columns in the expression matrix.
-    group : array or list or :obj:`inmoose.utils.factor.Factor`, optional
-        vector/factor for biological condition of interest (default: `None`)
-    covar_mod : matrix, optional
-        model matrix for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
-    full_mod : bool, optional
-        if True, include condition of interest in model
+    covar_mod : list or matrix, optional
+        model matrix (dataframe, list or numpy array) for one or multiple covariates to include in linear model (signal
+        from these variables are kept in data after adjustment). Covariates have to be categorial,
+        they can not be continious values (default: `None`).
     shrink : bool, optional
         whether to apply shrinkage on parameter estimation
     shrink_disp : bool, optional
@@ -101,7 +97,7 @@ def pycombat_seq(
         n_batch,
         n_sample,
         ref_batch_index,
-    ) = make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch)
+    ) = make_design_matrix(counts, batch, covar_mod, ref_batch)
 
     # Check for missing values in count matrix
     if np.isnan(counts).any():

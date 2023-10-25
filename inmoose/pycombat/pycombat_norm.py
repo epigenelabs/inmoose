@@ -553,7 +553,7 @@ def adjust_data(
 def pycombat_norm(
     data,
     batch,
-    mod=None,
+    covar_mod=None,
     par_prior=True,
     prior_plots=False,
     mean_only=False,
@@ -569,8 +569,10 @@ def pycombat_norm(
         expression matrix (dataframe or numpy array). It contains the information about the gene expression (rows) for each sample (columns).
     batch : list
         batch indices. Must have as many elements as the number of columns in the expression matrix.
-    mod : matrix, optional
-        matrix model for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
+    covar_mod : list or matrix, optional
+        model matrix (dataframe, list or numpy array) for one or multiple covariates to include in linear model (signal
+        from these variables are kept in data after adjustment). Covariates have to be categorial,
+        they can not be continious values (default: `None`).
     par_prior : bool, optional
         False for non-parametric estimation of batch effects (default: `True`).
     prior_plots : bool, optional
@@ -607,7 +609,7 @@ def pycombat_norm(
         n_batch,
         n_array,
         ref,
-    ) = make_design_matrix(dat, batch, None, mod, True, ref_batch)
+    ) = make_design_matrix(dat, batch, covar_mod, ref_batch)
     design = np.transpose(design)
 
     # Check for missing values in count matrix

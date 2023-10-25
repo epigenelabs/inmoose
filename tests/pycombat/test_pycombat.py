@@ -57,7 +57,7 @@ class test_pycombat(unittest.TestCase):
             self.n_batch,
             self.n_array,
             ref,
-        ) = make_design_matrix(self.dat, self.batch, None, mod, True, ref_batch)
+        ) = make_design_matrix(self.dat, self.batch, mod, ref_batch)
         self.design = np.transpose(design)
 
         NAs = check_NAs(self.dat)
