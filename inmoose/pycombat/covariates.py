@@ -92,16 +92,7 @@ def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
     mod = dmatrix("~1", pd.DataFrame(counts.T))
     # covariate
     if covar_mod is not None:
-        covar_mod = format_covar_mod(covar_mod)
-        # check for nan in covariates
-        nan_covar_mod = covar_mod.isna()
-        if nan_covar_mod.any().any():
-            logging.warnings.warn(
-                f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. You may want to double check your covariates."
-            )
-        # drop intercept in covariate model
-        check = [(covar_mod[:, i] == 1).all() for i in range(covar_mod.shape[1])]
-        covar_mod = covar_mod[:, np.logical_not(check)]
+        covar_mod = format_covar_mod(covar_mod, batch)
         # bind with biological condition of interest
         mod = np.concatenate((mod, covar_mod), axis=1)
 
@@ -148,7 +139,7 @@ class ConfoundingVariablesError(Exception):
         super().__init__(self.message)
 
 
-def format_covar_mod(covar_mod):
+def format_covar_mod(covar_mod, batch):
     """Format the covariate table in dataframe.
     Transforms categorical variables into integers.
 
@@ -156,6 +147,8 @@ def format_covar_mod(covar_mod):
     ---------
     covar_mod : list or matrix
         model matrix (dataframe, list or numpy array) contaning one or multiple covariates
+    batch : array or list or :obj:`inmoose.utils.factor.Factor`
+        batch indices
 
     Returns
     -------
@@ -168,6 +161,41 @@ def format_covar_mod(covar_mod):
         else:
             covar_mod = pd.DataFrame(covar_mod)
         covar_mod.columns = ["col_" + str(col_nb) for col_nb in list(covar_mod.columns)]
+
+    # check for float type with decimal (excluding nan) to identify potential continue_variable
+    continue_variable = [
+        col
+        for col in covar_mod.columns
+        if True
+        in [
+            (ele % 1) > 0
+            for ele in covar_mod[col].dropna().to_list()
+            if type(ele) == float
+        ]
+    ]
+    if len(continue_variable) > 0:
+        raise ValueError(
+            f"Found numerical covariates (covar_mod parameters) {continue_variable}. Numerical covariates are not accepted. Please remove them before proceeding with pycombat_norm."
+        )
+
+    # check for nan in categorial covariates
+    nan_covar_mod = covar_mod.isna()
+    if nan_covar_mod.any().any():
+        logging.warnings.warn(
+            f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
+        )
+
+    # handle missing covariates, by creating a distinct covariate per batch
+    # where a missing covariate appears
+    for col in covar_mod.columns:
+        nan_cov_col = covar_mod[col].isna()
+        nan_batch_group = [
+            f"nan_batch_{batch[i]}"
+            for i in range(len(covar_mod[col]))
+            if nan_cov_col[i]
+        ]
+        for i, j in enumerate(np.where(nan_cov_col)[0]):
+            covar_mod.loc[j, col] = nan_batch_group[i]
 
     covar_mod = dmatrix("+".join(covar_mod.columns), data=covar_mod)
     check = [(covar_mod[:, i] == 1).all() for i in range(covar_mod.shape[1])]
