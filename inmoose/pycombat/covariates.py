@@ -18,7 +18,7 @@
 import logging
 import numpy as np
 import pandas as pd
-from patsy import dmatrix
+from patsy import dmatrix, DesignMatrix
 
 from ..utils import asfactor
 
@@ -89,16 +89,18 @@ def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
     else:
         ref_batch_idx = None
 
-    mod = dmatrix("~1", pd.DataFrame(counts.T))
     # covariate
     if covar_mod is not None:
-        covar_mod = format_covar_mod(covar_mod, batch)
+        # if needed, format covariate DesignMatrix
+        if type(covar_mod) != DesignMatrix:
+            covar_mod = format_covar_mod(covar_mod, batch)
         # bind with biological condition of interest
-        mod = np.concatenate((mod, covar_mod), axis=1)
-
+        mod = covar_mod
+    else:
+        mod = dmatrix("~1", pd.DataFrame(counts.T))
     # combine
     design = dmatrix("~ 0 + batchmod + mod")
-
+    
     # Check for intercept in covariates, and drop if present
     check = [(design[:, i] == 1).all() for i in range(design.shape[1])]
     if ref_batch_idx is not None:
@@ -197,10 +199,7 @@ def format_covar_mod(covar_mod, batch):
         for i, j in enumerate(np.where(nan_cov_col)[0]):
             covar_mod.loc[j, col] = nan_batch_group[i]
 
-    covar_mod = dmatrix("+".join(covar_mod.columns), data=covar_mod)
-    check = [(covar_mod[:, i] == 1).all() for i in range(covar_mod.shape[1])]
-    covar_mod = covar_mod[:, np.logical_not(check)]
-
+    covar_mod = dmatrix("+".join([f"C({cv})" for cv in covar_mod.columns]), data=covar_mod)
     return covar_mod
 
 
