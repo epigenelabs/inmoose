@@ -92,7 +92,7 @@ def dispCoxReid(
        49, 1-39.
     .. [2] M. D. Robinson, G. K. Smyth. 2008. Small-sample estimation of
        negative binomial dispersion, with applications to SAGE data.
-       Biostatistics 9, 321-332.
+       Biostatistics 9, 321-332. :doi:`10.1093/biostatistics/kxm030`
     .. [3] D. J. McCarthy, Y. Chen, G. K. Smyth. 2012. Differential expression
        analysis of multifactor RNA-Seq experiments with respect to biological
        variation. Nucleic Acids Research 40, 4288-4297. :doi:`10.1093/nar/gks042`
