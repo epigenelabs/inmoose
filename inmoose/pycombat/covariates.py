@@ -23,7 +23,9 @@ from patsy import dmatrix, DesignMatrix
 from ..utils import asfactor
 
 
-def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
+def make_design_matrix(
+    counts, batch, covar_mod=None, ref_batch=None, cov_missing_value=None
+):
     """Make design matrix for batch effect correction. Handles covariates as
     well as reference batch.
 
@@ -40,6 +42,12 @@ def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
     ref_batch : any
         batch id of the batch to use as reference. Must be one of the element of
         `batch` (default: `None`).
+    cov_missing_value : str
+        Option to choose the way to handle missing covariates
+        `None` raise an error if missing covariates and stop the code
+        `remove` remove samples with missing covariates and raise a warning
+        `fill` handle missing covariates, by creating a distinct covariate per batch
+        (default: `None`)
 
     Returns
     -------
@@ -59,10 +67,31 @@ def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
         the number of samples
     int or None
         the index of the reference batch if any, otherwise None
+    batch : array or list or :obj:`inmoose.utils.factor.Factor`
+        batch indices
+    remove_sample : list
+        sample indices to remove from the analysis
     """
+    # covariate
+    remove_sample = []
+    if covar_mod is not None:
+        # if needed, format covariate DesignMatrix
+        if type(covar_mod) != DesignMatrix:
+            remove_sample, covar_mod = format_covar_mod(
+                covar_mod, batch, cov_missing_value
+            )
+            batch = [batch[i] for i in range(0, len(batch)) if i not in remove_sample]
+        # bind with biological condition of interest
+        mod = covar_mod
+    else:
+        mod = dmatrix("~1", pd.DataFrame(counts.T))
 
     # preparation
     batch = asfactor(batch)
+    # batch
+    batchmod = dmatrix("~0 + C(batch)")
+    # combine
+    design = dmatrix("~ 0 + batchmod + mod")
 
     # number of batches
     n_batch = batch.nlevels()
@@ -75,8 +104,6 @@ def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
     if 1 in n_batches:
         logging.warnings.warn("Single-sample batch detected!")
 
-    # batch
-    batchmod = dmatrix("~0 + C(batch)")
     # reference batch
     if ref_batch is not None:
         if ref_batch not in batch.categories:
@@ -89,18 +116,6 @@ def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
     else:
         ref_batch_idx = None
 
-    # covariate
-    if covar_mod is not None:
-        # if needed, format covariate DesignMatrix
-        if type(covar_mod) != DesignMatrix:
-            covar_mod = format_covar_mod(covar_mod, batch)
-        # bind with biological condition of interest
-        mod = covar_mod
-    else:
-        mod = dmatrix("~1", pd.DataFrame(counts.T))
-    # combine
-    design = dmatrix("~ 0 + batchmod + mod")
-    
     # Check for intercept in covariates, and drop if present
     check = [(design[:, i] == 1).all() for i in range(design.shape[1])]
     if ref_batch_idx is not None:
@@ -124,6 +139,8 @@ def make_design_matrix(counts, batch, covar_mod=None, ref_batch=None):
         n_batch,
         n_sample,
         ref_batch_idx,
+        batch,
+        remove_sample,
     )
 
 
@@ -141,9 +158,8 @@ class ConfoundingVariablesError(Exception):
         super().__init__(self.message)
 
 
-def format_covar_mod(covar_mod, batch):
-    """Format the covariate table in dataframe.
-    Transforms categorical variables into integers.
+def format_covar_mod(covar_mod, batch, cov_missing_value=None):
+    """Format the covariate table in model matrix.
 
     Arguments
     ---------
@@ -151,9 +167,17 @@ def format_covar_mod(covar_mod, batch):
         model matrix (dataframe, list or numpy array) contaning one or multiple covariates
     batch : array or list or :obj:`inmoose.utils.factor.Factor`
         batch indices
+    cov_missing_value : str
+        Option to choose the way to handle missing covariates
+        `None` raise an error if missing covariates and stop the code
+        "remove" remove samples with missing covariates and raise a warning
+        "fill" handle missing covariates, by creating a distinct covariate per batch
+        (default: "raise")
 
     Returns
     -------
+    remove_sample : list
+        sample indices to remove from the analysis
     covar_mod : dataframe
         model matrix (dataframe) contaning covariates in interger format
     """
@@ -181,26 +205,49 @@ def format_covar_mod(covar_mod, batch):
         )
 
     # check for nan in categorial covariates
+    remove_sample = []
     nan_covar_mod = covar_mod.isna()
     if nan_covar_mod.any().any():
-        logging.warnings.warn(
-            f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
-        )
+        if cov_missing_value is None:
+            name_nan_covar_mod = nan_covar_mod.loc[
+                :, nan_covar_mod.any() == True
+            ].columns.to_list()
+            raise ValueError(
+                f"{nan_covar_mod.sum().sum()} values are missing in covariates {', '.join(name_nan_covar_mod)}. Correct your covariates or use the cov_missing_value parameters"
+            )
+        elif cov_missing_value == "remove":
+            logging.warnings.warn(
+                f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
+            )
+            remove_sample = [
+                i
+                for i, x in enumerate((nan_covar_mod.sum(axis=1) > 0).to_list())
+                if x == True
+            ]
+        elif cov_missing_value == "fill":
+            logging.warnings.warn(
+                f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
+            )
+            # handle missing covariates, by creating a distinct covariate per batch
+            # where a missing covariate appears
+            for col in covar_mod.columns:
+                nan_cov_col = covar_mod[col].isna()
+                nan_batch_group = [
+                    f"nan_batch_{batch[i]}"
+                    for i in range(len(covar_mod[col]))
+                    if nan_cov_col[i]
+                ]
+                for i, j in enumerate(np.where(nan_cov_col)[0]):
+                    covar_mod.loc[j, col] = nan_batch_group[i]
+        else:
+            raise ValueError(
+                f"cov_missing_value parameter doesn't accept {cov_missing_value} value, only `None`, `fill` or `remove` are valid"
+            )
 
-    # handle missing covariates, by creating a distinct covariate per batch
-    # where a missing covariate appears
-    for col in covar_mod.columns:
-        nan_cov_col = covar_mod[col].isna()
-        nan_batch_group = [
-            f"nan_batch_{batch[i]}"
-            for i in range(len(covar_mod[col]))
-            if nan_cov_col[i]
-        ]
-        for i, j in enumerate(np.where(nan_cov_col)[0]):
-            covar_mod.loc[j, col] = nan_batch_group[i]
-
-    covar_mod = dmatrix("+".join([f"C({cv})" for cv in covar_mod.columns]), data=covar_mod)
-    return covar_mod
+    covar_mod = dmatrix(
+        "+".join([f"C({cv})" for cv in covar_mod.columns]), data=covar_mod
+    )
+    return remove_sample, covar_mod
 
 
 def check_confounded_covariates(design, n_batch):

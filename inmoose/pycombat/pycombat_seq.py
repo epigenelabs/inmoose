@@ -36,6 +36,7 @@ def pycombat_seq(
     shrink_disp=False,
     gene_subset_n=None,
     ref_batch=None,
+    cov_missing_value=None,
 ):
     """pycombat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
 
@@ -57,6 +58,12 @@ def pycombat_seq(
         number of genes to use in emprirical Bayes estimation, only useful when shrink = True
     ref_batch : any, optional
         batch id of the batch to use as reference (default: `None`)
+    cov_missing_value : str
+        Option to choose the way to handle missing covariates
+        `None` raise an error if missing covariates and stop the code
+        `remove` remove samples with missing covariates and raise a warning
+        `fill` handle missing covariates, by creating a distinct covariate per batch
+        (default: `None`)
 
     Returns
     -------
@@ -76,17 +83,6 @@ def pycombat_seq(
     # make sure batch is a factor
     batch = asfactor(batch)
 
-    # Remove genes with only 0 counts in any batch
-    keep = np.full((counts.shape[0],), True)
-    for b in batch.categories:
-        keep &= counts[:, batch == b].sum(axis=1) > 0
-    rm = np.logical_not(keep).nonzero()[0]
-    keep = keep.nonzero()[0]
-    countsOri = counts.copy()
-    counts = counts[keep, :]
-
-    dge_obj = DGEList(counts=counts)
-
     # Handle batches, covariates and prepare design matrix
     (
         design,
@@ -97,7 +93,22 @@ def pycombat_seq(
         n_batch,
         n_sample,
         ref_batch_index,
-    ) = make_design_matrix(counts, batch, covar_mod, ref_batch)
+        batch,
+        remove_sample,
+    ) = make_design_matrix(counts, batch, covar_mod, ref_batch, cov_missing_value)
+    # Remove samples
+    counts = np.delete(counts, (remove_sample), axis=1)
+
+    # Remove genes with only 0 counts in any batch
+    keep = np.full((counts.shape[0],), True)
+    for b in batch.categories:
+        keep &= counts[:, batch == b].sum(axis=1) > 0
+    rm = np.logical_not(keep).nonzero()[0]
+    keep = keep.nonzero()[0]
+    countsOri = counts.copy()
+    counts = counts[keep, :]
+
+    dge_obj = DGEList(counts=counts)
 
     # Check for missing values in count matrix
     if np.isnan(counts).any():
@@ -115,6 +126,7 @@ def pycombat_seq(
             or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]
         ):
             # not enough residual degree of freedom
+
             return estimateGLMCommonDisp(
                 counts[:, batches_ind[i]], design=None, subset=counts.shape[0]
             )
@@ -143,7 +155,6 @@ def pycombat_seq(
             )
 
     genewise_disp_lst = [genewise_disp_helper(i) for i in range(n_batch)]
-
     # construction dispersion matrix
     phi_matrix = np.full(counts.shape, np.nan)
     for k in range(n_batch):

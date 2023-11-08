@@ -57,7 +57,16 @@ class test_pycombat(unittest.TestCase):
             self.n_batch,
             self.n_array,
             ref,
+            batch,
+            remove_sample,
         ) = make_design_matrix(self.dat, self.batch, mod, ref_batch)
+        # Remove samples with NaN in covariates
+        self.dat = [
+            self.dat[n_col]
+            for n_col in range(0, len(self.dat))
+            if n_col not in remove_sample
+        ]
+
         self.design = np.transpose(design)
 
         NAs = check_NAs(self.dat)
