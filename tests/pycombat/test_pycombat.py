@@ -19,7 +19,6 @@ from inmoose.pycombat import pycombat_norm
 class test_pycombat(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.batch = np.asarray([1, 1, 1, 2, 2, 3, 3, 3, 3])
         matrix = np.transpose(
             [
                 np.random.normal(size=1000, loc=3, scale=1),
@@ -39,6 +38,9 @@ class test_pycombat(unittest.TestCase):
             columns=["sample_" + str(i + 1) for i in range(9)],
             index=["gene_" + str(i + 1) for i in range(1000)],
         )
+
+        # test normal execution
+        self.batch = np.asarray([1, 1, 1, 2, 2, 3, 3, 3, 3])
         self.matrix_adjusted = pycombat_norm(self.matrix, self.batch)
 
         # useful constants for unit testing
@@ -173,3 +175,9 @@ class test_pycombat(unittest.TestCase):
         self.assertTrue(
             np.var(self.matrix_adjusted.values) <= np.var(self.matrix.values)
         )
+        # test raise error for single sample batch
+        with self.assertRaisesRegex(
+            ValueError,
+            r"pycombat_norm doesn't support 1 sample per batch"
+        ):
+            pycombat_norm(self.matrix, np.asarray([1, 1, 1, 2, 2, 3, 3, 3, 4]))

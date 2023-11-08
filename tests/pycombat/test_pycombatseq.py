@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-import pytest
 
 from inmoose.utils import rnbinom
 from inmoose.pycombat import pycombat_seq
@@ -84,12 +83,18 @@ class test_pycombatseq(unittest.TestCase):
         res2 = pycombat_seq(self.y, ["a", "a", "b", "b", "b"], ref_batch="a")
         self.assertTrue(np.array_equal(res, res2))
 
+        # test raise error for single sample batch
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="pycombat_seq doesn't support 1 sample per batch"
+        ):
+            pycombat_seq(self.y, [1, 2, 2, 2, 2])
+
         # test with incomplete group
         with self.assertRaisesRegex(
             ValueError,
             expected_regex="2 values are missing in covariates col_0. Correct your covariates or use the cov_missing_value parameters",
         ):
-            res = pycombat_seq(self.y, self.batch, covar_mod=[1, np.nan, 1, np.nan, 1])
+            pycombat_seq(self.y, self.batch, covar_mod=[1, np.nan, 1, np.nan, 1])
 
         ref = pycombat_seq(self.y, self.batch, covar_mod=[1, 2, 1, 3, 1])
         with self.assertWarnsRegex(

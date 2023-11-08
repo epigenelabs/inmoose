@@ -625,6 +625,10 @@ def pycombat_norm(
 
     design = np.transpose(design)
 
+    # Raise error if single-sample batch, code does not support 1 sample per batch
+    if 1 in n_batches:
+        raise ValueError(f"pycombat_norm doesn't support 1 sample per batch")
+
     # Check for missing values in count matrix
     NAs = np.isnan(dat).any()
     if NAs:

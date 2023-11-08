@@ -99,6 +99,10 @@ def pycombat_seq(
     # Remove samples
     counts = np.delete(counts, (remove_sample), axis=1)
 
+    # Raise error if single-sample batch, code does not support 1 sample per batch
+    if 1 in n_batches:
+        raise ValueError("pycombat_seq doesn't support 1 sample per batch")
+
     # Remove genes with only 0 counts in any batch
     keep = np.full((counts.shape[0],), True)
     for b in batch.categories:
