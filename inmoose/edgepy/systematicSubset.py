@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,13 +14,14 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/systematicSubset.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
 import numpy as np
 from math import floor
+
 
 def systematicSubset(n, order_by):
     """

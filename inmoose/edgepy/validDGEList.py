@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,13 +14,14 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/validDGEList.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
 import numpy as np
 from ..utils import gl
+
 
 def validDGEList(y):
     """
@@ -40,7 +41,7 @@ def validDGEList(y):
     """
     if y.counts is None:
         raise RuntimeError("No count matrix")
-    y.counts = np.asarray(y.counts, order='F')
+    y.counts = np.asarray(y.counts, order="F")
     nlib = y.counts.shape[1]
     if (y.samples.group.values == None).any():
         y.samples.group = gl(1, nlib)
@@ -50,4 +51,3 @@ def validDGEList(y):
         y.samples.norm_factors = np.ones(nlib)
 
     return y
-

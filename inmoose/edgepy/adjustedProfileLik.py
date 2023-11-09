@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,17 +14,24 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/adjustedProfileLik.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
 import numpy as np
-from .makeCompressedMatrix import _compressOffsets, _compressDispersions, _compressWeights
+from .makeCompressedMatrix import (
+    _compressOffsets,
+    _compressDispersions,
+    _compressWeights,
+)
 from .glmFit import glmFit
 from .edgepy_cpp import cxx_compute_apl
 
-def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True, start=None, get_coef=False):
+
+def adjustedProfileLik(
+    dispersion, y, design, offset, weights=None, adjust=True, start=None, get_coef=False
+):
     """
     Compute adjusted profile log-likelihoods for the dispersion parameters of
     genewise negative binomial GLMs.
@@ -98,7 +105,7 @@ def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True,
     """
 
     # Checking counts
-    y = np.asarray(y, order='F')
+    y = np.asarray(y, order="F")
 
     # Checking offsets
     offset = _compressOffsets(y, offset=offset)
@@ -110,9 +117,17 @@ def adjustedProfileLik(dispersion, y, design, offset, weights=None, adjust=True,
     weights = _compressWeights(y, weights)
 
     # Fit tagwise linear models
-    fit = glmFit(y, design=design, dispersion=dispersion, offset=offset, prior_count=0, weights=weights, start=start)
+    fit = glmFit(
+        y,
+        design=design,
+        dispersion=dispersion,
+        offset=offset,
+        prior_count=0,
+        weights=weights,
+        start=start,
+    )
     mu = fit.fitted_values
-    assert mu.dtype == np.dtype('double')
+    assert mu.dtype == np.dtype("double")
     assert mu.flags.f_contiguous
 
     # Compute adjusted log-likelihood

@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2022-2023 M. Colange
 
 # This program is free software: you can redistribute it and/or modify
@@ -13,13 +13,14 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file wraps scipy.stats functions into R-like functions.
 
 
 import numpy as np
 from scipy.stats import norm, gamma, nbinom
+
 
 def rbinom(n, size, prob=None, mu=None, seed=None):
     if prob is None and mu is None:
@@ -28,9 +29,10 @@ def rbinom(n, size, prob=None, mu=None, seed=None):
         raise ValueError("exactly one of prob and mu must be provided")
 
     if prob is None:
-        prob = size / (size+mu)
+        prob = size / (size + mu)
 
     return nbinom.rvs(size, prob, size=n, random_state=seed)
+
 
 def pnbinom(q, size, prob=None, mu=None, lower_tail=True):
     """
@@ -50,12 +52,13 @@ def pnbinom(q, size, prob=None, mu=None, lower_tail=True):
         raise ValueError("exactly one of prob and mu must be provided")
 
     if prob is None:
-        prob = size / (size+mu)
+        prob = size / (size + mu)
 
     if lower_tail:
         return nbinom.cdf(q, size, prob)
     else:
         return nbinom.sf(q, size, prob)
+
 
 def qnbinom(p, size, prob=None, mu=None, lower_tail=True):
     """
@@ -75,7 +78,7 @@ def qnbinom(p, size, prob=None, mu=None, lower_tail=True):
         raise ValueError("exactly one of prob and mu must be provided")
 
     if prob is None:
-        prob = size / (size+mu)
+        prob = size / (size + mu)
 
     if lower_tail:
         return nbinom.ppf(p, size, prob)
@@ -106,6 +109,7 @@ def pnorm(q, mean=0, sd=1, lower_tail=True, log_p=False):
 
     return f(q, loc=mean, scale=sd)
 
+
 def qnorm(p, mean=0, sd=1, lower_tail=True, log_p=False):
     """
     Quantile function of the normal distribution.
@@ -125,6 +129,7 @@ def qnorm(p, mean=0, sd=1, lower_tail=True, log_p=False):
         return norm.ppf(p, loc=mean, scale=sd)
     else:
         return norm.isf(p, loc=mean, scale=sd)
+
 
 def pgamma(q, shape, scale=1, lower_tail=True, log_p=False):
     """
@@ -148,6 +153,7 @@ def pgamma(q, shape, scale=1, lower_tail=True, log_p=False):
         f = gamma.sf
 
     return f(q, shape, scale=scale)
+
 
 def qgamma(p, shape, scale=1, lower_tail=True, log_p=False):
     """

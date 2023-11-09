@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2022-2023 M. Colange
 
 # This program is free software: you can redistribute it and/or modify
@@ -13,9 +13,10 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from scipy.stats import nbinom
+
 
 def rnbinom(n, size, mu, seed=None):
     """mimic R rnbinom function, to draw samples from a Negative Binomial distribution.

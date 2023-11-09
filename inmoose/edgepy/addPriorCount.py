@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/addPriorCount.R' of the Bioconductor edgeR package (version 3.38.4).
 
@@ -22,6 +22,7 @@
 import numpy as np
 from .makeCompressedMatrix import _compressOffsets, _compressPrior, makeCompressedMatrix
 from .edgepy_cpp import cxx_add_prior_count
+
 
 def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
     """
@@ -76,7 +77,7 @@ def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
     """
 
     # Check y
-    y = np.asarray(y, order='F')
+    y = np.asarray(y, order="F")
     if not np.issubdtype(y.dtype, np.number):
         raise ValueError("count matrix must be numeric")
 
@@ -92,4 +93,3 @@ def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
     (out_y, out_offset) = cxx_add_prior_count(y, offset, prior_count)
     out_offset = makeCompressedMatrix(out_offset, y.shape, byrow=True)
     return (out_y, out_offset)
-

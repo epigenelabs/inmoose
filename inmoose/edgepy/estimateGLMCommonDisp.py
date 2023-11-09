@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/estimateGLMCommonDisp.R' of the Bioconductor edgeR package (version 3.38.4).
 
@@ -24,7 +24,10 @@ from .aveLogCPM import aveLogCPM
 from .dispCoxReid import dispCoxReid
 from .validDGEList import validDGEList
 
-def estimateGLMCommonDisp_DGEList(self, design=None, method="CoxReid", subset=10000, verbose=False):
+
+def estimateGLMCommonDisp_DGEList(
+    self, design=None, method="CoxReid", subset=10000, verbose=False
+):
     """
     Estimate a common negative binomial dispersion parameter for a DGE dataset
     with a general experimental design.
@@ -54,13 +57,32 @@ def estimateGLMCommonDisp_DGEList(self, design=None, method="CoxReid", subset=10
     y = validDGEList(self)
     AveLogCPM = y.aveLogCPM(dispersion=0.05)
 
-    disp = estimateGLMCommonDisp(y=y.counts, design=design, offset=y.getOffset(), method=method, subset=subset, AveLogCPM=AveLogCPM, verbose=verbose, weights=y.weights)
+    disp = estimateGLMCommonDisp(
+        y=y.counts,
+        design=design,
+        offset=y.getOffset(),
+        method=method,
+        subset=subset,
+        AveLogCPM=AveLogCPM,
+        verbose=verbose,
+        weights=y.weights,
+    )
 
     y.common_dispersion = disp
     y.AveLogCPM = y.aveLogCPM(dispersion=disp)
     return y
 
-def estimateGLMCommonDisp(y, design=None, offset=None, method="CoxReid", subset=10000, AveLogCPM=None, verbose=False, weights=None):
+
+def estimateGLMCommonDisp(
+    y,
+    design=None,
+    offset=None,
+    method="CoxReid",
+    subset=10000,
+    AveLogCPM=None,
+    verbose=False,
+    weights=None,
+):
     """
     Estimate a common negative binomial dispersion parameter for a DGE dataset
     with a general experimental design.
@@ -106,11 +128,13 @@ def estimateGLMCommonDisp(y, design=None, offset=None, method="CoxReid", subset=
         estimated common dispersion
     """
 
-    #Check design
+    # Check design
     if design is None:
         design = np.ones((y.shape[1], 1))
     if design.shape[1] >= y.shape[1]:
-        logging.warnings.warn("No residual degree of freedom: setting dispersion to None")
+        logging.warnings.warn(
+            "No residual degree of freedom: setting dispersion to None"
+        )
         return None
 
     # Check method
@@ -127,11 +151,22 @@ def estimateGLMCommonDisp(y, design=None, offset=None, method="CoxReid", subset=
 
     # Call lower-level function
     if method == "CoxReid":
-        disp = dispCoxReid(y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM, weights=weights)
+        disp = dispCoxReid(
+            y,
+            design=design,
+            offset=offset,
+            subset=subset,
+            AveLogCPM=AveLogCPM,
+            weights=weights,
+        )
     elif method == "Pearson":
-        disp = dispPearson(y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM)
+        disp = dispPearson(
+            y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM
+        )
     elif method == "deviance":
-        disp = dispDeviance(y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM)
+        disp = dispDeviance(
+            y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM
+        )
     else:
         raise ValueError(f"invalid method for dispersion evaluation: {method}")
 

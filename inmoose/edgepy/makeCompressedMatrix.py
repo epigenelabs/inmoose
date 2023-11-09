@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,12 +14,13 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/makeCompressedMatrix.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
 import numpy as np
+
 
 # NB: we do not fully implement edgeR class CompressedMatrix: we use fully-expanded 2D numpy arrays instead
 #     still, to avoid useless calls to `_compress*` and `check_finite`, we subclass ndarray
@@ -28,7 +29,8 @@ class CompressedMatrix(np.ndarray):
     def __new__(cls, input_array):
         # Input array is an already formed ndarray instance
         # We thus cast to be our class type
-        return np.asarray(input_array, order='F').view(cls)
+        return np.asarray(input_array, order="F").view(cls)
+
 
 def makeCompressedMatrix(x, dims, byrow=True):
     """
@@ -39,9 +41,9 @@ def makeCompressedMatrix(x, dims, byrow=True):
 
     if len(dims) != 2:
         raise ValueError("dims does not represent the shape of a matrix")
-    x = np.asarray(x, order='F')
+    x = np.asarray(x, order="F")
     if len(x.shape) == 0:
-        x = np.full(dims, x, order='F')
+        x = np.full(dims, x, order="F")
     elif len(x.shape) == 2:
         assert dims == x.shape
     elif len(x.shape) == 1:
@@ -49,18 +51,19 @@ def makeCompressedMatrix(x, dims, byrow=True):
             if dims[0] != len(x):
                 raise ValueError("dims[0] should be equal to length of x")
             # build matrix by duplicating the column x
-            x = np.array([x for i in range(dims[1])], order='C').T
+            x = np.array([x for i in range(dims[1])], order="C").T
             # transposing a C-array should yield a F-array, but better safe than sorry
-            x = np.asarray(x, order='F')
+            x = np.asarray(x, order="F")
         else:
             if dims[1] != len(x):
                 raise ValueError("dims[1] should be equal to length of x")
             # build matrix by duplicating the row x
-            x = np.array([x for i in range(dims[0])], order='F')
+            x = np.array([x for i in range(dims[0])], order="F")
     else:
         raise ValueError("input has too many dimensions to be interpreted as a matrix")
 
     return CompressedMatrix(x)
+
 
 def check_finite(x, what, negative_allowed):
     xmin = np.amin(x)
@@ -86,10 +89,11 @@ def _compressOffsets(y, offset, lib_size=None):
             lib_size = y.sum(axis=0)
         offset = np.log(lib_size)
 
-    offset = np.asarray(offset, order='F', dtype='double')
+    offset = np.asarray(offset, order="F", dtype="double")
     offset = makeCompressedMatrix(offset, y.shape, byrow=True)
     check_finite(offset, "offset", negative_allowed=True)
     return offset
+
 
 def _compressWeights(y, weights=None):
     """
@@ -102,10 +106,11 @@ def _compressWeights(y, weights=None):
     if weights is None:
         weights = 1
 
-    weights = np.asarray(weights, order='F', dtype='double')
+    weights = np.asarray(weights, order="F", dtype="double")
     weights = makeCompressedMatrix(weights, y.shape, byrow=True)
     check_finite(weights, "weights", negative_allowed=False)
     return weights
+
 
 def _compressDispersions(y, dispersion):
     """
@@ -114,10 +119,11 @@ def _compressDispersions(y, dispersion):
     if dispersion.__class__ == CompressedMatrix:
         return dispersion
 
-    dispersion = np.asarray(dispersion, order='F', dtype='double')
+    dispersion = np.asarray(dispersion, order="F", dtype="double")
     dispersion = makeCompressedMatrix(dispersion, y.shape, byrow=False)
     check_finite(dispersion, "dispersion", negative_allowed=False)
     return dispersion
+
 
 def _compressPrior(y, prior_count):
     """
@@ -126,7 +132,7 @@ def _compressPrior(y, prior_count):
     if prior_count.__class__ == CompressedMatrix:
         return prior_count
 
-    prior_count = np.asarray(prior_count, order='F', dtype='double')
+    prior_count = np.asarray(prior_count, order="F", dtype="double")
     prior_count = makeCompressedMatrix(prior_count, y.shape, byrow=False)
     check_finite(prior_count, "prior counts", negative_allowed=False)
     return prior_count

@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/maximizeInterpolant.R' of the Bioconductor edgeR package (version 3.38.4).
 
@@ -23,7 +23,8 @@ import numpy as np
 
 from .edgepy_cpp import cxx_maximize_interpolant
 
-def maximizeInterpolant(x,y):
+
+def maximizeInterpolant(x, y):
     """
     Maximize a function given a table of values by spline interpolation.
 
@@ -51,8 +52,8 @@ def maximizeInterpolant(x,y):
     .. [1] G. E. Forsythe, M. A. Malcolm, C. B. Moler. 1977. Computer Methods
        for Mathematical Computations. Prentice-Hall.
     """
-    x = np.asarray(x, order='F', dtype='double')
-    y = np.asarray(y, order='F', dtype='double')
+    x = np.asarray(x, order="F", dtype="double")
+    y = np.asarray(y, order="F", dtype="double")
     if len(y.shape) != 2:
         raise ValueError("y is not a matrix: cannot perform interpolation")
     if len(x) != y.shape[1]:

@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/nbinomDeviance.R' of the Bioconductor edgeR package (version 3.38.4).
 
@@ -22,6 +22,7 @@
 import numpy as np
 from .makeCompressedMatrix import _compressDispersions, _compressWeights
 from .edgepy_cpp import cxx_compute_nbdev_sum, cxx_compute_nbdev_nosum
+
 
 def nbinomDeviance(y, mean, dispersion=0, weights=None):
     """
@@ -59,13 +60,16 @@ def nbinomDeviance(y, mean, dispersion=0, weights=None):
     ndarray
         vector of length equal to the number of rows in :code:`y`
     """
-    out = _compute_nbdeviance(y=y, mean=mean, dispersion=dispersion, weights=weights, dosum=True)
+    out = _compute_nbdeviance(
+        y=y, mean=mean, dispersion=dispersion, weights=weights, dosum=True
+    )
     return out
 
+
 def _compute_nbdeviance(y, mean, dispersion, weights, dosum):
-    y = np.asarray(y, order='F')
-    mean = np.asanyarray(mean, order='F', dtype='double')
-    dispersion = np.asanyarray(dispersion, order='F', dtype='double')
+    y = np.asarray(y, order="F")
+    mean = np.asanyarray(mean, order="F", dtype="double")
+    dispersion = np.asanyarray(dispersion, order="F", dtype="double")
 
     # Check y. May be matrix or vector
     if len(y.shape) == 2:
@@ -73,12 +77,12 @@ def _compute_nbdeviance(y, mean, dispersion, weights, dosum):
             raise ValueError("y is a matrix but mean is not")
     else:
         n = y.shape[0]
-        y = y.reshape((1,n))
+        y = y.reshape((1, n))
         if len(mean.shape) == 2:
             raise ValueError("mean is a matrix but y is not")
         else:
             if mean.shape[0] == n:
-                mean = mean.reshape((1,n))
+                mean = mean.reshape((1, n))
             else:
                 raise ValueError("length of mean differs from that of y")
 
@@ -86,7 +90,7 @@ def _compute_nbdeviance(y, mean, dispersion, weights, dosum):
             raise ValueError("dispersion is a matrix but y is not")
         else:
             if len(dispersion.shape) > 0 and dispersion.shape[0] == n:
-                dispersion = dispersion.reshape((1,n))
+                dispersion = dispersion.reshape((1, n))
             else:
                 raise ValueError("length of dispersion differs from that of y")
 
@@ -106,4 +110,3 @@ def _compute_nbdeviance(y, mean, dispersion, weights, dosum):
         return cxx_compute_nbdev_sum(y, mean, dispersion, weights)
     else:
         return cxx_compute_nbdev_nosum(y, mean, dispersion, weights)
-
