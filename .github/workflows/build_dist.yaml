@@ -7,7 +7,17 @@ on:
       - published
 
 jobs:
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - uses: psf/black@stable
+        with:
+          options: "--check"
+
   build_sdist:
+    needs: [black]
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
