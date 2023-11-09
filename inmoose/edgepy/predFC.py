@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/predFC.R' of the Bioconductor edgeR package (version 3.38.4).
 
@@ -24,7 +24,10 @@ import numpy as np
 
 from .addPriorCount import addPriorCount
 
-def predFC_DGEList(self, design, prior_count=0.125, offset=None, dispersion=None, weights=None):
+
+def predFC_DGEList(
+    self, design, prior_count=0.125, offset=None, dispersion=None, weights=None
+):
     """
     Compute estimated coefficients for a negative binomial GLM in such a way
     that the log-fold-changes are shrunk towards zero.
@@ -44,7 +47,15 @@ def predFC_DGEList(self, design, prior_count=0.125, offset=None, dispersion=None
         dispersion = 0
         logging.warnings.warn("dispersion set to zero")
 
-    return predFC(y=self.counts, design=design, prior_count=prior_count, offset=offset, dispersion=dispersion, weights=weights)
+    return predFC(
+        y=self.counts,
+        design=design,
+        prior_count=prior_count,
+        offset=offset,
+        dispersion=dispersion,
+        weights=weights,
+    )
+
 
 def predFC(y, design, prior_count=0.125, offset=None, dispersion=0, weights=None):
     """
@@ -106,12 +117,20 @@ def predFC(y, design, prior_count=0.125, offset=None, dispersion=0, weights=None
     http://repository.unimelb.edu.au/10187/17614
     """
     from .glmFit import glmFit
+
     # Add prior counts in proportion to library size
     (out_y, out_offset) = addPriorCount(y, offset=offset, prior_count=prior_count)
 
     # Check design
-    design = np.asarray(design, order='F')
+    design = np.asarray(design, order="F")
 
     # Return matrix of coefficients on log2 scale
-    g = glmFit(out_y, design, offset=out_offset, dispersion=dispersion, prior_count=0, weights=weights)
+    g = glmFit(
+        out_y,
+        design,
+        offset=out_offset,
+        dispersion=dispersion,
+        prior_count=0,
+        weights=weights,
+    )
     return g.coefficients / np.log(2)

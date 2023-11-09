@@ -78,7 +78,6 @@ class consensusClustering:
         self.deltaK = None
         self.bestK = None
 
-
     def _internal_resample(self, data, proportion, rand_state):
         """
         Sampling data based on the proportion of samples
@@ -520,17 +519,21 @@ class consensusClustering:
             cluster consensus minimum value to be considered as stable
             default=0.75
         """
-        ratio_stable_cluster = cons_clust_df.apply(lambda x:(x>threshold).sum()/(~x.isna()).sum(), axis=1)
-        nb_stable_cluster = cons_clust_df.apply(lambda x:(x>threshold).sum(), axis=1)
+        ratio_stable_cluster = cons_clust_df.apply(
+            lambda x: (x > threshold).sum() / (~x.isna()).sum(), axis=1
+        )
+        nb_stable_cluster = cons_clust_df.apply(lambda x: (x > threshold).sum(), axis=1)
 
         fig, (ax1, ax2) = plt.subplots(2)
         sn.lineplot(nb_stable_cluster, ax=ax1)
-        ax1.set_title('Cluster stability')
-        ax1.set(ylabel=f"number of cluster \n with stability>{threshold}", xlabel=' ')
-        sn.lineplot(ratio_stable_cluster, ax=ax2, color='orange')
-        ax2.set(ylabel=f"% of cluster \n with stability>{threshold}", xlabel='total nb of cluster')
+        ax1.set_title("Cluster stability")
+        ax1.set(ylabel=f"number of cluster \n with stability>{threshold}", xlabel=" ")
+        sn.lineplot(ratio_stable_cluster, ax=ax2, color="orange")
+        ax2.set(
+            ylabel=f"% of cluster \n with stability>{threshold}",
+            xlabel="total nb of cluster",
+        )
         plt.savefig(fig_path)
-
 
     def plot_deltak(self, fig_path):
         """

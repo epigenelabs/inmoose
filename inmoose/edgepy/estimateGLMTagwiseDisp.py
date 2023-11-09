@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/estimateGLMTagwiseDisp.R' of the Bioconductor edgeR package (version 3.38.4).
 
@@ -25,7 +25,10 @@ import numpy as np
 from .aveLogCPM import aveLogCPM
 from .dispCoxReidInterpolateTagwise import dispCoxReidInterpolateTagwise
 
-def estimateGLMTagwiseDisp_DGEList(self, design=None, prior_df=10, trend=None, span=None):
+
+def estimateGLMTagwiseDisp_DGEList(
+    self, design=None, prior_df=10, trend=None, span=None
+):
     """
     Compute an empirical Bayes estimate of the negative binomial dispersion
     parameter for each tag, with expression levels specified by a log-linear
@@ -60,11 +63,15 @@ def estimateGLMTagwiseDisp_DGEList(self, design=None, prior_df=10, trend=None, s
     if trend:
         dispersion = self.trended_dispersion
         if dispersion is None:
-            raise ValueError("No trended_dispersion in data object. Run estimateGLMTrendedDisp first.")
+            raise ValueError(
+                "No trended_dispersion in data object. Run estimateGLMTrendedDisp first."
+            )
     else:
         dispersion = self.common_dispersion
         if dispersion is None:
-            raise ValueError("No common_dispersion found in data object. Run estimateGLMCommonDisp first.")
+            raise ValueError(
+                "No common_dispersion found in data object. Run estimateGLMCommonDisp first."
+            )
 
     if self.AveLogCPM is None:
         self.AveLogCPM = self.aveLogCPM()
@@ -72,18 +79,38 @@ def estimateGLMTagwiseDisp_DGEList(self, design=None, prior_df=10, trend=None, s
 
     if span is None:
         if ntags > 10:
-            span = (10 / ntags)**0.23
+            span = (10 / ntags) ** 0.23
         else:
             span = 1
     self.span = span
 
-    d = estimateGLMTagwiseDisp(self.counts, design=design, offset=self.getOffset(), dispersion=dispersion, trend=trend, span=span, prior_df=prior_df, AveLogCPM=self.AveLogCPM, weights=self.weights)
+    d = estimateGLMTagwiseDisp(
+        self.counts,
+        design=design,
+        offset=self.getOffset(),
+        dispersion=dispersion,
+        trend=trend,
+        span=span,
+        prior_df=prior_df,
+        AveLogCPM=self.AveLogCPM,
+        weights=self.weights,
+    )
     self.prior_df = prior_df
     self.tagwise_dispersion = d
     return self
 
 
-def estimateGLMTagwiseDisp(y, dispersion, design=None, offset=None, prior_df=10, trend=True, span=None, AveLogCPM=None, weights=None):
+def estimateGLMTagwiseDisp(
+    y,
+    dispersion,
+    design=None,
+    offset=None,
+    prior_df=10,
+    trend=True,
+    span=None,
+    AveLogCPM=None,
+    weights=None,
+):
     """
     Compute an empirical Bayes estimate of the negative binomial dispersion
     parameter for each tag, with expression levels specified by a log-linear
@@ -147,20 +174,20 @@ def estimateGLMTagwiseDisp(y, dispersion, design=None, offset=None, prior_df=10,
     """
 
     # Check y
-    y = np.asarray(y, order='F')
+    y = np.asarray(y, order="F")
     (ntags, nlibs) = y.shape
     if ntags == 0:
         return 0
 
     # Check design
     if design is None:
-        design = np.ones((y.shape[1], 1), order='F')
+        design = np.ones((y.shape[1], 1), order="F")
     else:
-        design = np.asarray(design, order='F')
+        design = np.asarray(design, order="F")
 
     if design.shape[1] >= y.shape[1]:
         logging.warnings.warn("No residual df: setting dispersion to NA")
-        return np.full((ntags,), np.nan, order='F')
+        return np.full((ntags,), np.nan, order="F")
 
     # Check offset
     if offset is None:
@@ -170,7 +197,7 @@ def estimateGLMTagwiseDisp(y, dispersion, design=None, offset=None, prior_df=10,
     # span can be chosen smaller when ntags is large
     if span is None:
         if ntags > 10:
-            span = (10 / ntags)**0.23
+            span = (10 / ntags) ** 0.23
         else:
             span = 1
 
@@ -179,5 +206,15 @@ def estimateGLMTagwiseDisp(y, dispersion, design=None, offset=None, prior_df=10,
         AveLogCPM = aveLogCPM(y, offset=offset, weights=weights)
 
     # Call Cox-Reid grid method
-    tagwise_dispersion = dispCoxReidInterpolateTagwise(y, design, offset=offset, dispersion=dispersion, trend=trend, prior_df=prior_df, span=span, AveLogCPM=AveLogCPM, weights=weights)
+    tagwise_dispersion = dispCoxReidInterpolateTagwise(
+        y,
+        design,
+        offset=offset,
+        dispersion=dispersion,
+        trend=trend,
+        prior_df=prior_df,
+        span=span,
+        AveLogCPM=AveLogCPM,
+        weights=weights,
+    )
     return tagwise_dispersion

@@ -3,35 +3,59 @@ import numpy as np
 
 from inmoose.edgepy import DGEList, validDGEList
 
+
 class test_utils(unittest.TestCase):
     def test_isAllZero(self):
         from inmoose.edgepy.utils import _isAllZero
+
         self.assertEqual(_isAllZero(np.array([])), False)
-        self.assertEqual(_isAllZero(np.array([0,0,0])), True)
-        self.assertEqual(_isAllZero(np.array([2,1,0])), False)
+        self.assertEqual(_isAllZero(np.array([0, 0, 0])), True)
+        self.assertEqual(_isAllZero(np.array([2, 1, 0])), False)
         arr = np.array([np.NaN, 0, -1, np.PINF, 1, np.NINF])
-        with self.assertRaisesRegex(ValueError, expected_regex="NaN counts are not allowed"):
-            _isAllZero(np.array([1,2,3,np.NaN,4,5]))
-        with self.assertRaisesRegex(ValueError, expected_regex="infinite counts are not allowed"):
-            _isAllZero(np.array([1,2,3,np.PINF,4,5]))
-        with self.assertRaisesRegex(ValueError, expected_regex="negative counts are not allowed"):
-            _isAllZero(np.array([1,2,3,np.NINF,4,5]))
-        with self.assertRaisesRegex(ValueError, expected_regex="negative counts are not allowed"):
-            _isAllZero(np.array([1,2,3,-42,4,5]))
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="NaN counts are not allowed"
+        ):
+            _isAllZero(np.array([1, 2, 3, np.NaN, 4, 5]))
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="infinite counts are not allowed"
+        ):
+            _isAllZero(np.array([1, 2, 3, np.PINF, 4, 5]))
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="negative counts are not allowed"
+        ):
+            _isAllZero(np.array([1, 2, 3, np.NINF, 4, 5]))
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="negative counts are not allowed"
+        ):
+            _isAllZero(np.array([1, 2, 3, -42, 4, 5]))
+
 
 class test_DGEList(unittest.TestCase):
     def test_constructor(self):
-        with self.assertRaisesRegex(ValueError, expected_regex="'counts' is not a matrix"):
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="'counts' is not a matrix"
+        ):
             d = DGEList(None)
-        with self.assertRaisesRegex(ValueError, expected_regex="non-numeric values found in 'counts'"):
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="non-numeric values found in 'counts'"
+        ):
             d = DGEList([["foobar"]])
-        with self.assertRaisesRegex(ValueError, expected_regex="length of 'lib_size' must be equal to the number of columns in 'counts'"):
-            d = DGEList([[42]], lib_size=[1,2])
-        with self.assertRaisesRegex(ValueError, expected_regex="negative library size not permitted"):
+        with self.assertRaisesRegex(
+            ValueError,
+            expected_regex="length of 'lib_size' must be equal to the number of columns in 'counts'",
+        ):
+            d = DGEList([[42]], lib_size=[1, 2])
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="negative library size not permitted"
+        ):
             d = DGEList([[42]], lib_size=[-1])
-        with self.assertRaisesRegex(ValueError, expected_regex="library size set to zero but counts are nonzero"):
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="library size set to zero but counts are nonzero"
+        ):
             d = DGEList([[42]], lib_size=[0])
-        with self.assertWarnsRegex(UserWarning, expected_regex="library size of zero detected"):
+        with self.assertWarnsRegex(
+            UserWarning, expected_regex="library size of zero detected"
+        ):
             d = DGEList([[0]], lib_size=[0])
 
         d = DGEList([[42]])
@@ -73,4 +97,3 @@ class test_DGEList(unittest.TestCase):
         self.assertFalse((d.samples.group.values == None).any())
         self.assertFalse((d.samples.lib_size.values == None).any())
         self.assertFalse((d.samples.norm_factors.values == None).any())
-

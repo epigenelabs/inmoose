@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2019-2020 Yuqing Zhang
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/ComBat_seq.R' of the Bioconductor sva package (version 3.44.0).
 
@@ -27,7 +27,18 @@ from ..utils import asfactor
 from .covariates import make_design_matrix
 from .helper_seq import vec2mat, match_quantiles
 
-def pycombat_seq(data, batch, group=None, covar_mod=None, full_mod=True, shrink=False, shrink_disp=False, gene_subset_n=None, ref_batch=None):
+
+def pycombat_seq(
+    data,
+    batch,
+    group=None,
+    covar_mod=None,
+    full_mod=True,
+    shrink=False,
+    shrink_disp=False,
+    gene_subset_n=None,
+    ref_batch=None,
+):
     """pycombat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
 
     Arguments
@@ -76,36 +87,64 @@ def pycombat_seq(data, batch, group=None, covar_mod=None, full_mod=True, shrink=
     rm = np.logical_not(keep).nonzero()[0]
     keep = keep.nonzero()[0]
     countsOri = counts.copy()
-    counts = counts[keep,:]
+    counts = counts[keep, :]
 
     dge_obj = DGEList(counts=counts)
 
     # Handle batches, covariates and prepare design matrix
-    design, batchmod, mod, batches_ind, n_batches, n_batch, n_sample, ref_batch_index = \
-        make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch)
+    (
+        design,
+        batchmod,
+        mod,
+        batches_ind,
+        n_batches,
+        n_batch,
+        n_sample,
+        ref_batch_index,
+    ) = make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch)
 
     # Check for missing values in count matrix
     if np.isnan(counts).any():
-        raise ValueError(f"Found {np.isnan(counts).sum()} missing values (NaN) in count matrix. NaN values are not accepted. Please remove them before proceeding with pycombat_seq.")
+        raise ValueError(
+            f"Found {np.isnan(counts).sum()} missing values (NaN) in count matrix. NaN values are not accepted. Please remove them before proceeding with pycombat_seq."
+        )
 
     ####### Estimate gene-wise dispersions within each batch #######
     logging.info("Estimating dispersions")
+
     # Estimate common dispersion within each batch as an initial value
     def disp_common_helper(i):
-        if n_batches[i] <= design.shape[1]-batchmod.shape[1]+1 or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]:
+        if (
+            n_batches[i] <= design.shape[1] - batchmod.shape[1] + 1
+            or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]
+        ):
             # not enough residual degree of freedom
-            return estimateGLMCommonDisp(counts[:, batches_ind[i]], design=None, subset=counts.shape[0])
+            return estimateGLMCommonDisp(
+                counts[:, batches_ind[i]], design=None, subset=counts.shape[0]
+            )
         else:
-            return estimateGLMCommonDisp(counts[:, batches_ind[i]], design=mod[batches_ind[i]], subset=counts.shape[0])
+            return estimateGLMCommonDisp(
+                counts[:, batches_ind[i]],
+                design=mod[batches_ind[i]],
+                subset=counts.shape[0],
+            )
 
     disp_common = [disp_common_helper(i) for i in range(n_batch)]
 
     # Estimate gene-wise dispersion within each batch
     def genewise_disp_helper(i):
-        if n_batches[i] <= design.shape[1]-batchmod.shape[1]+1 or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]:
+        if (
+            n_batches[i] <= design.shape[1] - batchmod.shape[1] + 1
+            or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]
+        ):
             return [disp_common[i] for j in range(counts.shape[0])]
         else:
-            return estimateGLMTagwiseDisp(counts[:, batches_ind[i]], design=mod[batches_ind[i]], dispersion=disp_common[i], prior_df=0)
+            return estimateGLMTagwiseDisp(
+                counts[:, batches_ind[i]],
+                design=mod[batches_ind[i]],
+                dispersion=disp_common[i],
+                prior_df=0,
+            )
 
     genewise_disp_lst = [genewise_disp_helper(i) for i in range(n_batch)]
 
@@ -119,13 +158,19 @@ def pycombat_seq(data, batch, group=None, covar_mod=None, full_mod=True, shrink=
     # no intercept - nonEstimable; compute offset (library sizes) within function
     glm_f = dge_obj.glmFit(design=design, dispersion=phi_matrix, prior_count=1e-4)
     # compute intercept as batch-size-weighted average from batches
-    alpha_g = glm_f.coefficients[:, range(n_batch)] @ (n_batches/n_sample)
+    alpha_g = glm_f.coefficients[:, range(n_batch)] @ (n_batches / n_sample)
     # original offset - sample (library size)
     new_offset = vec2mat(dge_obj.getOffset(), counts.shape[0]).T
     # new offset - gene background expression (dge_obj.getOffset() is the same as log(dge_obj.samples.lib_size)
     new_offset += vec2mat(alpha_g, counts.shape[1])
 
-    glm_f2 = glmFit(dge_obj.counts, design=design, dispersion=phi_matrix, offset=new_offset, prior_count=1e-4)
+    glm_f2 = glmFit(
+        dge_obj.counts,
+        design=design,
+        dispersion=phi_matrix,
+        offset=new_offset,
+        prior_count=1e-4,
+    )
 
     gamma_hat = glm_f2.coefficients[:, range(n_batch)]
     mu_hat = glm_f2.fitted_values
@@ -143,7 +188,10 @@ def pycombat_seq(data, batch, group=None, covar_mod=None, full_mod=True, shrink=
     ####### Obtain adjusted batch-free distribution #######
     mu_star = np.full(counts.shape, np.nan)
     for jj in range(n_batch):
-        mu_star[:, batches_ind[jj]] = np.exp(np.log(mu_hat[:, batches_ind[jj]]) - vec2mat(gamma_star_mat[:, jj], n_batches[jj]))
+        mu_star[:, batches_ind[jj]] = np.exp(
+            np.log(mu_hat[:, batches_ind[jj]])
+            - vec2mat(gamma_star_mat[:, jj], n_batches[jj])
+        )
     phi_star = phi_star_mat.mean(axis=1)
 
     ####### Ajust the data #######
@@ -158,16 +206,20 @@ def pycombat_seq(data, batch, group=None, covar_mod=None, full_mod=True, shrink=
         old_phi = phi_hat[:, kk]
         new_mu = mu_star[:, batches_ind[kk]]
         new_phi = phi_star
-        adjust_counts[:, batches_ind[kk]] = match_quantiles(counts_sub=counts_sub, old_mu=old_mu, old_phi=old_phi, new_mu=new_mu, new_phi=new_phi)
+        adjust_counts[:, batches_ind[kk]] = match_quantiles(
+            counts_sub=counts_sub,
+            old_mu=old_mu,
+            old_phi=old_phi,
+            new_mu=new_mu,
+            new_phi=new_phi,
+        )
 
     # Add back genes with only 0 counts in any batch (so that dimensions do not change)
     adjust_counts_whole = np.full(countsOri.shape, np.nan)
-    adjust_counts_whole[keep,:] = adjust_counts
-    adjust_counts_whole[rm,:] = countsOri[rm,:]
+    adjust_counts_whole[keep, :] = adjust_counts
+    adjust_counts_whole[rm, :] = countsOri[rm, :]
 
     if isinstance(data, pd.DataFrame):
-        return pd.DataFrame(adjust_counts_whole,
-                            columns = list_samples,
-                            index = list_genes)
+        return pd.DataFrame(adjust_counts_whole, columns=list_samples, index=list_genes)
     else:
         return adjust_counts_whole

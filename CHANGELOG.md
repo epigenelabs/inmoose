@@ -3,6 +3,7 @@
 ## [0.2.2-dev]
 
 - proper documentation for the `sim` module
+- code is now formatted with `black`
 
 ## [0.2.1]
 

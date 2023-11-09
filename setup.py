@@ -15,36 +15,36 @@ if "--profile" in sys.argv:
 common_cpp = Extension(
     "inmoose.common_cpp",
     [
-        'inmoose/common_cpp/common_cpp.pyx',
-        'inmoose/common_cpp/matrix.cpp',
+        "inmoose/common_cpp/common_cpp.pyx",
+        "inmoose/common_cpp/matrix.cpp",
     ],
-    include_dirs = [numpy.get_include()],
-    extra_compile_args = cxx_compile_flags,
-    define_macros = macros,
-    )
+    include_dirs=[numpy.get_include()],
+    extra_compile_args=cxx_compile_flags,
+    define_macros=macros,
+)
 
 edgepy_cpp = Extension(
     "inmoose.edgepy.edgepy_cpp",
     [
-        'inmoose/edgepy/edgepy_cpp/edgepy_cpp.pyx',
-        'inmoose/edgepy/edgepy_cpp/add_prior.cpp',
-        'inmoose/edgepy/edgepy_cpp/add_prior_count.cpp',
-        'inmoose/edgepy/edgepy_cpp/adj_coxreid.cpp',
-        'inmoose/edgepy/edgepy_cpp/fit_levenberg.cpp',
-        'inmoose/edgepy/edgepy_cpp/glm_levenberg.cpp',
-        'inmoose/edgepy/edgepy_cpp/glm_one_group.cpp',
-        'inmoose/edgepy/edgepy_cpp/interpolator.cpp',
-        'inmoose/edgepy/edgepy_cpp/nbdev.cpp',
-        'inmoose/edgepy/edgepy_cpp/objects.cpp',
+        "inmoose/edgepy/edgepy_cpp/edgepy_cpp.pyx",
+        "inmoose/edgepy/edgepy_cpp/add_prior.cpp",
+        "inmoose/edgepy/edgepy_cpp/add_prior_count.cpp",
+        "inmoose/edgepy/edgepy_cpp/adj_coxreid.cpp",
+        "inmoose/edgepy/edgepy_cpp/fit_levenberg.cpp",
+        "inmoose/edgepy/edgepy_cpp/glm_levenberg.cpp",
+        "inmoose/edgepy/edgepy_cpp/glm_one_group.cpp",
+        "inmoose/edgepy/edgepy_cpp/interpolator.cpp",
+        "inmoose/edgepy/edgepy_cpp/nbdev.cpp",
+        "inmoose/edgepy/edgepy_cpp/objects.cpp",
     ],
-    include_dirs = [numpy.get_include(), 'inmoose/common_cpp/'],
-    extra_compile_args = cxx_compile_flags,
-    define_macros = macros,
-    )
+    include_dirs=[numpy.get_include(), "inmoose/common_cpp/"],
+    extra_compile_args=cxx_compile_flags,
+    define_macros=macros,
+)
 
 
 setup(
-    packages = [
+    packages=[
         "inmoose",
         "inmoose/consensus_clustering",
         "inmoose/pycombat",
@@ -54,31 +54,30 @@ setup(
         "inmoose/sim",
         "inmoose/utils",
     ],
-    package_data = {
+    package_data={
         "inmoose/edgepy/edgepy_cpp": [
-            'edgepy_cpp.pyx',
-            '__init__.pxd',
-            'add_prior.h',
-            'add_prior_count.h',
-            'ave_log_cpm.cpp',
-            'compute_apl.cpp',
-            'compute_nbdev.cpp',
-            'edgepy_cpp.h',
-            'fit_levenberg.h',
-            'fit_one_group.cpp',
-            'get_one_way_fitted.cpp',
-            'glm.h',
-            'initialize_levenberg.cpp',
-            'initialize_levenberg.h',
-            'interpolator.h',
-            'maximize_interpolant.cpp',
-            'objects.h',
-            'utils.h',
+            "edgepy_cpp.pyx",
+            "__init__.pxd",
+            "add_prior.h",
+            "add_prior_count.h",
+            "ave_log_cpm.cpp",
+            "compute_apl.cpp",
+            "compute_nbdev.cpp",
+            "edgepy_cpp.h",
+            "fit_levenberg.h",
+            "fit_one_group.cpp",
+            "get_one_way_fitted.cpp",
+            "glm.h",
+            "initialize_levenberg.cpp",
+            "initialize_levenberg.h",
+            "interpolator.h",
+            "maximize_interpolant.cpp",
+            "objects.h",
+            "utils.h",
         ],
         "inmoose/common_cpp": [
-            'matrix.h',
+            "matrix.h",
         ],
     },
-    ext_modules = [common_cpp, edgepy_cpp],
+    ext_modules=[common_cpp, edgepy_cpp],
 )
-

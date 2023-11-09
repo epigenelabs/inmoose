@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/mglmLevenberg.R' of the Bioconductor edgeR package (version 3.38.4).
 
@@ -22,10 +22,25 @@
 import numpy as np
 
 from .edgepy_cpp import cxx_get_levenberg_start, cxx_fit_levenberg
-from .makeCompressedMatrix import _compressDispersions, _compressOffsets, _compressWeights
+from .makeCompressedMatrix import (
+    _compressDispersions,
+    _compressOffsets,
+    _compressWeights,
+)
 from .utils import _isAllZero
 
-def mglmLevenberg(y, design, dispersion=0, offset=0, weights=None, coef_start=None, start_method="null", maxit=200, tol=1e-6):
+
+def mglmLevenberg(
+    y,
+    design,
+    dispersion=0,
+    offset=0,
+    weights=None,
+    coef_start=None,
+    start_method="null",
+    maxit=200,
+    tol=1e-6,
+):
     """
     Fit genewise negative binomial GLMs with log-link using Levenberg damping to
     ensure convergence.
@@ -93,7 +108,7 @@ def mglmLevenberg(y, design, dispersion=0, offset=0, weights=None, coef_start=No
           exceeded before convergence was achieved
     """
     # Check arguments
-    y = np.asarray(y, order='F')
+    y = np.asarray(y, order="F")
     (ngenes, nlibs) = y.shape
     if nlibs == 0 or ngenes == 0:
         raise ValueError("no data")
@@ -102,7 +117,7 @@ def mglmLevenberg(y, design, dispersion=0, offset=0, weights=None, coef_start=No
     _isAllZero(y)
 
     # Check the design matrix
-    design = np.asarray(design, order='F', dtype='double')
+    design = np.asarray(design, order="F", dtype="double")
     # TODO check that all entries in design matrix are finite
 
     # Check dispersions, offsets, and weights
@@ -114,9 +129,11 @@ def mglmLevenberg(y, design, dispersion=0, offset=0, weights=None, coef_start=No
     if coef_start is None:
         if start_method not in ["null", "y"]:
             raise ValueError(f"invalid start_method {start_method}")
-        beta = cxx_get_levenberg_start(y, offset, dispersion, weights, design, start_method=="null")
+        beta = cxx_get_levenberg_start(
+            y, offset, dispersion, weights, design, start_method == "null"
+        )
     else:
-        beta = np.asarray(coef_start, order='F', dtype='double')
+        beta = np.asarray(coef_start, order="F", dtype="double")
 
     assert beta.shape == (y.shape[0], design.shape[1])
     # Check the arguments and call the C++ method

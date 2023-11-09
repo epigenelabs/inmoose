@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2022-2023 M. Colange
 
 # This program is free software: you can redistribute it and/or modify
@@ -13,11 +13,12 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 import numpy as np
 from pandas import Categorical
+
 
 class Factor(Categorical):
     """
@@ -53,15 +54,16 @@ class Factor(Categorical):
 
         return len(self.categories)
 
+
 def asfactor(g):
     if type(g) is Factor:
         return g
     else:
         return Factor(g)
 
+
 def gl(n, k):
     arr = []
-    for i in range(1, n+1):
+    for i in range(1, n + 1):
         arr.extend([i for j in range(k)])
     return Factor(arr)
-

@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2019-2020 Yuqing Zhang
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # This file is based on the file 'R/helper_seq.R' of the Bioconductor sva package (version 3.44.0).
 
@@ -22,13 +22,15 @@
 import numpy as np
 from scipy.stats import nbinom
 
+
 def vec2mat(vec, n_times):
     """
     Expand a vector into matrix (columns as the original vector)
     """
     vec = np.asarray(vec)
-    vec = vec.reshape(vec.shape[0],1)
+    vec = vec.reshape(vec.shape[0], 1)
     return np.full((vec.shape[0], n_times), vec)
+
 
 def match_quantiles(counts_sub, old_mu, old_phi, new_mu, new_phi):
     """
@@ -63,12 +65,16 @@ def match_quantiles(counts_sub, old_mu, old_phi, new_mu, new_phi):
     new_size = np.full(new_mu.shape, 1 / new_phi.reshape(new_mu.shape[0], 1))
     old_prob = old_size / (old_size + old_mu)
     new_prob = new_size / (new_size + new_mu)
-    tmp_p = nbinom.cdf(counts_sub[i]-1, old_size[i], old_prob[i])
-    new_counts_sub[i] = np.where(np.abs(tmp_p-1) < 1e-4, counts_sub[i], 1+nbinom.ppf(tmp_p, new_size[i], new_prob[i]))
+    tmp_p = nbinom.cdf(counts_sub[i] - 1, old_size[i], old_prob[i])
+    new_counts_sub[i] = np.where(
+        np.abs(tmp_p - 1) < 1e-4,
+        counts_sub[i],
+        1 + nbinom.ppf(tmp_p, new_size[i], new_prob[i]),
+    )
 
     # Original (pythonized) R code for reference
     #
-    #for a in range(counts_sub.shape[0]):
+    # for a in range(counts_sub.shape[0]):
     #    for b in range(counts_sub.shape[1]):
     #        if counts_sub[a,b] <= 1:
     #            new_counts_sub[a,b] = counts_sub[a,b]
@@ -81,4 +87,3 @@ def match_quantiles(counts_sub, old_mu, old_phi, new_mu, new_phi):
     #                new_counts_sub[a,b] = 1+qnbinom_opt(tmp_p, mu=new_mu[a,b], size=1/new_phi[a])
 
     return new_counts_sub
-

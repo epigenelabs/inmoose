@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2019-2023 A. Behdenna, A. Nordor, J. Haziza, A. Gema and M. Colange
 
 # This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 import logging
 import numpy as np
@@ -21,6 +21,7 @@ import pandas as pd
 from patsy import dmatrix
 
 from ..utils import asfactor
+
 
 def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
     """Make design matrix for batch effect correction. Handles covariates as
@@ -69,8 +70,7 @@ def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
     # number of batches
     n_batch = batch.nlevels()
     # list of samples in each batch
-    batches_ind = [(batch == batch.categories[i]).nonzero()[0]
-                   for i in range(n_batch)]
+    batches_ind = [(batch == batch.categories[i]).nonzero()[0] for i in range(n_batch)]
     n_batches = [len(i) for i in batches_ind]
     n_sample = np.sum(n_batches)
     logging.info(f"Found {n_batch} batches")
@@ -88,7 +88,7 @@ def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
         # ref_batch_idx is the index of the reference batch in batch.categories
         ref_batch_idx = np.where(batch.categories == ref_batch)[0][0]
         # update batchmod with reference
-        batchmod[:,ref_batch_idx] = 1
+        batchmod[:, ref_batch_idx] = 1
     else:
         ref_batch_idx = None
 
@@ -98,12 +98,14 @@ def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
     # where a missing covariate appears
     nan_group = group.isna()
     if nan_group.any():
-        logging.warnings.warn(f"{nan_group.sum()} missing covariates in group. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates.")
-        nan_batch_group = [f"nan_batch_{batch[i]}"
-                           for i in range(len(group))
-                           if nan_group[i]]
+        logging.warnings.warn(
+            f"{nan_group.sum()} missing covariates in group. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
+        )
+        nan_batch_group = [
+            f"nan_batch_{batch[i]}" for i in range(len(group)) if nan_group[i]
+        ]
         group = group.add_categories(np.unique(nan_batch_group))
-        for i,j in enumerate(np.where(nan_group)[0]):
+        for i, j in enumerate(np.where(nan_group)[0]):
             group[j] = nan_batch_group[i]
 
     if full_mod and group.nlevels() > 1:
@@ -114,7 +116,7 @@ def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
         mod = dmatrix("~1", pd.DataFrame(counts.T))
     # drop intercept in covariate model
     if covar_mod is not None:
-        check = [(covar_mod[:,i] == 1).all() for i in range(covar_mod.shape[1])]
+        check = [(covar_mod[:, i] == 1).all() for i in range(covar_mod.shape[1])]
         covar_mod = covar_mod[:, np.logical_not(check)]
         # bind with biological condition of interest
         mod = np.concatenate((mod, covar_mod), axis=1)
@@ -122,18 +124,29 @@ def make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch):
     design = dmatrix("~ 0 + batchmod + mod")
 
     # Check for intercept in covariates, and drop if present
-    check = [(design[:,i] == 1).all() for i in range(design.shape[1])]
+    check = [(design[:, i] == 1).all() for i in range(design.shape[1])]
     if ref_batch_idx is not None:
         # the reference batch is not considered as a covariate
         check[ref_batch_idx] = False
     design = design[:, np.logical_not(check)]
 
-    logging.info(f"Adjusting for {design.shape[1] - batchmod.shape[1]} covariate(s) or covariate level(s)")
+    logging.info(
+        f"Adjusting for {design.shape[1] - batchmod.shape[1]} covariate(s) or covariate level(s)"
+    )
 
     # Check if the desigin is confounded
     check_confounded_covariates(design, n_batch)
 
-    return design, batchmod, mod, batches_ind, n_batches, n_batch, n_sample, ref_batch_idx
+    return (
+        design,
+        batchmod,
+        mod,
+        batches_ind,
+        n_batches,
+        n_batch,
+        n_sample,
+        ref_batch_idx,
+    )
 
 
 class ConfoundingVariablesError(Exception):
@@ -164,10 +177,18 @@ def check_confounded_covariates(design, n_batch):
 
     # if matrix is not invertible, different cases
     if np.linalg.matrix_rank(design) < design.shape[1]:
-        if design.shape[1] == n_batch+1: # case 1: covariate confounded with a batch
-            raise ConfoundingVariablesError("Covariate is confounded with batch. Try removing the covariates.")
-        if design.shape[1] > n_batch+1: # case 2: multiple covariates confounded with a batch
+        if design.shape[1] == n_batch + 1:  # case 1: covariate confounded with a batch
+            raise ConfoundingVariablesError(
+                "Covariate is confounded with batch. Try removing the covariates."
+            )
+        if (
+            design.shape[1] > n_batch + 1
+        ):  # case 2: multiple covariates confounded with a batch
             if np.linalg.matrix_rank(design.T[:n_batch]) < design.shape[1]:
-                raise ConfoundingVariablesError("Confounded design. Try removing one or more covariates.")
-            else: # case 3: at least one covariate confounded with a batch
-                raise ConfoundingVariablesError("At least one covariate is confounded with batch. Try removing confounded covariates.")
+                raise ConfoundingVariablesError(
+                    "Confounded design. Try removing one or more covariates."
+                )
+            else:  # case 3: at least one covariate confounded with a batch
+                raise ConfoundingVariablesError(
+                    "At least one covariate is confounded with batch. Try removing confounded covariates."
+                )

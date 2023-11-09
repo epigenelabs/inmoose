@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2023 M. Colange
 
 # This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 """
 This module contains utilities to simulate RNASeq and single-cell RNASeq count
@@ -60,24 +60,40 @@ def get_lognorm_factors(size, sel_prob, neg_prob, loc, scale, random_state):
 
     selected = bernoulli.rvs(sel_prob, size=size, random_state=random_state) == 1
     n_selected = selected.sum()
-    dir_selected = (-1) ** bernoulli.rvs(neg_prob, size=n_selected, random_state=random_state)
+    dir_selected = (-1) ** bernoulli.rvs(
+        neg_prob, size=n_selected, random_state=random_state
+    )
     # /!\ original R code uses `rlnorm(size, loc, scale)`, but the loc and scale correspond to the log-mean and log-sd
     #     therefore, the correct counterpart with scipy is `lognorm.rvs(s=scale, scale=np.exp(loc), size=size)`
-    fac_selected = lognorm.rvs(s=scale, scale=np.exp(loc), size=n_selected, random_state=random_state)
+    fac_selected = lognorm.rvs(
+        s=scale, scale=np.exp(loc), size=n_selected, random_state=random_state
+    )
     # reverse directions for factors that are less than one
     dir_selected[fac_selected < 1] *= -1
     factors = np.ones(size)
-    factors[selected] = fac_selected ** dir_selected
+    factors[selected] = fac_selected**dir_selected
     return factors
 
 
-def sim_rnaseq(nb_genes, nb_samples, batch=None, group=None, single_cell=False,
-               alpha=0.6, beta=0.3,
-               outlier_prob=0.05, outlier_location=4, outlier_scale=0.5,
-               libsize_loc=11, libsize_scale=0.2,
-               phi=0.1, bcv_df=60,
-               x0=0, k=-1,
-               random_state=None):
+def sim_rnaseq(
+    nb_genes,
+    nb_samples,
+    batch=None,
+    group=None,
+    single_cell=False,
+    alpha=0.6,
+    beta=0.3,
+    outlier_prob=0.05,
+    outlier_location=4,
+    outlier_scale=0.5,
+    libsize_loc=11,
+    libsize_scale=0.2,
+    phi=0.1,
+    bcv_df=60,
+    x0=0,
+    k=-1,
+    random_state=None,
+):
     """
     Simulate (sc)RNASeq data.
 
@@ -157,35 +173,63 @@ def sim_rnaseq(nb_genes, nb_samples, batch=None, group=None, single_cell=False,
     nb_groups = len(np.unique(group))
 
     # draw gene means
-    original_means = gamma.rvs(alpha, scale=1/beta, size=nb_genes, random_state=random_state)
+    original_means = gamma.rvs(
+        alpha, scale=1 / beta, size=nb_genes, random_state=random_state
+    )
 
     # draw outliers
-    outlier_factor = get_lognorm_factors(original_means.shape, outlier_prob, 0, outlier_location, outlier_scale, random_state)
+    outlier_factor = get_lognorm_factors(
+        original_means.shape,
+        outlier_prob,
+        0,
+        outlier_location,
+        outlier_scale,
+        random_state,
+    )
     is_outlier = outlier_factor != 1.0
-    gene_means = np.where(is_outlier, outlier_factor * np.median(original_means), original_means)
+    gene_means = np.where(
+        is_outlier, outlier_factor * np.median(original_means), original_means
+    )
 
     # draw library sizes
-    L = lognorm.rvs(libsize_scale, scale=np.exp(libsize_loc), size=nb_samples, random_state=random_state)
+    L = lognorm.rvs(
+        libsize_scale,
+        scale=np.exp(libsize_loc),
+        size=nb_samples,
+        random_state=random_state,
+    )
 
     # cell means
-    cell_means = L * gene_means[:,None] / gene_means.sum()
+    cell_means = L * gene_means[:, None] / gene_means.sum()
 
     # biological coefficients of variation (squared)
-    B2 = (phi + 1/np.sqrt(cell_means))**2 * (bcv_df / chi2.rvs(bcv_df, size=nb_genes, random_state=random_state))[:,None]
+    B2 = (phi + 1 / np.sqrt(cell_means)) ** 2 * (
+        bcv_df / chi2.rvs(bcv_df, size=nb_genes, random_state=random_state)
+    )[:, None]
 
     # trended cell means
-    trended_cell_means = gamma.rvs(1/B2, cell_means * B2, random_state=random_state)
+    trended_cell_means = gamma.rvs(1 / B2, cell_means * B2, random_state=random_state)
 
     # DE fold-changes between cell types
-    de_lf = [get_lognorm_factors(nb_genes, 1, 0.3+0.2*i, 0.1 + i*0.5, 1, random_state=random_state) for i in range(nb_groups)]
-    de_lf = np.choose(group, [x[:,None] for x in de_lf])
+    de_lf = [
+        get_lognorm_factors(
+            nb_genes, 1, 0.3 + 0.2 * i, 0.1 + i * 0.5, 1, random_state=random_state
+        )
+        for i in range(nb_groups)
+    ]
+    de_lf = np.choose(group, [x[:, None] for x in de_lf])
 
     # cell type specific cell means
     de_trended_cell_means = de_lf * trended_cell_means
 
     # batch effect factors
-    be_fact = [get_lognorm_factors(nb_genes, 1, 0.5, 0.1 + 0.5*i, 1, random_state=random_state) for i in range(nb_batches)]
-    be_fact = np.choose(batch, [x[:,None] for x in be_fact])
+    be_fact = [
+        get_lognorm_factors(
+            nb_genes, 1, 0.5, 0.1 + 0.5 * i, 1, random_state=random_state
+        )
+        for i in range(nb_batches)
+    ]
+    be_fact = np.choose(batch, [x[:, None] for x in be_fact])
     batch_cell_means = be_fact * de_trended_cell_means
 
     # counts
