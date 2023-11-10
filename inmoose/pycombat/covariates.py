@@ -80,7 +80,7 @@ def make_design_matrix(
             remove_sample, covar_mod = format_covar_mod(
                 covar_mod, batch, cov_missing_value
             )
-            batch = [batch[i] for i in range(0, len(batch)) if i not in remove_sample]
+            batch = [el for i, el in enumerate(batch) if i not in remove_sample]
         # bind with biological condition of interest
         mod = covar_mod
     else:
@@ -182,26 +182,34 @@ def format_covar_mod(covar_mod, batch, cov_missing_value=None):
         model matrix (dataframe) contaning covariates in interger format
     """
     if (type(covar_mod) == list) | (type(covar_mod) == np.ndarray):
-        if (type(covar_mod[0]) == list) | (type(covar_mod[0]) == np.ndarray):
-            covar_mod = pd.DataFrame(covar_mod).transpose()
-        else:
-            covar_mod = pd.DataFrame(covar_mod)
-        covar_mod.columns = ["col_" + str(col_nb) for col_nb in list(covar_mod.columns)]
+        covar_mod = pd.DataFrame(covar_mod)
+        if covar_mod.shape[0] != len(batch):
+            if covar_mod.shape[1] == len(batch):
+                covar_mod = covar_mod.T
+            else:
+                raise ValueError(
+                    "The covar_mod matrix parameter doesn't match the number of sample"
+                )
+        covar_mod.columns = ["col_" + str(col_nb) for col_nb in covar_mod.columns]
+    elif type(covar_mod) != pd.DataFrame:
+        raise ValueError(
+            f"The covar_mod parameter type {type(covar_mod)} is not accepted, it must be list, numpy.array or pandas.dataframe."
+        )
 
-    # check for float type with decimal (excluding nan) to identify potential continue_variable
-    continue_variable = [
+    # check for float type with decimal (excluding nan) to identify potential continuous_variable
+    continuous_variable = [
         col
         for col in covar_mod.columns
         if True
         in [
             (ele % 1) > 0
-            for ele in covar_mod[col].dropna().to_list()
+            for ele in covar_mod[col].dropna().unique()
             if type(ele) == float
         ]
     ]
-    if len(continue_variable) > 0:
+    if len(continuous_variable) > 0:
         raise ValueError(
-            f"Found numerical covariates (covar_mod parameters) {continue_variable}. Numerical covariates are not accepted. Please remove them before proceeding with pycombat_norm."
+            f"Found numerical covariates (covar_mod parameters) {continuous_variable}. Numerical covariates are not accepted. Please remove them before proceeding with pycombat_norm."
         )
 
     # check for nan in categorial covariates
@@ -211,7 +219,7 @@ def format_covar_mod(covar_mod, batch, cov_missing_value=None):
         if cov_missing_value is None:
             name_nan_covar_mod = nan_covar_mod.loc[
                 :, nan_covar_mod.any() == True
-            ].columns.to_list()
+            ].columns
             raise ValueError(
                 f"{nan_covar_mod.sum().sum()} values are missing in covariates {', '.join(name_nan_covar_mod)}. Correct your covariates or use the cov_missing_value parameters"
             )
@@ -220,9 +228,7 @@ def format_covar_mod(covar_mod, batch, cov_missing_value=None):
                 f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
             )
             remove_sample = [
-                i
-                for i, x in enumerate((nan_covar_mod.sum(axis=1) > 0).to_list())
-                if x == True
+                i for i, x in enumerate(nan_covar_mod.sum(axis=1) > 0) if x == True
             ]
         elif cov_missing_value == "fill":
             logging.warnings.warn(

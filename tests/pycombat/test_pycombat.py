@@ -177,7 +177,6 @@ class test_pycombat(unittest.TestCase):
         )
         # test raise error for single sample batch
         with self.assertRaisesRegex(
-            ValueError,
-            r"pycombat_norm doesn't support 1 sample per batch"
+            ValueError, r"pycombat_norm doesn't support 1 sample per batch"
         ):
             pycombat_norm(self.matrix, np.asarray([1, 1, 1, 2, 2, 3, 3, 3, 4]))
