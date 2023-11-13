@@ -196,20 +196,29 @@ def format_covar_mod(covar_mod, batch, cov_missing_value=None):
             f"The covar_mod parameter type {type(covar_mod)} is not accepted, it must be list, numpy.array or pandas.dataframe."
         )
 
-    # check for float type with decimal (excluding nan) to identify potential continuous_variable
-    continuous_variable = [
-        col
-        for col in covar_mod.columns
-        if True
-        in [
+    # check for numeric type (excluding nan) to identify potential continuous_variable
+    continuous_variable = []
+    potential_continuous_variable = []
+    for col in covar_mod.columns:
+        # Return True if numeric type with decimal
+        # Return False if numeric type without decimal
+        col_data_type = [
             (ele % 1) > 0
-            for ele in covar_mod[col].dropna().unique()
-            if type(ele) == float
+            for ele in set(covar_mod[col].dropna())
+            if (type(ele) == float) | (type(ele) == int) | (type(ele) == complex)
         ]
-    ]
+        if True in col_data_type:
+            continuous_variable.append(col)
+        elif False in col_data_type:
+            potential_continuous_variable.append(col)
+
     if len(continuous_variable) > 0:
         raise ValueError(
-            f"Found numerical covariates (covar_mod parameters) {continuous_variable}. Numerical covariates are not accepted. Please remove them before proceeding with pycombat_norm."
+            f"Found numerical covariates with decimal {', '.join(continuous_variable)} in covar_mod parameters. Numerical covariates are not accepted. Please remove them before proceeding with pycombat."
+        )
+    elif len(potential_continuous_variable) > 0:
+        logging.warnings.warn(
+            f"Found intereger covariates {', '.join(potential_continuous_variable)} in covar_mod parameters. Numerical covariates are not accepted, these covariates will be process as categorial. You may want to double check your covariates."
         )
 
     # check for nan in categorial covariates
