@@ -9,8 +9,8 @@ class Test(unittest.TestCase):
         batch = np.asarray([1, 1, 1, 2, 2, 3, 3, 3, 3])
 
         counts = np.ones((100, 5))
-        _, _, mod, _, _, _, _, _ = make_design_matrix(
-            counts, [0, 0, 0, 0, 0], [1, 1, 0, 1, 0], None, True, None
+        _, _, mod, _, _, _, _, _, _, _ = make_design_matrix(
+            counts, [0, 0, 0, 0, 0], [1, 1, 0, 1, 0], None
         )
         self.assertEqual(mod.shape, (5, 2))
         self.assertTrue(
@@ -27,7 +27,9 @@ class Test(unittest.TestCase):
             n_batch,
             n_sample,
             _,
-        ) = make_design_matrix(counts, batch, None, None, True, None)
+            _,
+            _,
+        ) = make_design_matrix(counts, batch, None, None)
         self.assertEqual(batchmod.shape, (9, 3))
 
         # test batches
@@ -42,8 +44,6 @@ class Test(unittest.TestCase):
         self.assertEqual(np.sum(design - batchmod), 0)
 
         # test reference batch
-        self.assertEqual(0, make_design_matrix(counts, batch, None, None, True, 1)[7])
-        self.assertEqual(1, make_design_matrix(counts, batch, None, None, True, 2)[7])
-        self.assertEqual(
-            None, make_design_matrix(counts, batch, None, None, True, None)[7]
-        )
+        self.assertEqual(0, make_design_matrix(counts, batch, None, 1)[7])
+        self.assertEqual(1, make_design_matrix(counts, batch, None, 2)[7])
+        self.assertEqual(None, make_design_matrix(counts, batch, None, None)[7])

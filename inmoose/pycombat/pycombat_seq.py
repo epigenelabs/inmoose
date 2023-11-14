@@ -31,13 +31,12 @@ from .helper_seq import vec2mat, match_quantiles
 def pycombat_seq(
     data,
     batch,
-    group=None,
     covar_mod=None,
-    full_mod=True,
     shrink=False,
     shrink_disp=False,
     gene_subset_n=None,
     ref_batch=None,
+    cov_missing_value=None,
 ):
     """pycombat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
 
@@ -47,12 +46,10 @@ def pycombat_seq(
         raw count matrix (dataframe or numpy array) from genomic studies (dimensions gene x sample)
     batch : array or list or :obj:`inmoose.utils.factor.Factor`
         Batch indices. Must have as many elements as the number of columns in the expression matrix.
-    group : array or list or :obj:`inmoose.utils.factor.Factor`, optional
-        vector/factor for biological condition of interest (default: `None`)
-    covar_mod : matrix, optional
-        model matrix for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
-    full_mod : bool, optional
-        if True, include condition of interest in model
+    covar_mod : list or matrix, optional
+        model matrix (dataframe, list or numpy array) for one or multiple covariates to include in linear model (signal
+        from these variables are kept in data after adjustment). Covariates have to be categorial,
+        they can not be continious values (default: `None`).
     shrink : bool, optional
         whether to apply shrinkage on parameter estimation
     shrink_disp : bool, optional
@@ -61,6 +58,12 @@ def pycombat_seq(
         number of genes to use in emprirical Bayes estimation, only useful when shrink = True
     ref_batch : any, optional
         batch id of the batch to use as reference (default: `None`)
+    cov_missing_value : str
+        Option to choose the way to handle missing covariates
+        `None` raise an error if missing covariates and stop the code
+        `remove` remove samples with missing covariates and raise a warning
+        `fill` handle missing covariates, by creating a distinct covariate per batch
+        (default: `None`)
 
     Returns
     -------
@@ -80,17 +83,6 @@ def pycombat_seq(
     # make sure batch is a factor
     batch = asfactor(batch)
 
-    # Remove genes with only 0 counts in any batch
-    keep = np.full((counts.shape[0],), True)
-    for b in batch.categories:
-        keep &= counts[:, batch == b].sum(axis=1) > 0
-    rm = np.logical_not(keep).nonzero()[0]
-    keep = keep.nonzero()[0]
-    countsOri = counts.copy()
-    counts = counts[keep, :]
-
-    dge_obj = DGEList(counts=counts)
-
     # Handle batches, covariates and prepare design matrix
     (
         design,
@@ -101,7 +93,26 @@ def pycombat_seq(
         n_batch,
         n_sample,
         ref_batch_index,
-    ) = make_design_matrix(counts, batch, group, covar_mod, full_mod, ref_batch)
+        batch,
+        remove_sample,
+    ) = make_design_matrix(counts, batch, covar_mod, ref_batch, cov_missing_value)
+    # Remove samples
+    counts = np.delete(counts, (remove_sample), axis=1)
+
+    # Raise error if single-sample batch, code does not support 1 sample per batch
+    if 1 in n_batches:
+        raise ValueError("pycombat_seq doesn't support 1 sample per batch")
+
+    # Remove genes with only 0 counts in any batch
+    keep = np.full((counts.shape[0],), True)
+    for b in batch.categories:
+        keep &= counts[:, batch == b].sum(axis=1) > 0
+    rm = np.logical_not(keep).nonzero()[0]
+    keep = keep.nonzero()[0]
+    countsOri = counts.copy()
+    counts = counts[keep, :]
+
+    dge_obj = DGEList(counts=counts)
 
     # Check for missing values in count matrix
     if np.isnan(counts).any():
@@ -119,6 +130,7 @@ def pycombat_seq(
             or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]
         ):
             # not enough residual degree of freedom
+
             return estimateGLMCommonDisp(
                 counts[:, batches_ind[i]], design=None, subset=counts.shape[0]
             )
@@ -147,7 +159,6 @@ def pycombat_seq(
             )
 
     genewise_disp_lst = [genewise_disp_helper(i) for i in range(n_batch)]
-
     # construction dispersion matrix
     phi_matrix = np.full(counts.shape, np.nan)
     for k in range(n_batch):

@@ -553,12 +553,13 @@ def adjust_data(
 def pycombat_norm(
     data,
     batch,
-    mod=None,
+    covar_mod=None,
     par_prior=True,
     prior_plots=False,
     mean_only=False,
     ref_batch=None,
     precision=None,
+    cov_missing_value=None,
     **kwargs,
 ):
     """Corrects batch effect in microarray expression data. Takes an gene expression file and a list of known batches corresponding to each sample.
@@ -569,8 +570,10 @@ def pycombat_norm(
         expression matrix (dataframe or numpy array). It contains the information about the gene expression (rows) for each sample (columns).
     batch : list
         batch indices. Must have as many elements as the number of columns in the expression matrix.
-    mod : matrix, optional
-        matrix model for multiple covariates to include in linear model (signal from these variables are kept in data after adjustment)
+    covar_mod : list or matrix, optional
+        model matrix (dataframe, list or numpy array) for one or multiple covariates to include in linear model (signal
+        from these variables are kept in data after adjustment). Covariates have to be categorial,
+        they can not be continious values (default: `None`).
     par_prior : bool, optional
         False for non-parametric estimation of batch effects (default: `True`).
     prior_plots : bool, optional
@@ -581,6 +584,12 @@ def pycombat_norm(
         batch id of the batch to use as reference (default: `None`)
     precision : float, optional
         level of precision for precision computing (default: `None`).
+    cov_missing_value : str
+        Option to choose the way to handle missing covariates
+        `None` raise an error if missing covariates and stop the code
+        `remove` remove samples with missing covariates and raise a warning
+        `fill` handle missing covariates, by creating a distinct covariate per batch
+        (default: `None`)
 
     Returns
     -------
@@ -598,6 +607,7 @@ def pycombat_norm(
 
     check_mean_only(mean_only)
 
+    # Handle batches, covariates and prepare design matrix
     (
         design,
         batchmod,
@@ -607,8 +617,17 @@ def pycombat_norm(
         n_batch,
         n_array,
         ref,
-    ) = make_design_matrix(dat, batch, None, mod, True, ref_batch)
+        batch,
+        remove_sample,
+    ) = make_design_matrix(dat, batch, covar_mod, ref_batch, cov_missing_value)
+    # Remove samples with NaN in covariates
+    dat = [dat[n_col] for n_col in range(0, len(dat)) if n_col not in remove_sample]
+
     design = np.transpose(design)
+
+    # Raise error if single-sample batch, code does not support 1 sample per batch
+    if 1 in n_batches:
+        raise ValueError(f"pycombat_norm doesn't support 1 sample per batch")
 
     # Check for missing values in count matrix
     NAs = np.isnan(dat).any()
