@@ -2,7 +2,7 @@
 
 ## [0.2.3-dev]
 
-None
+- fix syntax-impairing typos in `pyproject.toml`
 
 ## [0.2.2]
 
