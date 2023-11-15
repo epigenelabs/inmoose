@@ -1,9 +1,11 @@
 # InMoose release changelog
 
-## [0.2.2-dev]
+## [0.2.2]
 
 - proper documentation for the `sim` module
 - code is now formatted with `black`
+- add a link to the documentation in the README file
+- better handling of covariates in `pycombat` module
 
 ## [0.2.1]
 
