@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.2.3-dev]
+
+None
+
 ## [0.2.2]
 
 - proper documentation for the `sim` module
