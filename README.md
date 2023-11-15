@@ -13,6 +13,10 @@ You can install InMoose directly with:
 pip install inmoose
 ```
 
+# Documentation
+
+Documentation is hosted on [readthedocs.org](https://inmoose.readthedocs.io/en/latest/).
+
 # Batch Effect Correction
 
 InMoose provides features to correct technical biases, also called batch
