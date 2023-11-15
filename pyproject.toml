@@ -5,6 +5,8 @@ description = "InMoose: the Integrated Multi Omic Open Source Environment"
 readme = "README.md"
 authors = [
   {name = "Maximilien Colange", email = "maximilien@epigenelabs.com"}
+  {name = "Léa Meunier", email = "lea@epigenelabs.com"}
+  {name = "Solène Weill", email = "solene@epigenelabs.com"}
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
