@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.2.3-dev]
+## [0.2.3]
 
 - fix syntax-impairing typos in `pyproject.toml`
 
