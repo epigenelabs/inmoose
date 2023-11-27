@@ -24,6 +24,7 @@
 
       ~DESeqDataSet.design
       ~DESeqDataSet.dispersionFunction
+      ~DESeqDataSet.dispersions
       ~DESeqDataSet.normalizationFactors
       ~DESeqDataSet.sizeFactors
 
