@@ -49,6 +49,9 @@ class MetaDataBase:
     def __delitem__(self, index):
         del self.obj.attrs[self.name][index]
 
+    def __repr__(self):
+        return repr(self.obj.attrs[self.name])
+
     def filter(self, items=None, like=None, regex=None):
         import re
 
@@ -188,6 +191,24 @@ class DESeqDataSet(AnnData):
         )
 
         self.obsm["design"] = design
+
+    @property
+    def dispersions(self):
+        """
+        accessor for the dispersions
+        """
+        try:
+            return self.var["dispersion"]
+        except KeyError:
+            return None
+
+    @dispersions.setter
+    def dispersions(self, disp):
+        self.var["dispersion"] = disp
+
+    @dispersions.deleter
+    def dispersions(self):
+        del self.var["dispersion"]
 
     @property
     def sizeFactors(self):
