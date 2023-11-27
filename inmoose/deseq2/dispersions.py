@@ -55,33 +55,22 @@ def estimateDispersions_dds(
     dispersion is found which maximizes the Cox-Reid adjusted profile
     likelihood (the methods of Cox-Reid adjusted profile likelihood
     maximization for estimation of dispersion in RNA-Seq data were developed by
-    McCarthy *et al.* (2012) [1]_, first implemented in the edgeR package in
-    2010 (see :func:`inmoose.edgepy.glmFit` and
-    :func:`inmoose.edgepy.dispCoxReid`); a trend line capturing the
-    dispersion-mean relationship is fit to the maximum likelihood estimates; a
-    normal prior is determined for the log dispersion estimates centered on the
-    predicted value from the trended fit with variance equal to the difference
-    between the observed variance of the log dispersion estimates and te
-    expected sampling variance; finally maximum a posteriori dispersion
-    estimates are returned.  This final dispersion parameter is used in
-    subsequent tests. The final dispersion estimates can be accessed through
-    :attr:`DESeqDataSet.dispersions`. The fitted dispersion-mean relationship
-    is also used in :func:`varianceStabilizingTransformation`. All of the
-    intermediate values (gene-wise dispersion estimates, fitted dispersion
-    estimates from the trended fit, etc.) are stored in :code:`dds.var`.
+    [McCarthy2012]_, first implemented in the edgeR package in 2010 (see
+    :func:`inmoose.edgepy.glmFit` and :func:`inmoose.edgepy.dispCoxReid`); a
+    trend line capturing the dispersion-mean relationship is fit to the maximum
+    likelihood estimates; a normal prior is determined for the log dispersion
+    estimates centered on the predicted value from the trended fit with
+    variance equal to the difference between the observed variance of the log
+    dispersion estimates and te expected sampling variance; finally maximum a
+    posteriori dispersion estimates are returned.  This final dispersion
+    parameter is used in subsequent tests. The final dispersion estimates can
+    be accessed through :attr:`DESeqDataSet.dispersions`. The fitted
+    dispersion-mean relationship is also used in
+    :func:`varianceStabilizingTransformation`. All of the intermediate values
+    (gene-wise dispersion estimates, fitted dispersion estimates from the
+    trended fit, etc.) are stored in :code:`dds.var`.
 
-    The log normal prior on the dispersion parameter has been proposed by Wu *et
-    al.* (2012) [2]_.
-
-    References
-    ----------
-    .. [1] D. J. McCarthy, Y. Chen, G. K. Smyth. 2012. Differential expression
-       analysis of multifactor RNA-Seq experiments with respect to biological
-       variation. *Nucleic Acids Research* 40, 4288-4297.
-       :doi:`10.1093/nar/gks042`
-    .. [2] H. Wu, C. Wang, Z. Wu. 2012. A new shrinkage estimator for dispersion
-       improves differential detection in RNA-Seq data. *Biostatistics*.
-       :doi:`10.1093/biostatistics/kxs033`
+    The log normal prior on the dispersion parameter has been proposed by [Wu2012]_.
 
     See also
     --------
@@ -120,7 +109,7 @@ def estimateDispersions_dds(
     maxit : int
         maximum number of iterations to allow for convergence
     useCR : bool
-        whether to use Cox-Reid adjustment (see McCarthy *et al.* (2012) [1]_)
+        whether to use Cox-Reid adjustment (see [McCarthy2012]_)
     weightThreshold : float
         threshold for subsetting the design matrix and GLM weights for
         calculating the Cox-Reid correction
