@@ -23,6 +23,7 @@
       :toctree:
 
       ~DESeqDataSet.design
+      ~DESeqDataSet.dispersions
       ~DESeqDataSet.dispersionFunction
       ~DESeqDataSet.dispersions
       ~DESeqDataSet.normalizationFactors

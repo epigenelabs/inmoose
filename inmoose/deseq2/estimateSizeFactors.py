@@ -37,7 +37,7 @@ def estimateSizeFactors_dds(
     Estimate the size factors of a :class:`DESeqDataSet`
 
     This function estimates the size factors using the "median ratio method",
-    described by Equation 5 in Ander and Huber (2010) [1]_.
+    described by Equation 5 in [Anders2010]_.
 
     The estimated size factors can be accessed through the
     :attr:`DESeqDataSet.sizeFactors` property of :class:`DESeqDataSet`.
@@ -54,11 +54,6 @@ def estimateSizeFactors_dds(
 
     Internally, the function calls :func:`.estimateSizeFactorsForMatrix`, which
     provides more details on the calculation.
-
-    References
-    ----------
-    .. [1] S. Anders and W. Huber. 2010. Differential expression for sequence
-       count data. *Genome Biology*, 11:106. :doi:`10.1186/gb-2010-11-10-r106`
 
     See also
     --------
