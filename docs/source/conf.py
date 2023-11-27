@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     "sphinx_rtd_theme",
+    "sphinxcontrib.repl",
 ]
 
 nitpick_ignore = [("py:class", "optional"), ("py:class", "array-like")]

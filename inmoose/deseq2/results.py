@@ -265,12 +265,6 @@ def results_dds(
     also make use of the t-distribution for the Wald statistic, using the
     degrees of freedom in :code:`obj.var["tDegreesFreedom"]`.
 
-    References
-    ----------
-    .. [1] R. Bourgon, R. Gentleman, W. Huber. 2010. Independent filtering
-       increases detection power for high-throughput experiments. *PNAS*
-       :doi:`10.1073/pnas.0914005107`
-
     Arguments
     ---------
     obj : DESeqDataSet
