@@ -9,7 +9,7 @@ class Test(unittest.TestCase):
     def test_results(self):
         """test that results work as expected and throw errors"""
         ## test contrasts
-        dds = makeExampleDESeqDataSet(n=200, m=12)
+        dds = makeExampleDESeqDataSet(n=200, m=12, seed=42)
         dds.obs["condition"] = Factor(np.repeat([1, 2, 3], 4))
         dds.obs["group"] = Factor(np.repeat([[1, 2]], 6, axis=0).flatten())
         dds.obs["foo"] = np.repeat(["lo", "hi"], 6)
@@ -29,7 +29,20 @@ class Test(unittest.TestCase):
         res = dds.results()
         # TODO
         # show_res = res.show()
-        # summary_res = res.summary()
+        summary = res.summary()
+        print(summary)
+        summary_ref = """
+out of 200 with nonzero total read count
+adjusted p-value < 0.1
+LFC > 0 (up)       : 1, 0.50%
+LFC < 0 (down)     : 0, 0.00%
+outliers [1]       : 0, 0.00%
+low counts [2]     : 0, 0.00%
+(mean count < 0)
+[1] see 'cooksCutoff' argument of results()
+[2] see 'independentFiltering' argument of results()
+"""
+        self.assertEqual(summary, summary_ref)
 
         # various results error checking
         with self.assertRaisesRegex(
