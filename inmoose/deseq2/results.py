@@ -78,6 +78,82 @@ class DESeqResults(pd.DataFrame):
         if priorInfo is not None:
             self.priorInfo = priorInfo
 
+    def summary(self, alpha=None):
+        """
+        Print a summary of the results from a DESeq analysis.
+
+        Arguments
+        ---------
+        alpha : float, optional
+            the adjusted p-value cutoff. If not set, this defaults to the
+            :code:`alpha` argument which was used in :meth:`results` to set the
+            target FDR for independent filtering, or if independent filtering
+            was not performed, to 0.1.
+
+        Returns
+        -------
+        str
+            a summary (multi-line) string
+        """
+        sval = "svalue" in self.columns
+        if sval:
+            test_col = "svalue"
+            test_col_name = "s-value"
+        else:
+            test_col = "padj"
+            test_col_name = "adjusted p-value"
+
+        if alpha is None:
+            if sval:
+                alpha = 0.005
+            elif self.alpha is None:
+                alpha = 0.1
+            else:
+                alpha = self.alpha
+
+        if self.lfcThreshold is not None:
+            T = self.lfcThreshold
+            pT = f"{T:.2f} (up)    "
+            mT = f"{-T:.2f} (down) "
+        else:
+            T = 0
+        if T == 0:
+            pT = "0 (up)       "
+            mT = "0 (down)     "
+
+        res = "\n"
+        notallzero = (self.baseMean > 0).sum()
+        up = np.nansum((self[test_col] < alpha) & (self["log2FoldChange"] > T))
+        down = np.nansum((self[test_col] < alpha) & (self["log2FoldChange"] < -T))
+        if not sval:
+            filt = (~(self["pvalue"].isna()) & self["padj"].isna()).sum()
+            outlier = ((self["baseMean"] > 0) & self["pvalue"].isna()).sum()
+            if self.filterThreshold is None:
+                ft = 0
+            else:
+                ft = round(self.filterThreshold)
+
+        ihw = (not sval) and "ihwResult" in self.columns
+
+        res += f"out of {notallzero} with nonzero total read count\n"
+        res += f"{test_col_name} < {alpha}\n"
+        res += f"LFC > {pT}: {up}, {up/notallzero*100:.2f}%\n"
+        res += f"LFC < {mT}: {down}, {down/notallzero*100:.2f}%\n"
+        if not sval:
+            res += f"outliers [1]       : {outlier}, {outlier/notallzero*100:.2f}%\n"
+        if not sval and not ihw:
+            res += f"low counts [2]     : {filt}, {filt/notallzero*100:.2f}%\n"
+        if not sval and not ihw:
+            res += f"(mean count < {ft})\n"
+        if not sval:
+            res += "[1] see 'cooksCutoff' argument of results()\n"
+        if not sval and not ihw:
+            res += "[2] see 'independentFiltering' argument of results()\n"
+        if ihw:
+            res += "see res['ihwResult'] on hypothesis weighting\n"
+
+        return res
+
 
 def results_dds(
     obj,
