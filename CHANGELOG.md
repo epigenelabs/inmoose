@@ -2,7 +2,7 @@
 
 ## [0.2.4-dev]
 
-None
+- add a `data` module, with two RNA-Seq datasets: `pasilla` and `airway`
 
 ## [0.2.3]
 
