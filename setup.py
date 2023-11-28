@@ -47,6 +47,8 @@ setup(
     packages=[
         "inmoose",
         "inmoose/consensus_clustering",
+        "inmoose/data",
+        "inmoose/data/pasilla",
         "inmoose/pycombat",
         "inmoose/common_cpp",
         "inmoose/edgepy",
@@ -77,6 +79,19 @@ setup(
         ],
         "inmoose/common_cpp": [
             "matrix.h",
+        ],
+        "inmoose/data/pasilla": [
+            "Dmel.BDGP5.25.62.DEXSeq.chr.gff",
+            "geneIDsinsubset.txt",
+            "pasilla_gene_counts.tsv",
+            "pasilla_sample_annotation.csv",
+            "treated1fb.txt",
+            "treated2fb.txt",
+            "treated3fb.txt",
+            "untreated1fb.txt",
+            "untreated2fb.txt",
+            "untreated3fb.txt",
+            "untreated4fb.txt",
         ],
     },
     ext_modules=[common_cpp, edgepy_cpp],
