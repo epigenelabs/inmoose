@@ -17,7 +17,8 @@ describes how the data provided here were derived from the RNA-Seq read sequence
 data that are provided by NCBI Gene Expression Omnibus under accession numbers
 GSM461176 to GSM461181.
 
-We describe below how to load the data to build an :class:`AnnData` object::
+We describe below how to load the data to build an :class:`AnnData` object (NB:
+the snippet below is wrapped in the :func:`pasilla` function for convenience)::
 
   import importlib.resources
   import pandas as pd
@@ -42,6 +43,10 @@ We describe below how to load the data to build an :class:`AnnData` object::
   adata
 
 
+Code documentation
+------------------
+
+.. autofunction:: pasilla
 
 References
 ----------
