@@ -12,6 +12,7 @@ namely ComBat [1]_ and ComBat-Seq [2]_.
    :caption: Features
 
    pycombat
+   data
 
 .. toctree::
    :maxdepth: 1
