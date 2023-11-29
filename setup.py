@@ -48,6 +48,7 @@ setup(
         "inmoose",
         "inmoose/consensus_clustering",
         "inmoose/data",
+        "inmoose/data/airway",
         "inmoose/data/pasilla",
         "inmoose/pycombat",
         "inmoose/common_cpp",
@@ -79,6 +80,9 @@ setup(
         ],
         "inmoose/common_cpp": [
             "matrix.h",
+        ],
+        "inmoose/data/airway": [
+            "airway.h5ad",
         ],
         "inmoose/data/pasilla": [
             "Dmel.BDGP5.25.62.DEXSeq.chr.gff",
