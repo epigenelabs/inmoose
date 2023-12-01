@@ -110,6 +110,7 @@ class DESeqDataSet(AnnData):
     from .dispersions import estimateDispersions_dds as estimateDispersions
     from .estimateSizeFactors import estimateSizeFactors_dds as estimateSizeFactors
     from .results import results_dds as results
+    from .plot import plotDispEsts_dds as plotDispEsts
 
     def __init__(self, countData, clinicalData=None, design=None, ignoreRank=False):
         """
