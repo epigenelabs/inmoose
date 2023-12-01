@@ -56,6 +56,8 @@ class DESeqResults(pd.DataFrame):
         a list giving information on the log fold change prior
     """
 
+    from .plot import plotMA_res as plotMA
+
     _metadata = [
         "priorInfo",
         "filterThreshold",
