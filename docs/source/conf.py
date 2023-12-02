@@ -22,8 +22,6 @@ release = version
 html_logo = "inmoose.png"
 html_favicon = "epigenelogo_favicon.png"
 
-import sphinx_rtd_theme
-
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
