@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from inmoose.pycombat.covariates import make_design_matrix
-from inmoose.pycombat.pycombat_norm import check_mean_only, check_NAs
+from inmoose.pycombat.pycombat_norm import check_mean_only
 from inmoose.pycombat.pycombat_norm import (
     compute_prior,
     postmean,
@@ -50,34 +50,24 @@ class test_pycombat(unittest.TestCase):
         precision = None
         mod = None
         self.dat = self.matrix.values
-        (
-            design,
-            self.batchmod,
-            _,
-            self.batches,
-            self.n_batches,
-            self.n_batch,
-            self.n_array,
-            ref,
-            batch,
-            remove_sample,
-        ) = make_design_matrix(self.dat, self.batch, mod, ref_batch)
-        # Remove samples with NaN in covariates
-        self.dat = [
-            self.dat[n_col]
-            for n_col in range(0, len(self.dat))
-            if n_col not in remove_sample
-        ]
+        vci = make_design_matrix(
+            self.dat, self.batch, covar_mod=mod, ref_batch=ref_batch
+        )
+        self.dat = vci.counts
+        self.design = np.transpose(vci.design)
+        self.batchmod = vci.batch_mod
+        self.batches = [vci.batch_composition[b] for b in vci.batch.categories]
+        self.n_batches = [len(v) for v in self.batches]
+        self.batch = vci.batch
+        ref = vci.ref_batch_idx
+        self.n_batch = vci.n_batch
+        self.n_array = self.dat.shape[1]
 
-        self.design = np.transpose(design)
-
-        NAs = check_NAs(self.dat)
         self.B_hat, self.grand_mean, self.var_pooled = calculate_mean_var(
             self.design,
             self.batches,
             ref,
             self.dat,
-            NAs,
             self.n_batches,
             self.n_batch,
             self.n_array,
@@ -97,7 +87,6 @@ class test_pycombat(unittest.TestCase):
             par_prior,
             precision,
             ref,
-            NAs,
         )
         self.bayes_data = adjust_data(
             self.s_data,
@@ -144,9 +133,6 @@ class test_pycombat(unittest.TestCase):
         check_mean_only(False)
         print("Only one line of text should have been printed above.")
 
-    def test_check_NAs(self):
-        self.assertFalse(check_NAs([0, 1, 2]))
-
     def test_calculate_mean_var(self):
         self.assertEqual(np.shape(self.B_hat)[0], np.shape(self.design)[0])
         self.assertEqual(np.shape(self.grand_mean)[0], np.shape(self.dat)[0])
@@ -177,6 +163,7 @@ class test_pycombat(unittest.TestCase):
         )
         # test raise error for single sample batch
         with self.assertRaisesRegex(
-            ValueError, r"pycombat_norm doesn't support 1 sample per batch"
+            ValueError,
+            r"Batches 4 contain a single sample, which is not supported for batch effect correction. Please review your inputs.",
         ):
             pycombat_norm(self.matrix, np.asarray([1, 1, 1, 2, 2, 3, 3, 3, 4]))

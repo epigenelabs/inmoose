@@ -36,7 +36,7 @@ def pycombat_seq(
     shrink_disp=False,
     gene_subset_n=None,
     ref_batch=None,
-    cov_missing_value=None,
+    na_cov_action="raise",
 ):
     """pycombat_seq is an improved model from ComBat using negative binomial regression, which specifically targets RNA-Seq count data.
 
@@ -58,12 +58,13 @@ def pycombat_seq(
         number of genes to use in emprirical Bayes estimation, only useful when shrink = True
     ref_batch : any, optional
         batch id of the batch to use as reference (default: `None`)
-    cov_missing_value : str
+    na_cov_action : str
         Option to choose the way to handle missing covariates
-        `None` raise an error if missing covariates and stop the code
-        `remove` remove samples with missing covariates and raise a warning
-        `fill` handle missing covariates, by creating a distinct covariate per batch
-        (default: `None`)
+        - :code:`"raise"` raise an error if missing covariates and stop the code
+        - :code:`"remove"` remove samples with missing covariates and raise a warning
+        - :code:`"fill"` handle missing covariates, by creating a distinct
+          covariate per batch
+        (default: :code:`"raise"`)
 
     Returns
     -------
@@ -80,28 +81,27 @@ def pycombat_seq(
         counts = data
 
     ####### Preparation #######
-    # make sure batch is a factor
-    batch = asfactor(batch)
-
     # Handle batches, covariates and prepare design matrix
-    (
-        design,
-        batchmod,
-        mod,
-        batches_ind,
-        n_batches,
-        n_batch,
-        n_sample,
-        ref_batch_index,
+    vci = make_design_matrix(
+        counts,
         batch,
-        remove_sample,
-    ) = make_design_matrix(counts, batch, covar_mod, ref_batch, cov_missing_value)
-    # Remove samples
-    counts = np.delete(counts, (remove_sample), axis=1)
+        covar_mod=covar_mod,
+        ref_batch=ref_batch,
+        na_cov_action=na_cov_action,
+    )
 
-    # Raise error if single-sample batch, code does not support 1 sample per batch
-    if 1 in n_batches:
-        raise ValueError("pycombat_seq doesn't support 1 sample per batch")
+    counts = vci.counts
+    batch = vci.batch
+    design = vci.design
+    batchmod = vci.batch_mod
+    mod = vci.covar_mod
+    ref_batch_index = vci.ref_batch_idx
+
+    n_batch = vci.n_batch
+    batches_ind = vci.batch_composition
+    batch_sizes = {b: len(v) for b, v in batches_ind.items()}
+
+    n_sample = counts.shape[1]
 
     # Remove genes with only 0 counts in any batch
     keep = np.full((counts.shape[0],), True)
@@ -114,19 +114,13 @@ def pycombat_seq(
 
     dge_obj = DGEList(counts=counts)
 
-    # Check for missing values in count matrix
-    if np.isnan(counts).any():
-        raise ValueError(
-            f"Found {np.isnan(counts).sum()} missing values (NaN) in count matrix. NaN values are not accepted. Please remove them before proceeding with pycombat_seq."
-        )
-
     ####### Estimate gene-wise dispersions within each batch #######
     logging.info("Estimating dispersions")
 
     # Estimate common dispersion within each batch as an initial value
     def disp_common_helper(i):
         if (
-            n_batches[i] <= design.shape[1] - batchmod.shape[1] + 1
+            batch_sizes[i] <= design.shape[1] - batchmod.shape[1] + 1
             or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]
         ):
             # not enough residual degree of freedom
@@ -141,12 +135,12 @@ def pycombat_seq(
                 subset=counts.shape[0],
             )
 
-    disp_common = [disp_common_helper(i) for i in range(n_batch)]
+    disp_common = {b: disp_common_helper(b) for b in batch.categories}
 
     # Estimate gene-wise dispersion within each batch
     def genewise_disp_helper(i):
         if (
-            n_batches[i] <= design.shape[1] - batchmod.shape[1] + 1
+            batch_sizes[i] <= design.shape[1] - batchmod.shape[1] + 1
             or np.linalg.matrix_rank(mod[batches_ind[i]]) < mod.shape[1]
         ):
             return [disp_common[i] for j in range(counts.shape[0])]
@@ -158,18 +152,20 @@ def pycombat_seq(
                 prior_df=0,
             )
 
-    genewise_disp_lst = [genewise_disp_helper(i) for i in range(n_batch)]
+    genewise_disp_lst = {b: genewise_disp_helper(b) for b in batch.categories}
     # construction dispersion matrix
     phi_matrix = np.full(counts.shape, np.nan)
-    for k in range(n_batch):
-        phi_matrix[:, batches_ind[k]] = vec2mat(genewise_disp_lst[k], n_batches[k])
+    for b in batch.categories:
+        phi_matrix[:, batches_ind[b]] = vec2mat(genewise_disp_lst[b], batch_sizes[b])
 
     ####### Estimate parameters from NB GLM #######
     logging.info("Fitting the GLM model")
     # no intercept - nonEstimable; compute offset (library sizes) within function
     glm_f = dge_obj.glmFit(design=design, dispersion=phi_matrix, prior_count=1e-4)
     # compute intercept as batch-size-weighted average from batches
-    alpha_g = glm_f.coefficients[:, range(n_batch)] @ (n_batches / n_sample)
+    alpha_g = glm_f.coefficients[:, range(n_batch)] @ (
+        np.array([batch_sizes[batch.categories[i]] for i in range(n_batch)]) / n_sample
+    )
     # original offset - sample (library size)
     new_offset = vec2mat(dge_obj.getOffset(), counts.shape[0]).T
     # new offset - gene background expression (dge_obj.getOffset() is the same as log(dge_obj.samples.lib_size)
@@ -185,7 +181,9 @@ def pycombat_seq(
 
     gamma_hat = glm_f2.coefficients[:, range(n_batch)]
     mu_hat = glm_f2.fitted_values
-    phi_hat = np.column_stack(genewise_disp_lst)
+    phi_hat = np.column_stack(
+        [genewise_disp_lst[batch.categories[i]] for i in range(n_batch)]
+    )
 
     ####### In each batch, compute posterior estimation through Monte-Carlo integration #######
     if shrink:
@@ -199,9 +197,10 @@ def pycombat_seq(
     ####### Obtain adjusted batch-free distribution #######
     mu_star = np.full(counts.shape, np.nan)
     for jj in range(n_batch):
-        mu_star[:, batches_ind[jj]] = np.exp(
-            np.log(mu_hat[:, batches_ind[jj]])
-            - vec2mat(gamma_star_mat[:, jj], n_batches[jj])
+        b = batch.categories[jj]
+        mu_star[:, batches_ind[b]] = np.exp(
+            np.log(mu_hat[:, batches_ind[b]])
+            - vec2mat(gamma_star_mat[:, jj], batch_sizes[b])
         )
     phi_star = phi_star_mat.mean(axis=1)
 
@@ -209,15 +208,16 @@ def pycombat_seq(
     logging.info("Adjusting the data")
     adjust_counts = np.full(counts.shape, np.nan)
     for kk in range(n_batch):
-        counts_sub = counts[:, batches_ind[kk]]
+        b = batch.categories[kk]
+        counts_sub = counts[:, batches_ind[b]]
         if kk == ref_batch_index:
-            adjust_counts[:, batches_ind[kk]] = counts_sub
+            adjust_counts[:, batches_ind[b]] = counts_sub
             continue
-        old_mu = mu_hat[:, batches_ind[kk]]
+        old_mu = mu_hat[:, batches_ind[b]]
         old_phi = phi_hat[:, kk]
-        new_mu = mu_star[:, batches_ind[kk]]
+        new_mu = mu_star[:, batches_ind[b]]
         new_phi = phi_star
-        adjust_counts[:, batches_ind[kk]] = match_quantiles(
+        adjust_counts[:, batches_ind[b]] = match_quantiles(
             counts_sub=counts_sub,
             old_mu=old_mu,
             old_phi=old_phi,

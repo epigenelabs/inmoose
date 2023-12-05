@@ -288,25 +288,7 @@ def check_mean_only(mean_only):
         logging.info("Using mean only version")
 
 
-def check_NAs(dat):
-    """check if NaNs - in theory, we construct the data without NAs
-
-    Arguments:
-        dat {matrix} -- the data matrix
-
-    Returns:
-        NAs {bool} -- boolean characterising the presence of NaNs in the data matrix
-    """
-    # NAs = True in (np.isnan(dat))
-    NAs = np.isnan(np.sum(dat))  # Check if NaN exists
-    if NAs:
-        logging.error(
-            "Found missing data values. Please remove all missing values before proceeding with pyComBat."
-        )
-    return NAs
-
-
-def calculate_mean_var(design, batches, ref, dat, NAs, n_batches, n_batch, n_array):
+def calculate_mean_var(design, batches, ref, dat, n_batches, n_batch, n_array):
     """calculates the Normalisation factors
 
     Arguments:
@@ -314,7 +296,6 @@ def calculate_mean_var(design, batches, ref, dat, NAs, n_batches, n_batch, n_arr
         batches {int list} -- list of unique batches
         ref {int} -- reference batch index
         dat {matrix} -- data matrix
-        NAs {bool} -- presence of NaNs in the data matrix
         n_batches {int list} -- list of batches lengths
         n_array {int} -- total size of dataset
 
@@ -324,11 +305,10 @@ def calculate_mean_var(design, batches, ref, dat, NAs, n_batches, n_batch, n_arr
         var_pooled {matrix} -- Variance for each gene and each batch
     """
     logging.info("Standardizing Data across genes.")
-    if not (NAs):  # NAs not supported
-        # B_hat is the vector of regression coefficients corresponding to the design matrix
-        B_hat = np.linalg.solve(
-            np.dot(design, np.transpose(design)), np.dot(design, np.transpose(dat))
-        )
+    # B_hat is the vector of regression coefficients corresponding to the design matrix
+    B_hat = np.linalg.solve(
+        np.dot(design, np.transpose(design)), np.dot(design, np.transpose(dat))
+    )
 
     # Calculates the general mean
     if ref is not None:
@@ -338,21 +318,20 @@ def calculate_mean_var(design, batches, ref, dat, NAs, n_batches, n_batch, n_arr
             np.transpose([i / n_array for i in n_batches]), B_hat[0:n_batch]
         )
     # Calculates the general variance
-    if not NAs:  # NAs not supported
-        if ref is not None:  # depending on ref batch
-            ref_dat = np.transpose(np.transpose(dat)[batches[ref]])
-            var_pooled = np.dot(
-                np.square(
-                    ref_dat
-                    - np.transpose(np.dot(np.transpose(design)[batches[ref]], B_hat))
-                ),
-                [1 / n_batches[ref]] * n_batches[ref],
-            )
-        else:
-            var_pooled = np.dot(
-                np.square(dat - np.transpose(np.dot(np.transpose(design), B_hat))),
-                [1 / n_array] * n_array,
-            )
+    if ref is not None:  # depending on ref batch
+        ref_dat = np.transpose(np.transpose(dat)[batches[ref]])
+        var_pooled = np.dot(
+            np.square(
+                ref_dat
+                - np.transpose(np.dot(np.transpose(design)[batches[ref]], B_hat))
+            ),
+            [1 / n_batches[ref]] * n_batches[ref],
+        )
+    else:
+        var_pooled = np.dot(
+            np.square(dat - np.transpose(np.dot(np.transpose(design), B_hat))),
+            [1 / n_array] * n_array,
+        )
 
     return (B_hat, grand_mean, var_pooled)
 
@@ -397,20 +376,17 @@ def standardise_data(dat, stand_mean, var_pooled, n_array):
     return s_data
 
 
-def fit_model(
-    design, n_batch, s_data, batches, mean_only, par_prior, precision, ref, NAs
-):
+def fit_model(design, n_batch, s_data, batches, mean_only, par_prior, precision, ref):
     logging.info("Fitting L/S model and finding priors.")
 
     # fraction of design matrix related to batches
     batch_design = design[0:n_batch]
 
-    if not NAs:  # CF SUPRA FOR NAs
-        # gamma_hat is the vector of additive batch effect
-        gamma_hat = np.linalg.solve(
-            np.dot(batch_design, np.transpose(batch_design)),
-            np.dot(batch_design, np.transpose(s_data)),
-        )
+    # gamma_hat is the vector of additive batch effect
+    gamma_hat = np.linalg.solve(
+        np.dot(batch_design, np.transpose(batch_design)),
+        np.dot(batch_design, np.transpose(s_data)),
+    )
 
     delta_hat = []  # delta_hat is the vector of estimated multiplicative batch effect
 
@@ -559,7 +535,7 @@ def pycombat_norm(
     mean_only=False,
     ref_batch=None,
     precision=None,
-    cov_missing_value=None,
+    na_cov_action="raise",
     **kwargs,
 ):
     """Corrects batch effect in microarray expression data. Takes an gene expression file and a list of known batches corresponding to each sample.
@@ -584,12 +560,13 @@ def pycombat_norm(
         batch id of the batch to use as reference (default: `None`)
     precision : float, optional
         level of precision for precision computing (default: `None`).
-    cov_missing_value : str
+    na_cov_action : str
         Option to choose the way to handle missing covariates
-        `None` raise an error if missing covariates and stop the code
-        `remove` remove samples with missing covariates and raise a warning
-        `fill` handle missing covariates, by creating a distinct covariate per batch
-        (default: `None`)
+        - :code:`"raise"` raise an error if missing covariates and stop the code
+        - :code:`"remove"` remove samples with missing covariates and raise a warning
+        - :code:`"fill"` handle missing covariates, by creating a distinct
+          covariate per batch
+        (default: :code:`"raise"`)
 
     Returns
     -------
@@ -608,53 +585,40 @@ def pycombat_norm(
     check_mean_only(mean_only)
 
     # Handle batches, covariates and prepare design matrix
-    (
-        design,
-        batchmod,
-        mod,
-        batches,
-        n_batches,
-        n_batch,
-        n_array,
-        ref,
-        batch,
-        remove_sample,
-    ) = make_design_matrix(dat, batch, covar_mod, ref_batch, cov_missing_value)
-    # Remove samples with NaN in covariates
-    dat = [dat[n_col] for n_col in range(0, len(dat)) if n_col not in remove_sample]
+    vci = make_design_matrix(
+        dat, batch, covar_mod, ref_batch, na_cov_action=na_cov_action
+    )
 
-    design = np.transpose(design)
+    dat = vci.counts
+    batch = vci.batch
+    design = np.transpose(vci.design)
+    ref = vci.ref_batch_idx
 
-    # Raise error if single-sample batch, code does not support 1 sample per batch
-    if 1 in n_batches:
-        raise ValueError(f"pycombat_norm doesn't support 1 sample per batch")
+    n_batch = vci.n_batch
+    batches_ind = [vci.batch_composition[b] for b in batch.categories]
+    batch_sizes = [len(v) for v in batches_ind]
 
-    # Check for missing values in count matrix
-    NAs = np.isnan(dat).any()
-    if NAs:
-        raise ValueError(
-            f"Found {np.isnan(dat).sum()} missing values (NaN) in count matrix. NaN values are not accepted. Please remove them before proceeding with pycombat_norm."
-        )
+    n_sample = dat.shape[1]
 
     B_hat, grand_mean, var_pooled = calculate_mean_var(
-        design, batches, ref, dat, NAs, n_batches, n_batch, n_array
+        design, batches_ind, ref, dat, batch_sizes, n_batch, n_sample
     )
-    stand_mean = calculate_stand_mean(grand_mean, n_array, design, n_batch, B_hat)
-    s_data = standardise_data(dat, stand_mean, var_pooled, n_array)
+    stand_mean = calculate_stand_mean(grand_mean, n_sample, design, n_batch, B_hat)
+    s_data = standardise_data(dat, stand_mean, var_pooled, n_sample)
     gamma_star, delta_star, batch_design = fit_model(
-        design, n_batch, s_data, batches, mean_only, par_prior, precision, ref, NAs
+        design, n_batch, s_data, batches_ind, mean_only, par_prior, precision, ref
     )
     bayes_data = adjust_data(
         s_data,
         gamma_star,
         delta_star,
         batch_design,
-        n_batches,
+        batch_sizes,
         var_pooled,
         stand_mean,
-        n_array,
+        n_sample,
         ref,
-        batches,
+        batches_ind,
         dat,
     )
 
