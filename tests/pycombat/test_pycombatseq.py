@@ -85,14 +85,14 @@ class test_pycombatseq(unittest.TestCase):
 
         # test raise error for single sample batch
         with self.assertRaisesRegex(
-            ValueError, expected_regex="pycombat_seq doesn't support 1 sample per batch"
+            ValueError, expected_regex="Batches a contain a single sample"
         ):
             pycombat_seq(self.y, ["a", "b", "b", "b", "b"])
 
         # test with incomplete group
         with self.assertRaisesRegex(
             ValueError,
-            expected_regex="2 values are missing in covariates col_0. Correct your covariates or use the cov_missing_value parameters",
+            expected_regex="2 values are missing in covariates cov_0. Correct your covariates or use the cov_missing_value parameters",
         ):
             pycombat_seq(self.y, self.batch, covar_mod=["a", np.nan, "a", np.nan, "a"])
 
@@ -105,7 +105,7 @@ class test_pycombatseq(unittest.TestCase):
                 self.y,
                 self.batch,
                 covar_mod=[1, 2, 1, np.nan, 1],
-                cov_missing_value="fill",
+                na_cov_action="fill",
             )
         self.assertTrue(np.array_equal(res, ref))
 
@@ -117,7 +117,7 @@ class test_pycombatseq(unittest.TestCase):
                 self.y,
                 self.batch,
                 covar_mod=[1, 2, 1, np.nan, 1],
-                cov_missing_value="remove",
+                na_cov_action="remove",
             )
         ref_y = np.delete(self.y, (3), axis=1)
         ref_batch = np.array([1, 1, 2, 2])
@@ -127,20 +127,11 @@ class test_pycombatseq(unittest.TestCase):
         # test error/warning message for data type of covariates
         with self.assertRaisesRegex(
             ValueError,
-            expected_regex=r"Found numerical covariates with decimal col_0 in covar_mod parameters. Numerical covariates are not accepted. Please remove them before proceeding with pycombat.",
+            expected_regex=r"Cannot create new categories for numerical covariates cov_0. Please fix the NA in those covariates manually.",
         ):
             pycombat_seq(
                 self.y,
                 self.batch,
-                covar_mod=[1, 2.9, 1, 1, 1],
-            )
-
-        with self.assertWarnsRegex(
-            UserWarning,
-            expected_regex=r"Found intereger covariates col_0 in covar_mod parameters. Numerical covariates are not accepted, these covariates will be process as categorial. You may want to double check your covariates.",
-        ):
-            pycombat_seq(
-                self.y,
-                self.batch,
-                covar_mod=[1, 2, 1, 2, 1],
+                covar_mod=[1, 2.9, 1, 1, np.nan],
+                na_cov_action="fill",
             )

@@ -6,6 +6,8 @@
 - fix build on readthedocs
 - updated bibliography with our BMC Bioinformatics paper
 - add verbose to consensus clustering computation
+- add a utility class `VirtualCohortInput` to better check the well definition
+  of inputs to the batch effect correction routines
 
 ## [0.2.3]
 
