@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.2.4-dev]
+## [0.2.4-beta1]
 
 - add a `data` module, with two RNA-Seq datasets: `pasilla` and `airway`
 - fix build on readthedocs
