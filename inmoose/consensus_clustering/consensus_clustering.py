@@ -19,6 +19,7 @@
 # This file is based on the file 'consensusClustering.py' of the repository
 # github.com/ZigaSajovic/Consensus_Clustering (as of July 30, 2021).
 
+import logging
 import numpy as np
 from itertools import combinations
 import bisect
@@ -122,7 +123,7 @@ class consensusClustering:
 
         for k in range(self.min_k, self.max_k + 1):  # for each number of clusters
             if verbose:
-                print(f"Computing consensus matrix for {k} clusters")
+                logging.info(f"Computing consensus matrix for {k} clusters")
             indicator_matrix = np.zeros((data.shape[0],) * 2)
             connectivity_matrix = np.zeros((data.shape[0],) * 2)
 
