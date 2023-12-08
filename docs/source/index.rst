@@ -51,9 +51,10 @@ The :doc:`pycombat <pycombat>` module was previously `distributed independently 
 To cite InMoose, please use the following reference:
 
 A. Behdenna, M. Colange, J. Haziza, A. Gema, G. Appé, C.-A. Azencott and A.
-Nordor. 2020. pyComBat, a Python tool for batch effects correction in
-high-throughput molecular data using empirical Bayes methods. *bioRxiv*.
-:doi:`10.1101/2020.03.17.995431`
+Nordor. 2023. pyComBat, a Python tool for batch effects correction in
+high-throughput molecular data using empirical Bayes methods.  *BMC
+Bioinformatics* 7;24(1):459. :doi:`10.1186/s12859-023-05578-5`
+
 
 References
 ==========

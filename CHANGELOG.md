@@ -4,6 +4,7 @@
 
 - add a `data` module, with two RNA-Seq datasets: `pasilla` and `airway`
 - fix build on readthedocs
+- updated bibliography with our BMC Bioinformatics paper
 
 ## [0.2.3]
 
