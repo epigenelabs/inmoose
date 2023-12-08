@@ -5,6 +5,7 @@
 - add a `data` module, with two RNA-Seq datasets: `pasilla` and `airway`
 - fix build on readthedocs
 - updated bibliography with our BMC Bioinformatics paper
+- add verbose to consensus clustering computation
 
 ## [0.2.3]
 
