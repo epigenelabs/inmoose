@@ -19,6 +19,7 @@
 # This file is based on the file 'consensusClustering.py' of the repository
 # github.com/ZigaSajovic/Consensus_Clustering (as of July 30, 2021).
 
+import logging
 import numpy as np
 from itertools import combinations
 import bisect
@@ -102,7 +103,7 @@ class consensusClustering:
         )
         return resampled_indices
 
-    def compute_consensus_clustering(self, data, random_state):
+    def compute_consensus_clustering(self, data, random_state, verbose=False):
         """
         Fits a consensus matrix for each number of clusters
 
@@ -112,6 +113,8 @@ class consensusClustering:
             numpy matrix to run the cluster on samples*features
         random_state: int
             seed to use to generate a numpy generator instance. Default is None
+        verbose: bool (default=False)
+            If True, print the number of clusters for which the consensus matrix is computed
         """
         rand_state = np.random.default_rng(random_state)
         consensus_mats = np.zeros(
@@ -119,10 +122,12 @@ class consensusClustering:
         )
 
         for k in range(self.min_k, self.max_k + 1):  # for each number of clusters
+            if verbose:
+                logging.info(f"Computing consensus matrix for {k} clusters")
             indicator_matrix = np.zeros((data.shape[0],) * 2)
             connectivity_matrix = np.zeros((data.shape[0],) * 2)
 
-            for h in range(self.nb_iteration):  # resample H times
+            for _ in range(self.nb_iteration):  # resample H times
                 resampled_indices = self._internal_resample(
                     data, self.resample_proportion, rand_state
                 )
