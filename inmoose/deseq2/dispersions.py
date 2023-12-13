@@ -523,11 +523,13 @@ def estimateDispersionsFit(obj, fitType="parametric", minDisp=1e-8, quiet=False)
         useForMean = useForMean & ~np.isnan(objNZ.var["dispGeneEst"])
         meanDisp = trim_mean(objNZ.var["dispGeneEst"][useForMean], 0.001)
         dispFunction = lambda means: meanDisp
+        dispFunction.mean = meanDisp
 
     if fitType == "glmGamPoi":
         raise NotImplementedError()
 
     # store the dispersion function and attributes
+    dispFunction.fitType = fitType
     obj.setDispFunction(dispFunction)
 
     return obj
@@ -938,5 +940,7 @@ def parametricDispersionFit(means, disps):
         if iter_ > 10:
             raise RuntimeError("dispersion fit did not converge")
 
+    coefs.index = ["asymptDisp", "extraPois"]
     ans = lambda q: coefs[0] + coefs[1] / q
+    ans.coefficients = coefs
     return ans
