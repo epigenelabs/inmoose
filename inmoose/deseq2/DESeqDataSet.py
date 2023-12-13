@@ -85,16 +85,6 @@ class DescMetaData(MetaDataBase):
         super().__init__(obj, "description")
 
 
-class DispFunction:
-    def __init__(self, f, dispPriorVar=None, varLogDispEsts=None):
-        self.f = f
-        self.dispPriorVar = dispPriorVar
-        self.varLogDispEsts = varLogDispEsts
-
-    def __call__(self, *args, **kwargs):
-        return self.f(*args, **kwargs)
-
-
 class DESeqDataSet(AnnData):
     """
     DESeqDataSet extends AnnData class to store observations (samples) of
@@ -307,9 +297,7 @@ class DESeqDataSet(AnnData):
         :code:`self.var["dispFit"]` and the estimate of the variance of
         dispersion residuals.
         """
-        return DispFunction(
-            self._dispersionFunction, self._dispPriorVar, self._varLogDispEsts
-        )
+        return self._dispersionFunction
 
     @dispersionFunction.setter
     def dispersionFunction(self, v):
@@ -344,9 +332,6 @@ class DESeqDataSet(AnnData):
         DESeqDataSet
             self object
         """
-        if not isinstance(value, DispFunction):
-            value = DispFunction(value)
-
         # the following will add 'dispFit' to self.var
         # first check to see that we have 'baseMean' and 'allZero'
         if "baseMean" not in self.var or "allZero" not in self.var:
@@ -379,9 +364,7 @@ class DESeqDataSet(AnnData):
                 )
 
         # store the dispersion function
-        self._dispersionFunction = value.f
-        self._dispPriorVar = value.dispPriorVar
-        self._varLogDispEsts = value.varLogDispEsts
+        self._dispersionFunction = value
         return self
 
     def __getitem__(self, index):
