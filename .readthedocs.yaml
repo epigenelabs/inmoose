@@ -13,7 +13,8 @@ build:
   jobs:
     post_build:
       - echo "Listing the content of the output folder"
-      - ls ${READTHEDOCS_OUTPUT}/html
+      - ls -l ${READTHEDOCS_OUTPUT}/html
+      - ls -R ${READTHEDOCS_OUTPUT}/html
       - echo "Listing the repl images"
       - ls ${READTHEDOCS_OUTPUT}/html/_images_repl
 

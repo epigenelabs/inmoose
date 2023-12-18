@@ -21,8 +21,22 @@ hesitate to open an issue if your favorite DESeq2 feature is missing.
 
 
 .. repl::
+   import os
+   import getpass
+   getpass.getuser()
+
    from matplotlib import rcParams
-   rcParams
+   repl_img = os.path.dirname(rcParams['savefig.directory'])
+   rel_repl_img = os.path.relpath(repl_img, os.path.curdir)
+   repl_img
+   rel_repl_img
+   os.path.exists(repl_img)
+   os.path.exists(rel_repl_img)
+   os.makedirs(rel_repl_img, exist_ok=True)
+   os.path.exists(repl_img)
+   os.path.exists(rel_repl_img)
+   fh = open(f"{rcParams['savefig.directory']}000.txt", "w")
+   #rcParams
 
 
 Quick start
