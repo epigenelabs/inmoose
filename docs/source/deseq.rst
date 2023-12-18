@@ -19,6 +19,12 @@ hesitate to open an issue if your favorite DESeq2 feature is missing.
    import pandas as pd
    import scipy
 
+
+.. repl::
+   from matplotlib import rcParams
+   rcParams
+
+
 Quick start
 ===========
 
