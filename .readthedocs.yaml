@@ -10,6 +10,12 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
+  jobs:
+    post_build:
+      - echo "Listing the content of the output folder"
+      - ls ${READTHEDOCS_OUTPUT}/html
+      - echo "Listing the repl images"
+      - ls ${READTHEDOCS_OUTPUT}/html/_images_repl
 
 # Optionally declare the Python requirements required to build your docs
 python:
