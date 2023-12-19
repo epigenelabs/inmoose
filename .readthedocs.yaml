@@ -11,6 +11,9 @@ build:
   tools:
     python: "3.11"
   jobs:
+    # make sure the repl image folder exists
+    pre_build:
+      - mkdir -p ${READTHEDOCS_OUTPUT}/html/_images_repl
     post_build:
       - echo "Listing the content of the output folder"
       - ls -l ${READTHEDOCS_OUTPUT}/html
