@@ -23,6 +23,8 @@ hesitate to open an issue if your favorite DESeq2 feature is missing.
 .. repl::
    import os
    from matplotlib import rcParams
+   rcParams['savefig.directory'] = rcParams['savefig.directory'].replace("readthedocs-org", "readthedocs.org")
+
    repl_img = os.path.dirname(rcParams['savefig.directory'])
    rel_repl_img = os.path.relpath(repl_img, os.path.curdir)
    repl_img
