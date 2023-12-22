@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.2.5-dev]
+## [0.3.0]
 
 - add and optimize a few functions in the `utils.stats` module
 - add a module featuring a port of the DESeq2 R package
