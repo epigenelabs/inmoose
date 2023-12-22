@@ -1,6 +1,6 @@
 [project]
 name = "inmoose"
-version = "0.3.0"
+version = "0.3.1-dev"
 description = "InMoose: the Integrated Multi Omic Open Source Environment"
 readme = "README.md"
 authors = [

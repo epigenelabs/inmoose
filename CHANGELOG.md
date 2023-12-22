@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.3.1-dev]
+
+None
+
 ## [0.3.0]
 
 - add and optimize a few functions in the `utils.stats` module
