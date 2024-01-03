@@ -1,8 +1,9 @@
 import unittest
 import numpy as np
+import pandas as pd
 
 from inmoose.utils import rnbinom
-from inmoose.edgepy import DGEList, glmFit
+from inmoose.edgepy import DGEList, glmFit, glmLRT, glmQLFTest
 
 
 class test_DGEGLM(unittest.TestCase):
@@ -25,9 +26,10 @@ class test_DGEGLM(unittest.TestCase):
         self.assertIsNone(d.prior_count)
         self.assertIsNone(d.unshrunk_coefficients)
         self.assertIsNone(d.method)
+        self.assertIsNone(d.AveLogCPM)
 
 
-class test_glmFit(unittest.TestCase):
+class test_glm(unittest.TestCase):
     def setUp(self):
         y = np.array(rnbinom(80, size=5, mu=20, seed=42)).reshape((20, 4))
         y = np.vstack(([0, 0, 0, 0], [0, 0, 2, 2], y))
@@ -171,3 +173,332 @@ class test_glmFit(unittest.TestCase):
             ]
         ).reshape(e.coefficients.shape)
         self.assertTrue(np.allclose(e.coefficients, coef_ref, atol=1e-6, rtol=0))
+
+    def test_glmQLFit(self):
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="No dispersion values found in DGEList object"
+        ):
+            self.d.glmQLFit()
+        # first estimate common dispersion
+        self.d.estimateGLMCommonDisp()
+
+        e = self.d.glmQLFit()
+        self.assertEqual(e.method, "oneway")
+        coef_ref = np.array(
+            [
+                [-8.989943, 0.000000000],
+                [-8.989943, 2.832275076],
+                [-3.812746, -0.258338047],
+                [-4.297698, -0.001976527],
+                [-3.705921, -0.522525658],
+                [-4.500199, 0.942978065],
+                [-4.040138, 0.500298444],
+                [-3.859316, 0.284480541],
+                [-4.226767, 0.184626544],
+                [-4.227016, 0.578352261],
+                [-3.572745, -0.441539334],
+                [-4.040290, -0.030706290],
+                [-3.572760, -0.441672710],
+                [-3.471510, -0.723582927],
+                [-3.882900, 0.175143962],
+                [-3.790498, 0.519873066],
+                [-3.985036, -0.278532340],
+                [-3.555513, -0.281880293],
+                [-3.471359, -0.051338428],
+                [-3.322486, -0.103831822],
+                [-3.882996, 0.290140213],
+                [-4.012239, 0.127298731],
+            ]
+        )
+        self.assertTrue(np.allclose(e.coefficients, coef_ref, atol=1e-4, rtol=0))
+        self.assertTrue(
+            np.array_equal(
+                [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                e.df_residual_zeros,
+            )
+        )
+        self.assertAlmostEqual(e.df_prior, 4.672744, places=6)
+        var_post_ref = np.array(
+            [
+                4.458200e-07,
+                8.302426e-06,
+                6.524738e-01,
+                3.709944e-01,
+                2.159878e00,
+                6.208389e-01,
+                5.878879e-01,
+                1.325040e00,
+                3.203313e-01,
+                1.176470e00,
+                6.941698e-01,
+                4.743232e-01,
+                1.205789e00,
+                5.523578e-01,
+                6.314750e-01,
+                5.425240e-01,
+                3.352875e-01,
+                2.129557e00,
+                9.924612e-01,
+                5.895944e-01,
+                5.991600e-01,
+                4.650080e-01,
+            ]
+        )
+        self.assertTrue(np.allclose(e.var_post, var_post_ref, atol=1e-6, rtol=0))
+        var_prior_ref = np.array(
+            [
+                4.458200e-07,
+                9.918589e-06,
+                6.392936e-01,
+                2.804475e-01,
+                6.394279e-01,
+                6.503286e-01,
+                7.568130e-01,
+                7.713810e-01,
+                4.405790e-01,
+                6.716242e-01,
+                7.527023e-01,
+                5.182746e-01,
+                7.526737e-01,
+                7.527380e-01,
+                7.426247e-01,
+                7.491848e-01,
+                4.566134e-01,
+                7.744945e-01,
+                7.490555e-01,
+                7.042350e-01,
+                7.668183e-01,
+                6.273684e-01,
+            ]
+        )
+        self.assertTrue(np.allclose(e.var_prior, var_prior_ref, atol=1e-6, rtol=0))
+
+    def test_glmQLFTest(self):
+        # first estimate common dispersion
+        self.d.estimateGLMCommonDisp()
+        s = glmQLFTest(self.d.glmQLFit())
+        table_ref = pd.DataFrame(
+            {
+                "logFC": [
+                    0.00000,
+                    4.086109e00,
+                    -0.3727030,
+                    -2.851525e-03,
+                    -0.7538452,
+                    1.36042978,
+                    0.7217781,
+                    0.4104187,
+                    0.2663598,
+                    0.8343859,
+                    -0.6370066,
+                    -0.04429981,
+                    -0.6371990,
+                    -1.04390950,
+                    0.2526793,
+                    0.7500183,
+                    -0.4018372,
+                    -0.4066673,
+                    -0.07406570,
+                    -0.14979766,
+                    0.4185838,
+                    0.1836532,
+                ],
+                "logCPM": [
+                    10.95644,
+                    1.154123e01,
+                    14.3827970,
+                    1.391051e01,
+                    14.3829969,
+                    14.39896457,
+                    14.6144562,
+                    14.6840429,
+                    14.1263018,
+                    14.4316968,
+                    14.6005670,
+                    14.22314458,
+                    14.6004725,
+                    14.60068510,
+                    14.5711003,
+                    14.9673456,
+                    14.1463618,
+                    14.7114142,
+                    14.96790942,
+                    15.13649877,
+                    14.6566606,
+                    14.3657820,
+                ],
+                "F": [
+                    0.000000e00,
+                    5.998382e05,
+                    4.845263e-01,
+                    4.551851e-05,
+                    5.906064e-01,
+                    6.441791e00,
+                    2.069610e00,
+                    3.032625e-01,
+                    4.811457e-01,
+                    1.334095e00,
+                    1.367280e00,
+                    9.186695e-03,
+                    7.875974e-01,
+                    4.518866e00,
+                    2.379445e-01,
+                    2.538764e00,
+                    1.047358e00,
+                    1.860394e-01,
+                    1.375613e-02,
+                    9.649525e-02,
+                    6.947198e-01,
+                    1.651446e-01,
+                ],
+                "PValue": [
+                    1.00000000,
+                    0.01861634,
+                    0.50988854,
+                    0.99481417,
+                    0.46850481,
+                    0.04035278,
+                    0.19546361,
+                    0.59978572,
+                    0.51131874,
+                    0.28775816,
+                    0.28234748,
+                    0.92645653,
+                    0.40567730,
+                    0.07303738,
+                    0.64131120,
+                    0.15720197,
+                    0.34177834,
+                    0.67982404,
+                    0.91008476,
+                    0.76555392,
+                    0.43338141,
+                    0.69717923,
+                ],
+            }
+        )
+        self.assertTrue(
+            np.allclose(table_ref["logFC"], s.table["logFC"], atol=1e-4, rtol=0)
+        )
+        self.assertTrue(
+            np.allclose(table_ref["logCPM"], s.table["logCPM"], atol=1e-4, rtol=0)
+        )
+        self.assertTrue(np.allclose(table_ref["F"], s.table["F"], rtol=1e-6))
+        self.assertTrue(
+            np.allclose(table_ref["PValue"], s.table["PValue"], atol=1e-6, rtol=0)
+        )
+
+    def test_glmLRT(self):
+        # first estimate common dispersion
+        self.d.estimateGLMCommonDisp()
+        s = glmLRT(self.d.glmFit())
+        table_ref = pd.DataFrame(
+            {
+                "logFC": [
+                    0.00000,
+                    4.08610921,
+                    -0.3727030,
+                    -2.851525e-03,
+                    -0.7538452,
+                    1.36042978,
+                    0.7217781,
+                    0.4104187,
+                    0.2663598,
+                    0.8343859,
+                    -0.6370066,
+                    -0.044299812,
+                    -0.6371990,
+                    -1.043910,
+                    0.2526793,
+                    0.7500183,
+                    -0.4018372,
+                    -0.4066673,
+                    -0.07406570,
+                    -0.1497977,
+                    0.4185838,
+                    0.18365325,
+                ],
+                "logCPM": [
+                    10.95644,
+                    11.54122852,
+                    14.3827970,
+                    1.391051e01,
+                    14.3829969,
+                    14.39896457,
+                    14.6144562,
+                    14.6840429,
+                    14.1263018,
+                    14.4316968,
+                    14.6005670,
+                    14.223144579,
+                    14.6004725,
+                    14.600685,
+                    14.5711003,
+                    14.9673456,
+                    14.1463618,
+                    14.7114142,
+                    14.96790942,
+                    15.1364988,
+                    14.6566606,
+                    14.36578202,
+                ],
+                "LR": [
+                    0.000000e00,
+                    4.980113e00,
+                    3.161407e-01,
+                    1.688711e-05,
+                    1.275638e00,
+                    3.999315e00,
+                    1.216698e00,
+                    4.018350e-01,
+                    1.541260e-01,
+                    1.569523e00,
+                    9.491243e-01,
+                    4.357462e-03,
+                    9.496767e-01,
+                    2.496031e00,
+                    1.502560e-01,
+                    1.377340e00,
+                    3.511659e-01,
+                    3.961817e-01,
+                    1.365242e-02,
+                    5.689306e-02,
+                    4.162483e-01,
+                    7.679356e-02,
+                ],
+                "PValue": [
+                    1.00000000,
+                    0.02564032,
+                    0.57393623,
+                    0.99672119,
+                    0.25871164,
+                    0.04551876,
+                    0.27000955,
+                    0.52614310,
+                    0.69462318,
+                    0.21027629,
+                    0.32994229,
+                    0.94736901,
+                    0.32980161,
+                    0.11413364,
+                    0.69829083,
+                    0.24055469,
+                    0.55345388,
+                    0.52906782,
+                    0.90698400,
+                    0.81147574,
+                    0.51881503,
+                    0.78169064,
+                ],
+            }
+        )
+        self.assertTrue(
+            np.allclose(table_ref["logFC"], s.table["logFC"], atol=1e-4, rtol=0)
+        )
+        self.assertTrue(
+            np.allclose(table_ref["logCPM"], s.table["logCPM"], atol=1e-4, rtol=0)
+        )
+        self.assertTrue(np.allclose(table_ref["LR"], s.table["LR"], atol=1e-5, rtol=0))
+        self.assertTrue(
+            np.allclose(table_ref["PValue"], s.table["PValue"], atol=1e-5, rtol=0)
+        )
