@@ -21,12 +21,15 @@
 # the Bioconductor edgeR package (version 3.38.4):
 # - 'src/nbdev.cpp' and 'src/R_compute_nbdev.cpp' (function
 #   `compute_unit_nb_deviance`)
+# - 'R/q2qnbinom.R' (function _q2qnbinom)
 
 import numpy as np
 cimport cython
 from libcpp.cmath cimport log
 from scipy.linalg.cython_lapack cimport dormqr, dgeqrf, dtrtrs, dpotrf, dpotrs, dsytrf
 from scipy.linalg.cython_blas cimport dgemv
+from libc.math cimport sqrt
+from scipy.special cimport cython_special as sp
 
 cdef public object make_levenberg_result "make_levenberg_result"(
         ndarray[double, ndim=2] coefficients,
@@ -131,3 +134,34 @@ cdef double compute_unit_nb_deviance(double y, double mu, double phi):
         return 2 * (resid/mu - log(y/mu)) * mu/(1+product)
     else:
         return 2 * (y * log(y/mu) + (y + 1/phi) * log((mu + 1/phi)/(y + 1/phi)))
+
+@cython.ufunc
+cdef double _q2qnbinom(double x, double input_mean, double output_mean, double dispersion):
+    if x < 0:
+        raise ValueError("x must be non-negative")
+    if input_mean < 0:
+        raise ValueError("input_mean must be non-negative")
+    if output_mean < 0:
+        raise ValueError("output_mean must be non-negative")
+    if dispersion < 0:
+        raise ValueError("dispersion must be non-negative")
+
+    eps = 1e-14
+    if input_mean < eps or output_mean < eps:
+        input_mean += 0.25
+        output_mean += 0.25
+    ri = 1 + dispersion * input_mean
+    vi = input_mean * ri
+    ro = 1 + dispersion * output_mean
+    vo = output_mean * ro
+
+    q1 = output_mean + sqrt(vo / vi) * (x - input_mean)
+
+    if x >= input_mean:
+        p2 = sp.gammaincc(input_mean / ri, x/ri)
+        q2 = sp.gammainccinv(output_mean / ro, p2) * ro
+    else:
+        p2 = sp.gammainc(input_mean / ri, x/ri)
+        q2 = sp.gammaincinv(output_mean / ro, p2) * ro
+
+    return (q1+q2)/2
