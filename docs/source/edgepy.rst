@@ -17,6 +17,10 @@ References
    Rsubread and the edgeR quasi-likelihood pipeline. *F1000Research* 5, 1438.
    :doi:`10.12688/f1000research.8987.2`
 
+.. [Gibbons1975] J.D. Gibbons, J.W. Pratt. 1975. P-values: interpretation and
+   methodology. *The American Statistician* 29, 20-25.
+   :doi:`10.1080/00031305.1975.10479106`
+
 .. [Lun2016] A.T.L. Lun, Y. Chen, G.K. Smyth. 2016. It's DE-licious: a recipe
    for differential expression analyses of RNA-seq experiments using
    quasi-likelihood methods in edgeR.  *Methods in Molecular Biology* 1418,
@@ -42,6 +46,10 @@ References
    2016. Robust hyperparameter estimation protects against hypervariable genes
    and improves power to detect differential expression. *Annals of Applied
    Statistics* 10, 946-963. :doi:`10.1214/16-AOAS920`
+
+.. [Robinson2008] M.D. Robinson, g.K. Smyth. 2008. Small-sample estimation of
+   negative binomial dispersion, with applications to SAGE data.
+   *Biostatistics* 9, 321-332.  :doi:`10.1093/biostatistics/kxm030`
 
 
 Code documentation
