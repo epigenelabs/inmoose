@@ -44,7 +44,6 @@ edgepy_cpp = Extension(
         "inmoose/edgepy/edgepy_cpp/glm_levenberg.cpp",
         "inmoose/edgepy/edgepy_cpp/glm_one_group.cpp",
         "inmoose/edgepy/edgepy_cpp/interpolator.cpp",
-        "inmoose/edgepy/edgepy_cpp/nbdev.cpp",
         "inmoose/edgepy/edgepy_cpp/objects.cpp",
     ],
     include_dirs=[numpy.get_include(), "inmoose/common_cpp/"],

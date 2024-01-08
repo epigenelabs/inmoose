@@ -1,6 +1,7 @@
 # distutils: language = c++
 #-----------------------------------------------------------------------------
-# Copyright (C) 2022-2023 Maximilien Colange
+# Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
+# Copyright (C) 2022-2024 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +17,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------
 
+# This file contains Cython ports of the original C++ code from various files of
+# the Bioconductor edgeR package (version 3.38.4):
+# - 'src/nbdev.cpp' and 'src/R_compute_nbdev.cpp' (function
+#   `compute_unit_nb_deviance`)
+
 import numpy as np
+cimport cython
+from libcpp.cmath cimport log
 from scipy.linalg.cython_lapack cimport dormqr, dgeqrf, dtrtrs, dpotrf, dpotrs, dsytrf
 from scipy.linalg.cython_blas cimport dgemv
 
@@ -77,3 +85,49 @@ cdef public void f77_dpotrs "f77_dpotrs"(const char *uplo, const int *n, const i
     dpotrs(<char*>uplo, <int*>n, <int*>nrhs, <double*>a, <int*>lda, b, <int*>ldb, info)
 cdef public void f77_dsytrf "f77_dsytrf"(const char *uplo, const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info) nogil:
     dsytrf(<char*>uplo, <int*>n, a, <int*>lda, ipiv, work, <int*>lwork, info)
+
+
+cdef double mildly_low_value = 1e-8
+@cython.ufunc
+@cython.cdivision(True)
+cdef double compute_unit_nb_deviance(double y, double mu, double phi):
+    """
+    Calculate the deviance of a negative binomial fit
+
+    Note the protection for very large mu*phi (where we use a Gamma instead) or
+    very small mu*phi (where we use a Poisson instead). This approximation
+    protects against numerical instability introduced by subtracting a very
+    large log value in (log mu) with another very large logarithm (log mu+1/phi).
+    We need to consider the phi as the approximation is only good when the
+    product is very big or very small.
+
+    Arguments
+    ---------
+    y : array_like
+        counts matrix
+    mu : array_like
+        expected means matrix (broadcastable to the shape of :code:`y`)
+    phi : array_like
+        dispersion matrix (broadcastable to the shape of :code:`y`)
+
+    Returns
+    -------
+    ndarray
+        matrix of deviances (same shape as :code:`y`)
+    """
+    # add a small value to protect against zero during division and log
+    y = y + mildly_low_value
+    mu = mu + mildly_low_value
+
+    # Calculating the deviance using either the Poisson (small phi*mu), the
+    # Gamma (large phi*mu) or NB (everything else). Some additional work is
+    # put in to make the transitiosn between families smooth
+    resid = y - mu
+    product = mu * phi
+
+    if phi < 1e-4:
+        return 2 * (y * log(y/mu) - resid - 0.5*resid*resid*phi*(1+phi*(2/3*resid-y)))
+    elif product > 1e6:
+        return 2 * (resid/mu - log(y/mu)) * mu/(1+product)
+    else:
+        return 2 * (y * log(y/mu) + (y + 1/phi) * log((mu + 1/phi)/(y + 1/phi)))
