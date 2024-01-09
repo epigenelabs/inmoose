@@ -80,6 +80,18 @@ class VirtualCohortInput:
             batch id of the batch to use as reference. Must be one of the element of
             :code:`batch` (default: :code:`None`).
         """
+        if isinstance(counts, pd.DataFrame):
+            list_samples = counts.columns
+            list_genes = counts.index
+            counts = counts.values
+        elif isinstance(counts, np.ndarray):
+            list_samples = None
+            list_genes = None
+        else:
+            raise ValueError("counts must be a pandas DataFrame or a numpy nd array")
+
+        self.list_samples = list_samples
+        self.list_genes = list_genes
         self.counts = counts
         self.batch = asfactor(batch)
         self.nan_batch = self.batch.isna().any()
@@ -114,9 +126,7 @@ class VirtualCohortInput:
 
         if covar_mod is not None and not isinstance(covar_mod, DesignMatrix):
             # convert to dataframe
-            dfIn = True
             if isinstance(covar_mod, (list, np.ndarray)):
-                dfIn = False
                 covar_mod = pd.DataFrame(covar_mod)
             elif type(covar_mod) != pd.DataFrame:
                 raise ValueError(
@@ -134,7 +144,7 @@ class VirtualCohortInput:
                         "The covar_mod matrix parameter doesn't match the number of sample"
                     )
 
-            if not dfIn:
+            if covar_mod.columns.values.dtype == "int64":
                 covar_mod.columns = [
                     "cov_" + str(col_nb) for col_nb in covar_mod.columns
                 ]
@@ -249,7 +259,6 @@ class VirtualCohortInput:
             raise ValueError(
                 f"Covariates {', '.join([str(c) for c in self.confounded_cov])} are confounded with the batches. Please review your covariates before proceeding with batch effect correction."
             )
-
         return (False, self)
 
     def fix_na_cov(self, na_cov_action="raise"):

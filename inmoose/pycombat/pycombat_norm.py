@@ -527,7 +527,7 @@ def adjust_data(
 
 
 def pycombat_norm(
-    data,
+    counts,
     batch,
     covar_mod=None,
     par_prior=True,
@@ -542,7 +542,7 @@ def pycombat_norm(
 
     Arguments
     ---------
-    data : matrix
+    counts : matrix
         expression matrix (dataframe or numpy array). It contains the information about the gene expression (rows) for each sample (columns).
     batch : list
         batch indices. Must have as many elements as the number of columns in the expression matrix.
@@ -574,22 +574,16 @@ def pycombat_norm(
         the input expression matrix adjusted for batch effects.
         same type as the input `data`
     """
-
-    if isinstance(data, pd.DataFrame):
-        list_samples = data.columns
-        list_genes = data.index
-        dat = data.values
-    else:
-        dat = data
-
     check_mean_only(mean_only)
 
     # Handle batches, covariates and prepare design matrix
     vci = make_design_matrix(
-        dat, batch, covar_mod, ref_batch, na_cov_action=na_cov_action
+        counts, batch, covar_mod, ref_batch, na_cov_action=na_cov_action
     )
 
     dat = vci.counts
+    list_samples = vci.list_samples
+    list_genes = vci.list_genes
     batch = vci.batch
     design = np.transpose(vci.design)
     ref = vci.ref_batch_idx
@@ -622,7 +616,7 @@ def pycombat_norm(
         dat,
     )
 
-    if isinstance(data, pd.DataFrame):
+    if isinstance(counts, pd.DataFrame):
         return pd.DataFrame(bayes_data, columns=list_samples, index=list_genes)
     else:
         return bayes_data

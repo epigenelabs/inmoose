@@ -2,7 +2,7 @@
 
 ## [0.3.1-dev]
 
-None
+- Fix issue #25 and #10 related to counts parameter data format check and gestion (when it's a pandas dataframe)
 
 ## [0.3.0]
 

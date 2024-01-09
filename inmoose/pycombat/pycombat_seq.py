@@ -29,7 +29,7 @@ from .helper_seq import vec2mat, match_quantiles
 
 
 def pycombat_seq(
-    data,
+    counts,
     batch,
     covar_mod=None,
     shrink=False,
@@ -42,7 +42,7 @@ def pycombat_seq(
 
     Arguments
     ---------
-    data : matrix
+    counts : matrix
         raw count matrix (dataframe or numpy array) from genomic studies (dimensions gene x sample)
     batch : array or list or :obj:`inmoose.utils.factor.Factor`
         Batch indices. Must have as many elements as the number of columns in the expression matrix.
@@ -73,13 +73,6 @@ def pycombat_seq(
         same type as the input `data`
     """
 
-    if isinstance(data, pd.DataFrame):
-        list_samples = data.columns
-        list_genes = data.index
-        counts = data.values
-    else:
-        counts = data
-
     ####### Preparation #######
     # Handle batches, covariates and prepare design matrix
     vci = make_design_matrix(
@@ -91,6 +84,8 @@ def pycombat_seq(
     )
 
     counts = vci.counts
+    list_samples = vci.list_samples
+    list_genes = vci.list_genes
     batch = vci.batch
     design = vci.design
     batchmod = vci.batch_mod
@@ -231,7 +226,7 @@ def pycombat_seq(
     adjust_counts_whole[keep, :] = adjust_counts
     adjust_counts_whole[rm, :] = countsOri[rm, :]
 
-    if isinstance(data, pd.DataFrame):
+    if isinstance(counts, pd.DataFrame):
         return pd.DataFrame(adjust_counts_whole, columns=list_samples, index=list_genes)
     else:
         return adjust_counts_whole
