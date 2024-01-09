@@ -60,6 +60,7 @@ setup(
         "inmoose/data/airway",
         "inmoose/data/pasilla",
         "inmoose/pycombat",
+        "inmoose/limma",
         "inmoose/common_cpp",
         "inmoose/edgepy",
         "inmoose/edgepy/edgepy_cpp",
