@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import pandas as pd
 
 from inmoose.utils import rnbinom
 from inmoose.pycombat import pycombat_seq
@@ -83,6 +84,39 @@ class test_pycombatseq(unittest.TestCase):
         res2 = pycombat_seq(self.y, ["a", "a", "b", "b", "b"], ref_batch="a")
         self.assertTrue(np.array_equal(res, res2))
 
+        # test raise error for incorect counts format
+        with self.assertRaisesRegex(
+            ValueError,
+            expected_regex="counts must be a pandas DataFrame or a numpy nd array",
+        ):
+            pycombat_seq(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 2, 2, 2],
+                    [19, 14, 14, 29, 13],
+                    [22, 13, 15, 13, 30],
+                    [34, 2, 15, 8, 25],
+                    [24, 18, 17, 41, 24],
+                    [11, 43, 24, 25, 12],
+                    [14, 21, 16, 7, 23],
+                    [31, 39, 29, 19, 10],
+                    [28, 18, 18, 12, 17],
+                    [17, 12, 11, 45, 47],
+                    [24, 14, 16, 33, 17],
+                    [24, 26, 20, 22, 42],
+                    [34, 18, 21, 13, 16],
+                    [6, 67, 33, 10, 35],
+                    [19, 31, 20, 51, 33],
+                    [34, 23, 23, 21, 24],
+                    [30, 18, 19, 26, 16],
+                    [32, 17, 19, 38, 32],
+                    [17, 16, 14, 36, 20],
+                    [23, 14, 15, 13, 25],
+                    [8, 30, 18, 49, 15],
+                ],
+                ["a", "b", "b", "b", "b"],
+            )
+
         # test raise error for single sample batch
         with self.assertRaisesRegex(
             ValueError, expected_regex="Batches a contain a single sample"
@@ -119,6 +153,53 @@ class test_pycombatseq(unittest.TestCase):
                 covar_mod=[1, 2, 1, np.nan, 1],
                 na_cov_action="remove",
             )
+
+        # with count as dataframe
+        # check remove option warning message
+        with self.assertWarnsRegex(
+            UserWarning,
+            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
+        ):
+            res = pycombat_seq(
+                pd.DataFrame(
+                    self.y,
+                    columns=["sample1", "sample2", "sample3", "sample4", "sample5"],
+                ),
+                self.batch,
+                covar_mod=pd.DataFrame(
+                    [1, 2, 1, np.nan, 1],
+                    columns=["test"],
+                    index=["sample1", "sample2", "sample3", "sample4", "sample5"],
+                ),
+                na_cov_action="remove",
+            )
+
+        # check remove option results
+        res2 = pycombat_seq(
+            pd.DataFrame(
+                self.y[:, [0, 1, 2, 4]],
+                columns=["sample1", "sample2", "sample3", "sample5"],
+            ),
+            np.array([1, 1, 2, 2]),
+            covar_mod=pd.DataFrame(
+                [1, 2, 1, 1],
+                columns=["test"],
+                index=["sample1", "sample2", "sample3", "sample5"],
+            ),
+        )
+        self.assertTrue(np.array_equal(res, res2))
+
+        with self.assertWarnsRegex(
+            UserWarning,
+            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
+        ):
+            res = pycombat_seq(
+                self.y,
+                self.batch,
+                covar_mod=pd.DataFrame(["a", "b", "a", np.nan, "a"], columns=["test"]),
+                na_cov_action="remove",
+            )
+
         ref_y = np.delete(self.y, (3), axis=1)
         ref_batch = np.array([1, 1, 2, 2])
         ref = pycombat_seq(ref_y, ref_batch, covar_mod=[1, 2, 1, 1])
