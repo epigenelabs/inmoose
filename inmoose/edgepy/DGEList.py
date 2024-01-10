@@ -67,6 +67,7 @@ class DGEList(object):
         estimateGLMTagwiseDisp_DGEList as estimateGLMTagwiseDisp,
     )
     from .glmFit import glmFit_DGEList as glmFit
+    from .glmQLFit import glmQLFit_DGEList as glmQLFit
     from .predFC import predFC_DGEList as predFC
     from .splitIntoGroups import splitIntoGroups_DGEList as splitIntoGroups
 

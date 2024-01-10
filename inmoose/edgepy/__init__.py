@@ -7,7 +7,8 @@ from .dispCoxReid import dispCoxReid
 from .dispCoxReidInterpolateTagwise import dispCoxReidInterpolateTagwise
 from .estimateGLMCommonDisp import estimateGLMCommonDisp
 from .estimateGLMTagwiseDisp import estimateGLMTagwiseDisp
-from .glmFit import glmFit
+from .glmFit import glmFit, glmLRT
+from .glmQLFit import glmQLFit, glmQLFTest
 from .maximizeInterpolant import maximizeInterpolant
 from .mglmLevenberg import mglmLevenberg
 from .mglmOneGroup import mglmOneGroup

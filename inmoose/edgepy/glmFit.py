@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
-# Copyright (C) 2022-2023 Maximilien Colange
+# Copyright (C) 2022-2024 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,16 +20,19 @@
 
 
 import numpy as np
+import pandas as pd
+import scipy
 
 from ..utils import asfactor
 from .DGEGLM import DGEGLM
+from .DGELRT import DGELRT
 from .makeCompressedMatrix import _compressDispersions, _compressOffsets
 from .mglmLevenberg import mglmLevenberg
 from .mglmOneWay import designAsFactor, mglmOneWay
 from .nbinomDeviance import nbinomDeviance
 from .predFC import predFC
 
-from patsy import dmatrix
+from patsy import dmatrix, DesignMatrix
 
 
 def glmFit_DGEList(self, design=None, dispersion=None, prior_count=0.125, start=None):
@@ -116,8 +119,7 @@ def glmFit(
     each gene. Conduct genewise statistical tests for a given coefficient or
     coefficient contrast.
 
-    This function implements one of the GLM methods developed by McCarthy et al.
-    (2012) [1]_.
+    This function implements one of the GLM methods developed by [McCarthy2012]_.
 
     :code:`glmFit` fits genewise negative binomial GLMs, all with the same
     design matrix but possibly different dispersions, offsets and weights.
@@ -189,12 +191,6 @@ def glmFit(
         - :code:`fitted_values`, matrix of fitted values from GLM fits, same
           shape as :code:`y`
         - :code:`deviance`, numeric vector of deviances, one for each gene
-
-    References
-    ----------
-    .. [1] D. J. McCarthy, Y. Chen, G. K. Smyth. 2012. Differential expression
-       analysis of multifactor RNA-Seq experiments with respect to biological
-       variation. Nucleic Acids Research 40, 4288-4297. :doi:`10.1093/nar/gks042`
     """
     # Check y
     y = np.asarray(y, order="F")
@@ -202,15 +198,20 @@ def glmFit(
 
     # Check design
     if design is None:
-        design = np.ones(shape=(nlib, 1), order="F")
-    else:
+        design = dmatrix("~1", pd.DataFrame(y.T))
+    try:
+        design = DesignMatrix(
+            np.asarray(design, order="F"), design_info=design.design_info
+        )
+    except AttributeError:
         design = np.asarray(design, order="F")
-        if design.shape[0] != nlib:
-            raise ValueError("design should have as many rows as y has columns")
-        if np.linalg.matrix_rank(design) < design.shape[1]:
-            raise ValueError(
-                "Design matrix is not full rank. Some coefficients are not estimable"
-            )
+
+    if design.shape[0] != nlib:
+        raise ValueError("design should have as many rows as y has columns")
+    if np.linalg.matrix_rank(design) < design.shape[1]:
+        raise ValueError(
+            "Design matrix is not full rank. Some coefficients are not estimable"
+        )
 
     # Check dispersion
     if dispersion is None:
@@ -293,3 +294,148 @@ def glmFit(
     fit.weights = weights
     fit.prior_count = prior_count
     return fit
+
+
+def glmLRT(glmfit, coef=None, contrast=None):
+    """
+    Conduct genewise statistical tests for a given coefficient or coefficient contrast.
+
+    This function implements one of the GLM methods developed by [McCarthy2012]_.
+
+    :func:`glmLRT` conducts likelihood ratio tests for one or more coefficients
+    in the linear model. If :code:`coef` is used, the null hypothesis is that
+    all the coefficients indicated by :code:`coef` are equal to zero. If
+    :code:`contrast` is non-null, then the null hypothesis is that the
+    specified contrasts of the coefficients are equal to zero. For example, a
+    contrast of :code:`[0,1,-1]`, assuming there are three coefficients, would
+    test the hypothesis that the second and third coefficients are equal.
+
+    Arguments
+    ---------
+    glmfit : DGEGLM
+        a :class:`DGEGLM` object, usually output from :func:`glmFit`
+    coef : array_like of integers or strings
+        vector indicating which coefficients of the linear model are to be
+        tested equal to zero. Values must be column indices or column names of
+        :code:`design`. Defaults to the last coefficient. Ignored if
+        :code:`contrast` is specified.
+    contrast : array or matrix of integers
+        vector or matrix specifying one or more contrasts of the linear model
+        coefficients to be tested equal to zero. Number of rows must equal to
+        the number of columns of :code:`design`. If specified, then takes
+        precedence over :code:`coef`.
+
+    Returns
+    -------
+    DGELRT
+        object with the same components as for :func:`glmFit` plus the following:
+
+        - :code:`table`, data frame with the same rows as :code:`y` containing
+          the log2-fold-changes, likelihood ratio statistics and *p*-values,
+          ready to be displayed by :func:`topTags`.
+        - :code:`comparison`, string describing the coefficient or the contrast
+          being tested.
+
+        The dataframe :code:`table` contains the following columns:
+
+        - :code:`"logFC"`, log2-fold-change of expression between conditions
+          being tested.
+        - :code:`"logCPM"`, average log2-counts per million, the average taken
+          over all libraries in :code:`y`.
+        - :code:`LR`, likelihood ratio statistics.
+        - :code:`PValue`, *p*-values.
+    """
+    if coef is None:
+        coef = glmfit.design.shape[1] - 1
+    if not isinstance(glmfit, DGEGLM):
+        raise ValueError("glmfit must be a DGEGLM object (usually produced by glmFit).")
+
+    if glmfit.AveLogCPM is None:
+        glmfit.AveLogCPM = glmfit.aveLogCPM()
+    nlibs = glmfit.coefficients.shape[1]
+
+    # check design matrix
+    design = glmfit.design
+    nbeta = design.shape[1]
+    if nbeta < 2:
+        raise ValueError(
+            "Need at least two columns for design, usually the first is the intercept columns"
+        )
+    coef_names = design.design_info.column_names
+
+    # Evaluate logFC for coef to be tested
+    # Note that contrast takes precedence over coef: if contrast is given then reform
+    # design matrix so that contrast of interest is last column
+    if contrast is None:
+        if not isinstance(coef, (list, np.ndarray)):
+            coef = [coef]
+        if isinstance(coef[0], str):
+            check_coef = np.isin(coef, design.design_info.column_names)
+            if (~check_coef).any():
+                raise ValueError(
+                    "One or more named coef arguments do not match a column of the design matrix."
+                )
+            coef_name = coef
+            coef = np.nonzero([design.design_info.column_names == c for c in coef])[0]
+        else:
+            coef_name = [coef_names[c] for c in coef]
+        logFC = glmfit.coefficients[:, coef] / np.log(2)
+    else:
+        # TODO make sure contrast is a matrix
+        if contrast.shape[0] != glmfit.coefficients.shape[1]:
+            raise ValueError(
+                "contrast vector of wrong length, should be equal to number of coefficients in the linear model"
+            )
+        ncontrasts = np.linalg.matrix_rank(contrast)
+        Q, R = np.linalg.qr(contrast)
+        if ncontrasts == 0:
+            raise ValueError("contrasts are all zero")
+        coef = np.arange(ncontrasts)
+        logFC = (glmfit.coefficients @ contrast) / np.log(2)
+        if ncontrasts > 1:
+            coef_name = f"LR test on {ncontrasts} degrees of freedom"
+        else:
+            contrast = np.squeeze(contrast)
+            i = contrast != 0
+            coef_name = " ".join(
+                [f"{a}*{b}" for a, b in zip(contrast[i], coef_names[i])]
+            )
+        Dvec = np.ones(nlibs, int)
+        Dvec[coef] = np.diag(R)[coef]
+        Q = Q * Dvec
+        design = design @ Q
+
+    # Null design matrix
+    non_coef = np.setdiff1d(np.arange(design.shape[1]), coef)
+    design0 = design[:, non_coef]
+
+    # Null fit
+    fit_null = glmFit(
+        glmfit.counts,
+        design=design0,
+        offset=glmfit.offset,
+        weights=glmfit.weights,
+        dispersion=glmfit.dispersion,
+        prior_count=0,
+    )
+
+    # Likelihood ratio statistic
+    LR = np.subtract(fit_null.deviance, glmfit.deviance)
+    df_test = fit_null.df_residual - glmfit.df_residual
+    LRT_pvalue = scipy.stats.chi2.sf(LR, df=df_test)
+    # TODO what about row names?
+    tab = pd.DataFrame()
+    if logFC.ndim > 1:
+        for i in range(logFC.shape[1]):
+            tab[f"logFC{i}"] = logFC[:, i]
+        tab.columns = ["logFC" for i in range(logFC.shape[1])]
+    else:
+        tab["logFC"] = logFC
+    tab["logCPM"] = glmfit.AveLogCPM
+    tab["LR"] = LR
+    tab["PValue"] = LRT_pvalue
+    res = DGELRT(glmfit)
+    res.table = tab
+    res.comparison = coef_name
+    res.df_test = df_test
+    return res

@@ -84,6 +84,20 @@ def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion
     )
 
 
+def aveLogCPM_DGEGLM(y, prior_count=2, dispersion=None):
+    # Dispersion supplied as argument over-rules value in object
+    if dispersion is None:
+        dispersion = y.dispersion
+
+    return aveLogCPM(
+        y.counts,
+        offset=y.offset,
+        prior_count=prior_count,
+        dispersion=dispersion,
+        weights=y.weights,
+    )
+
+
 def aveLogCPM(
     y, lib_size=None, offset=None, prior_count=2, dispersion=None, weights=None
 ):
