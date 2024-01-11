@@ -14,7 +14,7 @@ from .exactTestByDeviance import exactTestByDeviance
 from .exactTestBySmallP import exactTestBySmallP
 from .exactTestDoubleTail import exactTestDoubleTail
 from .glmFit import glmFit, glmLRT
-from .glmQLFit import glmQLFit, glmQLFTest
+from .glmQLFit import glmQLFit, glmQLFTest, plotQLDisp
 from .maximizeInterpolant import maximizeInterpolant
 from .mglmLevenberg import mglmLevenberg
 from .mglmOneGroup import mglmOneGroup

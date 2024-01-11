@@ -345,3 +345,60 @@ def _isBelowPoissonBound(glmfit):
     fitted = glmfit.fitted_values
 
     return (((fitted * disp + 1) * s2) < 1).any(axis=1)
+
+
+def plotQLDisp(
+    glmfit,
+    xlab="Average Log2 CPM",
+    ylab="Quarter-Root Mean Deviance",
+    col_shrunk="red",
+    col_trend="blue",
+    col_raw="black",
+):
+    """
+    Plot the genewise quasi-likelihood dispersion against the gene abundance (in log2 counts per million)
+
+    This function displays the quarter-root of the quasi-likelihood dispersions
+    for all genes, before and after shrinkage towards a trend. If
+    :code:`glmfit` was constructed without an abundance trend, the function
+    instead plots a horizontal line (of color :code:`col_trend`) at the common
+    value towards which dispersions are shrunk. The quarter-root transformation
+    is applied to improve visibility for dispersions around unity.
+
+    Arguments
+    ---------
+    glmfit : DGEGLM
+        a DGEGLM object produced by :func:`glmQLFit`
+    xlab : str
+        label for the x-axis
+    ylab : str
+        label for the y-axis
+    col_shrunk : str
+        color of the points representing the squeezed quasi-likelihood dispersions
+    col_trend : str
+        color of the line showing dispersion trend
+    col_raw : str
+        color of the line showing the unshrunk dispersions
+    """
+    import matplotlib.pyplot as plt
+
+    A = glmfit.AveLogCPM
+    if A is None:
+        A = glmfit.aveLogCPM()
+    A = np.asarray(A)
+    s2 = glmfit.deviance / glmfit.df_residual_zeros
+    if glmfit.var_post is None:
+        raise ValueError("need to run glmQLFit before plotQLDisp")
+
+    plt.scatter(A, np.sqrt(np.sqrt(s2)), c=col_raw, label="Raw")
+    plt.scatter(A, np.sqrt(np.sqrt(glmfit.var_post)), c=col_shrunk, label="Shrunk")
+    if isinstance(glmfit.var_prior, float):
+        plt.axhline(y=np.sqrt(np.sqrt(glmfit.var_prior)), c=col_trend, label="Trend")
+    else:
+        o = np.argsort(A)
+        plt.plot(
+            A[o], np.sqrt(np.sqrt(glmfit.var_prior[o])), c=col_trend, label="Trend"
+        )
+
+    plt.legend(loc="upper right")
+    plt.show()
