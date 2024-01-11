@@ -5,6 +5,7 @@
 - support for Python 3.12
 - bump github actions versions
 - publish coverage report to coveralls.io
+- port `edgeR` functions for differential expression to `inmoose`
 
 ## [0.3.1]
 
