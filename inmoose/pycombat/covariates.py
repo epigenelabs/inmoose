@@ -257,7 +257,7 @@ class VirtualCohortInput:
 
         if self.confounded_cov is not None and len(self.confounded_cov) > 0:
             raise ValueError(
-                f"Covariates {', '.join([str(c) for c in self.confounded_cov])} are confounded with the batches. Please review your covariates before proceeding with batch effect correction."
+                f"Covariates {', '.join([str(self.covar_mod.design_info.column_names[c]) for c in self.confounded_cov])} are confounded with the batches. Please review your covariates before proceeding with batch effect correction."
             )
         return (False, self)
 
