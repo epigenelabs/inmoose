@@ -63,18 +63,29 @@ Code documentation
    addPriorCount
    adjustedProfileLik
    aveLogCPM
+   binomTest
    designAsFactor
    dispCoxReid
    dispCoxReidInterpolateTagwise
    estimateGLMCommonDisp
    estimateGLMTagwiseDisp
+   exactTest
+   exactTestBetaApprox
+   exactTestByDeviance
+   exactTestBySmallP
+   exactTestDoubleTail
    glmFit
+   glmLRT
+   glmQLFit
+   glmQLFTest
    mglmLevenberg
    mglmOneGroup
    mglmOneWay
    movingAverageByCol
    nbinomDeviance
+   plotQLDisp
    predFC
    splitIntoGroups
    systematicSubset
+   topTags
    validDGEList
