@@ -41,7 +41,7 @@ def varianceStabilizingTransformation(obj, blind=True, fitType="parametric"):
     yielding a matrix of values which are now approximately homoskedastic
     (having constant variance along the range of mean values). The
     transformation also normalizes with respect to library size. The
-    :fun:`rlog` is less sensitive to size factors, which can be an issue when
+    :func:`rlog` is less sensitive to size factors, which can be an issue when
     size factors vary widely. These transformations are useful when checking
     for outliers or as input for machine learning techniques such as clustering
     or linear discriminant analysis.
@@ -56,10 +56,10 @@ def varianceStabilizingTransformation(obj, blind=True, fitType="parametric"):
     the variance function, *i.e.* one ignoring conditions. This is performed by
     default, and can be modified using the :code:`blind` argument.
 
-    Note that neither :fun:`rlog` transformation nor the VST are used by the
-    differential expression estimation in :fun:`DESeq`, which always occurs on
+    Note that neither :func:`rlog` transformation nor the VST are used by the
+    differential expression estimation in :func:`DESeq`, which always occurs on
     the raw count data, through generalized linear modeling which incorporates
-    knowledge of the variance-mean dependence. The :fun:`rlog` transformation
+    knowledge of the variance-mean dependence. The :func:`rlog` transformation
     and VST are offered as separate functionality which can be used for
     visualization, clustering or other machine learning tasks. See the
     transformation section of the vignette for more details.
@@ -70,7 +70,8 @@ def varianceStabilizingTransformation(obj, blind=True, fitType="parametric"):
     A typical workflow is shown in Section *Variance stabilizing
     transformation* in the vignette.
 
-    If :fun:`estimateDispersions` was called with:
+    If :func:`estimateDispersions` was called with:
+
     - :code:`fitType="parametric"`: a closed-form expression for the variance
       stabilizing transformation is used on the normalized count data.
     - :code:`fitType="local"`: the reciprocal of the square root of the
@@ -80,7 +81,7 @@ def varianceStabilizingTransformation(obj, blind=True, fitType="parametric"):
       transformed value.
     - :code:`fitType="mean"`, a VST is applied for Negative Binomial
       distributed counts, :math:`k`, with a fixed dispersion, :math:`a`:
-      :math:`(2 \\asinh(\sqrt(a k)) - \log(a) - \log(4)) / \log(2)`.
+      :math:`(2 \\operatorname{asinh}(\sqrt{a k}) - \log(a) - \log(4)) / \log(2)`.
 
     In all cases, the transformation is scaled such that for large counts, it
     becomes asymptotically (for large values) equal to the logarithm to base 2
@@ -88,9 +89,9 @@ def varianceStabilizingTransformation(obj, blind=True, fitType="parametric"):
 
     The variance stabilizing transformation from a previous dataset can be
     "frozen" and reapplied to new samples. The frozen VST is accomplished by
-    saving the dispersion function accessible with :fun:`dispersionFunction`,
+    saving the dispersion function accessible with :func:`dispersionFunction`,
     assigning this to the :class:`DESeqDataSet` with the new samples, and
-    running :fun:`varianceStabilizingTransformation` with :code:`blind` set to
+    running :func:`varianceStabilizingTransformation` with :code:`blind` set to
     :code:`False`. Then the dispersion function from the previous dataset will
     be used to transform the new sample(s).
 
@@ -98,7 +99,7 @@ def varianceStabilizingTransformation(obj, blind=True, fitType="parametric"):
     has to be used for all samples. This results in the variance stabilization
     to be only approximate. The more the size factors differ, the more residual
     dependence of the variance on the mean will be found in the transformed
-    data. :fun:`rlog` is a transformation which can perform better in these
+    data. :func:`rlog` is a transformation which can perform better in these
     cases. As shown in the vignette, :code:`meanSdPlot` from the package *vsn*
     can be used to see whether this is a problem.
 
@@ -120,7 +121,7 @@ def varianceStabilizingTransformation(obj, blind=True, fitType="parametric"):
         Defaults to :code:`True`.
     fitType : { "parametric", "local", "mean" }
         in case dispersions have not yet been estimated for :code:`self`, this
-        parameter is passed on to :fun:`estimateDispersions` (options described
+        parameter is passed on to :func:`estimateDispersions` (options described
         there).
         Defaults to :code:`"parametric"`.
 
@@ -231,7 +232,7 @@ def vst(obj, blind=True, nsub=1000, fitType="parametric"):
     """
     Quickly estimate dispersion trend and apply a variance stabilizing transformation
 
-    This is a wrapper for the :fun:`varianceStabilizingTransformation` (VST)
+    This is a wrapper for the :func:`varianceStabilizingTransformation` (VST)
     that provides much faster estimation of the dispersion trend used to
     determine the formula for the VST. The speed-up is accomplished by
     subsetting to a smaller number of genes in order to estimate this
@@ -244,17 +245,17 @@ def vst(obj, blind=True, nsub=1000, fitType="parametric"):
         a :class:`DESeqDataSet` or matrix of counts
     blind : bool
         whether to blind the transformation to the experimental design (see
-        :fun:`varianceStabilizingTransformation`)
+        :func:`varianceStabilizingTransformation`)
     nsub : int
         the number of genes to subset to (default 1000)
     fitType : { "parametric", "local", "mean" }
         for estimation of dispersions: this parameter is passed on to
-        :fun:`estimateDispersions` (options described there)
+        :func:`estimateDispersions` (options described there)
 
     Returns
     -------
     DESeqTransform or matrix
-        same as :fun:`varianceStabilizingTransformation`
+        same as :func:`varianceStabilizingTransformation`
     """
     if obj.n_var < nsub:
         raise ValueError(

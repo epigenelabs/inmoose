@@ -28,7 +28,7 @@ class DESeqTransform(AnnData):
         DESeqTransform constructor
 
         This constructor function would not typically be used by "end users". This simple class extends the :class:`~anndata.AnnData` class of the *anndata* package.
-        It is used by :fun:`rlog` and :fun:`varianceStabilizingTransformation` to wrap up the results into a class for downstream methods, such as :fun:`plotPCA`.
+        It is used by :func:`rlog` and :func:`varianceStabilizingTransformation` to wrap up the results into a class for downstream methods, such as :func:`plotPCA`.
 
         Arguments
         ---------

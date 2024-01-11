@@ -9,7 +9,7 @@ import inmoose
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "InMoose"
-copyright = "2022-2023, Maximilien Colange"
+copyright = "2022-2024, Maximilien Colange"
 author = "Maximilien Colange"
 
 version = inmoose.__version__
