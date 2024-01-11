@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.3.2-dev]
+
+None
+
 ## [0.3.1]
 
 - Fix issue #25 and #10 related to counts parameter data format check and gestion (when it's a pandas dataframe)
