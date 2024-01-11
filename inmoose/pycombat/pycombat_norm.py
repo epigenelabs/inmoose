@@ -562,6 +562,7 @@ def pycombat_norm(
         level of precision for precision computing (default: `None`).
     na_cov_action : str
         Option to choose the way to handle missing covariates
+
         - :code:`"raise"` raise an error if missing covariates and stop the code
         - :code:`"remove"` remove samples with missing covariates and raise a warning
         - :code:`"fill"` handle missing covariates, by creating a distinct
