@@ -26,5 +26,6 @@ from .q2qnbinom import q2qnbinom
 from .splitIntoGroups import splitIntoGroups
 from .stats import pnbinom, qnbinom
 from .systematicSubset import systematicSubset
+from .topTags import topTags
 from .validDGEList import validDGEList
 from .edgepy_cpp import *
