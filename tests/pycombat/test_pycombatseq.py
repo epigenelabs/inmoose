@@ -189,6 +189,32 @@ class test_pycombatseq(unittest.TestCase):
         )
         self.assertTrue(np.array_equal(res, res2))
 
+        # check confounded covariates
+        with self.assertRaisesRegex(
+            ValueError,
+            expected_regex=r"Covariates test are confounded with the batches. Please review your covariates before proceeding with batch effect correction.",
+        ):
+            pycombat_seq(
+                self.y,
+                self.batch,
+                covar_mod=pd.DataFrame(
+                    [2, 2, 1, 1, 1],
+                    columns=["test"],
+                ),
+            )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            expected_regex=r"Covariates cov_0 are confounded with the batches. Please review your covariates before proceeding with batch effect correction.",
+        ):
+            pycombat_seq(
+                self.y,
+                self.batch,
+                covar_mod=pd.DataFrame(
+                    [2, 2, 1, 1, 1],
+                ),
+            )
+
         with self.assertWarnsRegex(
             UserWarning,
             r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
