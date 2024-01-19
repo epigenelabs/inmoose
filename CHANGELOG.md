@@ -4,6 +4,7 @@
 
 - support for Python 3.12
 - bump github actions versions
+- publish coverage report to coveralls.io
 
 ## [0.3.1]
 

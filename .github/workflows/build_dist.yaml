@@ -16,14 +16,42 @@ jobs:
         with:
           options: "--check"
 
+  tests_and_coverage:
+    needs: [black]
+    name: Run unit tests and upload coverage report
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install test dependencies
+        run: pip install tox tox-gh-actions
+
+      - name: Run tests and build coverage report
+        run: tox
+
+      # upload the coverage report to coveralls.io
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2.2.3
+        if: ${{ matrix.python-version == '3.12' }}
+
   build_sdist:
     needs: [black]
     name: Build source distribution
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build sdist
+      - name: Build source distribution
         run: pipx run build --sdist
 
       - uses: actions/upload-artifact@v4
@@ -31,34 +59,8 @@ jobs:
           name: inmoose_sdist
           path: dist/inmoose-*.tar.gz
 
-  build_wheels:
-    needs: [build_sdist]
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, macos-11]
-
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: inmoose_sdist
-          path: sdist
-
-      - run: mv sdist/*.tar.gz sdist/inmoose.tar.gz
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16
-        env:
-          CIBW_BUILD_FRONTEND: "build"
-          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
-          CIBW_SKIP: "*-musllinux* *i686"
-          CIBW_TEST_COMMAND: "python -m unittest discover -s {package}/tests"
-        with:
-          package-dir: sdist/inmoose.tar.gz
-
   upload_pypi:
-    needs: [build_sdist, build_wheels]
+    needs: [build_sdist, tests_and_coverage]
     name: Publish source distribution on PyPI
     runs-on: ubuntu-latest
     permissions:
