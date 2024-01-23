@@ -6,8 +6,42 @@ edgepy
 
 This module is a partial port in Python of the R Bioconductor `edgeR package
 <https://bioconductor.org/packages/release/bioc/html/edgeR.html>`_.
-Only the functionalities necessary to :func:`inmoose.pycombat.pycombat_seq` have
-been ported so far.
+Only the functionalities necessary to :func:`inmoose.pycombat.pycombat_seq` and
+differential expression analysis have been ported so far.
+
+Differential Expression Analysis Example
+========================================
+
+We give below an example of how to use :code:`edgepy` to perform a differential
+expression analysis on the pasilla dataset.
+
+.. repl::
+   from inmoose.data.pasilla import pasilla
+   from inmoose.edgepy import DGEList, glmLRT, topTags
+   from patsy import dmatrix
+
+   # load the pasilla dataset as an AnnData
+   pas = pasilla()
+
+   # extract the count matrix and the annotation dataframe from the AnnData object
+   counts = pas.X.T
+   anno = pas.obs
+   # build the design matrix
+   design = dmatrix("~condition", data=anno)
+
+   # build a DGEList object
+   dge_list = DGEList(counts=counts, samples=anno, group_col="condition", genes=pas.var)
+   # estimate the dispersions
+   dge_list.estimateGLMCommonDisp(design=design)
+
+   # fit the GLM
+   fit = dge_list.glmFit(design=design)
+
+   # run a differential expression analysis based on LRT
+   lrt = glmLRT(fit)
+
+   topTags(lrt)
+
 
 References
 ==========

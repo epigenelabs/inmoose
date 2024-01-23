@@ -26,7 +26,7 @@ from .exactTestDoubleTail import exactTestDoubleTail
 from .edgepy_cpp import compute_unit_nb_deviance
 
 
-def exactTestByDeviance(y1, y2, dispersion=0):
+def exactTestByDeviance(y1, y2, dispersion=0.0):
     """
     Compute genewise *p*-values for differences in the means between two groups of negative-binomially distributed counts.
 

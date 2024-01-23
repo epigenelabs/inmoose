@@ -23,7 +23,18 @@ import numpy as np
 
 def _comboGroups(truths):
     """
-    Function that returns a list of vectors of indices, where each vector refers to the rows with the same combination of True/False values in :code:`truths`.
+    Function that returns a list of lists of indices, where each vector refers to the rows with the same combination of True/False values in :code:`truths`.
+
+    Arguments
+    ---------
+    truths : array_like
+        Boolean matrix
+
+    Returns
+    -------
+    list of lists of ints
+        each element of this list is the list of row indices of :code:`truths`
+        that contain the same combination of :code:`True`/:code:`False`
     """
 
     d = {}
@@ -39,6 +50,18 @@ def _comboGroups(truths):
 def _residDF(zero, design):
     """
     Effective residual degrees of freedom after adjusting for exact zeros
+
+    Arguments
+    ---------
+    zero : array_like
+        matrix of boolean indicating the zero counts
+    design : array_like
+        design matrix
+
+    Returns
+    -------
+    ndarray
+        effective residual degrees of freedom, one element per row in :code:`zero`
     """
     nlib = zero.shape[1]
     ncoef = design.shape[1]
