@@ -22,7 +22,7 @@ import numpy as np
 from scipy.stats import beta
 
 
-def exactTestBetaApprox(y1, y2, dispersion=0):
+def exactTestBetaApprox(y1, y2, dispersion=0.0):
     """
     Compute genewise *p*-values for differences in the means between two groups of negative-binomially distributed counts.
 

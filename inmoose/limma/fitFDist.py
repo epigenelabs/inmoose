@@ -201,6 +201,15 @@ def fitFDist(x, df1, covariate=None):
 def trigammaInverse(x):
     """
     Solve trigamma(y) = x for y
+
+    Arguments
+    ---------
+    x : array_like
+
+    Returns
+    -------
+    ndarray
+        trigamma inverses for each value of :code:`x`
     """
     x = np.asarray(x)
 

@@ -137,6 +137,34 @@ cdef double compute_unit_nb_deviance(double y, double mu, double phi):
 
 @cython.ufunc
 cdef double _q2qnbinom(double x, double input_mean, double output_mean, double dispersion):
+    """
+    Interpolated quantile to quantile mapping between negative-binomial distributions with the same dispersion but different means.
+
+    This is the low-level Cythonized function called by :func:`q2qnbinom`.
+
+    See also
+    --------
+    q2qnbinom
+
+    Arguments
+    ---------
+    x : array_like
+        matrix of counts
+    input_mean : array_like
+        matrix of population means for :code:`x`. If 1-D, then of the same
+        length as :code:`x.shape[0]`
+    output_mean : array_like
+        matrix of population means for the output values. If 1-D, then of the
+        same length as :code:`x.shape[0]`
+    dispersion : array_like
+        scalar, vector or matrix giving negative binomial dispersion values
+
+    Returns
+    -------
+    ndarray
+        matrix of same dimensions as :code:`x`, with :code:`output_mean` as the
+        new nominal population mean
+    """
     if x < 0:
         raise ValueError("x must be non-negative")
     if input_mean < 0:

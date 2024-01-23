@@ -85,6 +85,29 @@ def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion
 
 
 def aveLogCPM_DGEGLM(y, prior_count=2, dispersion=None):
+    """
+    Compute average log2 counts per million for each row of counts.
+
+    See also
+    --------
+    This function calls :func:`aveLogCPM`.
+
+    Arguments
+    ---------
+    y : DGEGLM
+        DGEGLM object
+    prior_count : float or array_like, optional
+        scalar or vector of length :code:`y.counts.shape[0]`, containing the
+        average value(s) to be added to each count to avoid infinite value on
+        the log-scale. Defaults to :code:`2`.
+    dispersion : float or array_like, optional
+        scalar or vector of negative binomial dispersions.
+
+    Returns
+    -------
+    ndarray
+        numeric vector giving :code:`log2(AveCPM)` for each row of :code:`y`
+    """
     # Dispersion supplied as argument over-rules value in object
     if dispersion is None:
         dispersion = y.dispersion

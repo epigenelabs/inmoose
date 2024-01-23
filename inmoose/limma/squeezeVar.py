@@ -116,6 +116,22 @@ def _squeezeVar(var, df, var_prior, df_prior):
     Squeeze posterior variances given hyperparameters
 
     NAs not allowed in :code:`df_prior`
+
+    Arguments
+    ---------
+    var : array_like
+        1-D array of independent sample variances
+    df : array_like
+        1-D array of degrees of freedom for the sample variances
+    var_prior : array_like
+        array of prior variances
+    df_prior :
+        array of degrees of freedom for the prior variances
+
+    Returns
+    -------
+    ndarray
+        array of posterior variances
     """
     df = np.broadcast_to(df, var.shape)
     var_prior = np.broadcast_to(var_prior, var.shape)

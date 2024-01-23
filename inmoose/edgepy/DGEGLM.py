@@ -20,6 +20,30 @@ import patsy
 
 
 class DGEGLM(object):
+    """
+    A simple class to store results of a GLM fit to each gene in  DGE dataset.
+
+    Attributes
+    ----------
+    coefficients : array_like
+        matrix containing the coefficients computed from fitting the model defined by
+        the design matrix to each gene in the dataset
+    deviance : array_like
+        vector giving the deviance from the model fit to each gene
+    design : array_like
+        design matrix for the full model from the likelihood ratio test
+    offset : array_like
+        offset values to included in the GLM for each gene
+    dispersion : array_like
+        dispersion parameters used in the negative binomial GLM for each gene
+    weights : array_like
+        matrix of weights used in the GLM fitting for each gene
+    fitted_values : array_like
+        the fitted (expected) values from the GLM for each gene
+    AveLogCPM : array_like
+        average log2 counts per million for each gene
+    """
+
     from .aveLogCPM import aveLogCPM_DGEGLM as aveLogCPM
 
     def __init__(self, fit):
