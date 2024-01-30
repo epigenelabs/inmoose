@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # not needed if files are in the default location `.github/workflows`
+    directory: "/"
+    schedule:
+      interval: "weekly"
