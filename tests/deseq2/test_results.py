@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
         dds.design = "~ group + condition"
 
         # calling results too early
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValueError,
             expected_regex="could not find results in obj. first run DESeq()",
         ):
