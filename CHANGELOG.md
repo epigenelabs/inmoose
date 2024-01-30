@@ -3,6 +3,7 @@
 ## [0.3.2-dev]
 
 - support for Python 3.12
+- bump github actions versions
 
 ## [0.3.1]
 
