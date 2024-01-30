@@ -234,9 +234,9 @@ class consensusClustering:
         consensus_mat = connectivity_mat / (indicator_mat + 1e-8)
         # consensus_mat is upper triangular (with zeros on diagonal), we now make it symmetric
         consensus_mat += consensus_mat.T
-        consensus_mat[
-            range(consensus_mat.shape[0]), range(consensus_mat.shape[0])
-        ] = 1  # always with self
+        consensus_mat[range(consensus_mat.shape[0]), range(consensus_mat.shape[0])] = (
+            1  # always with self
+        )
         return consensus_mat
 
     def compute_bestk(self):

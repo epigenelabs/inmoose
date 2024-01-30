@@ -1000,9 +1000,9 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
                     }
                 )
                 lfcType = "MAP" if obj.betaPrior else "MLE"
-                res.description[
-                    "log2FoldChange"
-                ] = f"log2 fold change ({lfcType}): {cleanName}"
+                res.description["log2FoldChange"] = (
+                    f"log2 fold change ({lfcType}): {cleanName}"
+                )
                 resReady = True
 
             elif contrastNumLevel == contrastBaseLevel:
@@ -1038,9 +1038,9 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
                 if test == "Wald":
                     res["stat"] *= -1
                 lfcType = "MAP" if obj.betaPrior else "MLE"
-                res.description[
-                    "log2FoldChange"
-                ] = f"log2 fold change ({lfcType}): {cleanName}"
+                res.description["log2FoldChange"] = (
+                    f"log2 fold change ({lfcType}): {cleanName}"
+                )
                 res.description["lfcSE"] = f"standard error: {cleanName}"
                 # rename some of the columns using the flipped contrast
                 if test == "Wald":
@@ -1141,9 +1141,9 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
         lfcType = "MAP" if obj.betaPrior else "MLE"
         for c in res.columns:
             res.type[c] = "results"
-        res.description[
-            "log2FoldChange"
-        ] = f"log2 fold change ({lfcType}): {contrastName}"
+        res.description["log2FoldChange"] = (
+            f"log2 fold change ({lfcType}): {contrastName}"
+        )
         res.description["lfcSE"] = f"standard error: {contrastName}"
         res.description["stat"] = f"Wald statistic: {contrastName}"
         res.description["pvalue"] = f"Wald test p-value: {contrastName}"

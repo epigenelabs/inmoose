@@ -228,9 +228,9 @@ def fitNbinomGLMs(
             beta_mat = np.zeros((obj.n_vars, modelMatrix.shape[1]))
             # use the natural log as fitBeta occurs in the natural log scale
             logBaseMean = np.log(np.mean(obj.counts(normalized=True), 0))
-            beta_mat[
-                :, modelMatrix.design_info.term_slices[patsy.Term([])]
-            ] = logBaseMean[:, None]
+            beta_mat[:, modelMatrix.design_info.term_slices[patsy.Term([])]] = (
+                logBaseMean[:, None]
+            )
         else:
             beta_mat = np.ones((obj.n_vars, modelMatrix.shape[1]))
 
