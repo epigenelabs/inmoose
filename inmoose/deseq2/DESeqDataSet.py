@@ -476,9 +476,9 @@ class DESeqDataSet(AnnData):
         self.var.description["baseMean"] = "mean of normalized counts for all samples"
         self.var["baseVar"] = np.var(cts_norm, 0, ddof=1)
         self.var.type["baseVar"] = "intermediate"
-        self.var.description[
-            "baseVar"
-        ] = "variance of normalized counts for all samples"
+        self.var.description["baseVar"] = (
+            "variance of normalized counts for all samples"
+        )
         self.var["allZero"] = np.sum(self.counts(), 0) == 0
         self.var.type["allZero"] = "intermediate"
         self.var.description["allZero"] = "all counts for a gene are zero"
@@ -518,11 +518,13 @@ class DESeqDataSet(AnnData):
 
     def makeExpandedModelMatrix(self):
         data = self.obs.apply(
-            lambda col: Factor(col)
-            .add_categories(["__null__"])
-            .reorder_categories(col.dtype.categories.insert(0, "__null__"))
-            if isinstance(col.dtype, pd.CategoricalDtype)
-            else col
+            lambda col: (
+                Factor(col)
+                .add_categories(["__null__"])
+                .reorder_categories(col.dtype.categories.insert(0, "__null__"))
+                if isinstance(col.dtype, pd.CategoricalDtype)
+                else col
+            )
         )
         # formula = "+".join([f"C({t.name()}, Treatment(reference='__null__'))"
         formula = "+".join(
