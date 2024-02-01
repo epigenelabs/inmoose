@@ -124,17 +124,17 @@ low counts [2]     : 0, 0.00%
             dds.results(contrast=["foo", "lo", "hi"])
 
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "1", "3"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "1", "3"]).log2FoldChange.iloc[0],
             -3,
             delta=1e-6,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "1", "2"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "1", "2"]).log2FoldChange.iloc[0],
             -1,
             delta=1e-6,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "2", "3"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "2", "3"]).log2FoldChange.iloc[0],
             -2,
             delta=1e-6,
         )
@@ -143,7 +143,7 @@ low counts [2]     : 0, 0.00%
         self.assertAlmostEqual(
             dds.results(
                 contrast=["condition_3_vs_1", "condition_2_vs_1"]
-            ).log2FoldChange[0],
+            ).log2FoldChange.iloc[0],
             2,
             delta=1e-6,
         )
@@ -182,29 +182,29 @@ low counts [2]     : 0, 0.00%
         dds.design = "~ 0 + condition"
         dds = DESeq(dds, betaPrior=False)
 
-        self.assertAlmostEqual(dds.results().log2FoldChange[0], 2, delta=0.1)
+        self.assertAlmostEqual(dds.results().log2FoldChange.iloc[0], 2, delta=0.1)
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "2", "1"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "2", "1"]).log2FoldChange.iloc[0],
             1.25,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "3", "2"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "3", "2"]).log2FoldChange.iloc[0],
             0.68,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "1", "3"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "1", "3"]).log2FoldChange.iloc[0],
             -2,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "1", "2"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "1", "2"]).log2FoldChange.iloc[0],
             -1.25,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "2", "3"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "2", "3"]).log2FoldChange.iloc[0],
             -0.68,
             delta=0.1,
         )
@@ -217,34 +217,34 @@ low counts [2]     : 0, 0.00%
         dds.design = "~ 0 + group + condition"
         dds = DESeq(dds, betaPrior=False)
 
-        self.assertAlmostEqual(dds.results().log2FoldChange[0], 2, delta=0.1)
+        self.assertAlmostEqual(dds.results().log2FoldChange.iloc[0], 2, delta=0.1)
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "3", "1"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "3", "1"]).log2FoldChange.iloc[0],
             2,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "2", "1"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "2", "1"]).log2FoldChange.iloc[0],
             1.25,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "3", "2"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "3", "2"]).log2FoldChange.iloc[0],
             0.68,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "1", "3"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "1", "3"]).log2FoldChange.iloc[0],
             -2,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "1", "2"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "1", "2"]).log2FoldChange.iloc[0],
             -1.25,
             delta=0.1,
         )
         self.assertAlmostEqual(
-            dds.results(contrast=["condition", "2", "3"]).log2FoldChange[0],
+            dds.results(contrast=["condition", "2", "3"]).log2FoldChange.iloc[0],
             -0.68,
             delta=0.1,
         )
