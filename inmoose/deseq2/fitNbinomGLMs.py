@@ -519,7 +519,7 @@ def fitNbinomGLMsOptim(
 
         nf = normalizationFactors[:, col]
         k = obj.counts()[:, col]
-        alpha = alpha_hat[col]
+        alpha = alpha_hat.iloc[col]
 
         def objectiveFn(p):
             mu_col = nf * 2 ** (x @ p)

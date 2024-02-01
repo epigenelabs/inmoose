@@ -128,7 +128,9 @@ class DESeqDataSet(AnnData):
                 raise ValueError(
                     "If `countData` is an AnnData, no further arguments are needed"
                 )
-        super().__init__(X=countData, obs=clinicalData, dtype=int)
+        else:
+            countData = countData.astype(int)
+        super().__init__(X=countData, obs=clinicalData)
 
         if design is not None:
             self.design = design

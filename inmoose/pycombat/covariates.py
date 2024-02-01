@@ -349,6 +349,8 @@ class VirtualCohortInput:
                     for i in range(len(self.covar_mod[col]))
                     if nan_cov_col[i]
                 ]
+                if nan_cov_col.any() and not hasattr(covar_mod[col], "str"):
+                    covar_mod[col] = covar_mod[col].astype(str)
                 for i, j in enumerate(np.where(nan_cov_col)[0]):
                     covar_mod.loc[j, col] = nan_batch_group[i]
             return self.counts, self.batch, covar_mod
