@@ -76,6 +76,8 @@ def wtd_quantile(
 def wtd_table(x, weights=None, normwt=False, na_rm=True):
     if weights is None:
         weights = np.ones(len(x))
+    else:
+        weights = np.asarray(weights)
 
     x = Factor(x)
     lev = x.categories

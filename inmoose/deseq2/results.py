@@ -605,6 +605,8 @@ def results_dds(
                     # do not filter out the p-value for those genes
                     dontFilter = np.sum(outliers > outCount, axis=0) >= 3
                     # reset the outlier status for these genes
+                    # NB: pandas 2.2 raises a warning here, but it should not. See
+                    #     https://github.com/pandas-dev/pandas/issues/57338
                     cooksOutlier[cooksOutlier] &= ~dontFilter
         ### END heuristic
 
@@ -931,8 +933,8 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
             raise ValueError(
                 f"{contrastFactorName} should be the name of a factor in the obs data of the DESeqDataSet"
             )
-        if contrastFactor not in obj.obs or not pd.api.types.is_categorical_dtype(
-            obj.obs[contrastFactor]
+        if contrastFactor not in obj.obs or not isinstance(
+            obj.obs[contrastFactor].dtype, pd.api.types.CategoricalDtype
         ):
             raise ValueError(f"{contrastFactorName} is not a factor")
 

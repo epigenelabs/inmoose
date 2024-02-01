@@ -22,6 +22,7 @@
 
 import logging
 import numpy as np
+import pandas as pd
 from scipy.special import polygamma
 from scipy.stats import trim_mean
 import statsmodels.api as sm
@@ -917,16 +918,16 @@ def parametricDispersionFit(means, disps):
     disps : ??
     """
     logging.warnings.simplefilter("ignore", DomainWarning)
-    coefs = [0.1, 1]
+    coefs = pd.Series([0.1, 1.0])
     iter_ = 0
     while True:
-        residuals = disps / (coefs[0] + coefs[1] / means)
+        residuals = disps / (coefs.iloc[0] + coefs.iloc[1] / means)
         good = (residuals > 1e-4) & (residuals < 15)
         # check for glm convergence below to exit while loop
         glm_gamma = sm.GLM(
             disps[good],
             sm.add_constant(1 / means[good]),
-            family=sm.families.Gamma(link=sm.families.links.identity()),
+            family=sm.families.Gamma(link=sm.families.links.Identity()),
         )
         fit = glm_gamma.fit(start_params=coefs)
         oldcoefs = coefs.copy()
@@ -934,13 +935,13 @@ def parametricDispersionFit(means, disps):
 
         if not np.all(coefs > 0):
             raise RuntimeError("parametric dispersion fit failed")
-        if np.sum(np.log(coefs / oldcoefs) ** 2) < 1e-6 and fit.converged:
+        if np.sum(np.log(coefs / oldcoefs.values) ** 2) < 1e-6 and fit.converged:
             break
         iter_ = iter_ + 1
         if iter_ > 10:
             raise RuntimeError("dispersion fit did not converge")
 
     coefs.index = ["asymptDisp", "extraPois"]
-    ans = lambda q: coefs[0] + coefs[1] / q
+    ans = lambda q: coefs.iloc[0] + coefs.iloc[1] / q
     ans.coefficients = coefs
     return ans
