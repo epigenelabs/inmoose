@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
         dds.X[:, 0] = [0, 0, 0, 0, 0, 1000, 1000, 0, 0, 0]
         dds = DESeq(dds, betaPrior=False)
         # beta iter = 100 implies optim used for fitting
-        self.assertEqual(dds.var["betaIter"][0], 100)
+        self.assertEqual(dds.var["betaIter"].iloc[0], 100)
         res1 = dds.results(contrast=["condition", "B", "A"])
         res2 = dds.results(contrast=[0, 1])
         self.assertTrue(np.allclose(res1.lfcSE, res2.lfcSE))

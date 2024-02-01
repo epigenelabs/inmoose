@@ -12,4 +12,4 @@ class Test(unittest.TestCase):
         dds.obs["run"] = np.arange(8)
         dds2 = collapseReplicates(dds, groupby=dds.obs["sample"], run=dds.obs["run"])
         self.assertTrue(np.all(dds2.counts()[0, :] == np.sum(dds.counts()[0:2, :], 0)))
-        self.assertEqual(dds2.obs["runsCollapsed"][0], "0,1")
+        self.assertEqual(dds2.obs["runsCollapsed"].iloc[0], "0,1")
