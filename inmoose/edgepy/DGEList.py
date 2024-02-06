@@ -78,6 +78,7 @@ class DGEList(object):
         norm_factors=None,
         samples=None,
         group=None,
+        group_col="group",
         genes=None,
         remove_zeroes=False,
     ):
@@ -97,6 +98,9 @@ class DGEList(object):
         group : array_like or Factor, optional
             vector or factor giving the experimental group/condition for each
             sample/library
+        group_col : str
+            the name of the column containing the group information in :code:`samples`.
+            only used if :code:`group` is not :code:`None`
         genes : DataFrame, optional
             annotation information for each gene
         remove_zeroes : bool
@@ -153,7 +157,7 @@ class DGEList(object):
 
         # Check samples
         if samples is not None:
-            if samples.shape()[0] != nlibs:
+            if samples.shape[0] != nlibs:
                 raise ValueError(
                     "Number of rows in 'samples' must be equal to the number of columns in 'counts'"
                 )
@@ -162,10 +166,10 @@ class DGEList(object):
         if (
             group is None
             and samples is not None
-            and (samples.group.values != None).all()
+            and (samples[group_col].values != None).all()
         ):
-            group = samples.group.values
-            samples = samples.drop(columns=["group"])
+            group = samples[group_col].values
+            samples = samples.drop(columns=[group_col])
 
         # Check group
         if group is None:
@@ -179,9 +183,10 @@ class DGEList(object):
         # Make data frame of sample informations
         # in R, acts as a dictionnary of info for each row. R allows duplicated column names (with a warning message)
         sam = pd.DataFrame(
-            dict(group=group, lib_size=lib_size, norm_factors=norm_factors)
+            {"group": group, "lib_size": lib_size, "norm_factors": norm_factors}
         )
         if samples is not None:
+            sam.index = samples.index
             sam = pd.concat([sam, samples], axis=1)
         samples = sam
         # TODO set row names in 'samples' according to column names in 'counts'
@@ -218,8 +223,8 @@ class DGEList(object):
         if self.offset is not None:
             return self.offset
 
-        lib_size = self.samples.lib_size
-        norm_factors = self.samples.norm_factors
+        lib_size = self.samples["lib_size"]
+        norm_factors = self.samples["norm_factors"]
         if (norm_factors.values != None).all():
             lib_size = lib_size * norm_factors
         return np.log(lib_size)

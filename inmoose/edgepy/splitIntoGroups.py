@@ -44,7 +44,7 @@ def splitIntoGroups_DGEList(self):
     list
         list in which each element is a matrix of counts for an individual group.
     """
-    group = self.samples.group
+    group = self.samples["group"]
     return splitIntoGroups(self.counts, group=group)
 
 

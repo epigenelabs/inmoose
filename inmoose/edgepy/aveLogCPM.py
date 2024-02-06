@@ -60,13 +60,13 @@ def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion
         numeric vector giving :code:`log2(AveCPM)` for each row of :code:`y`
     """
     # Library sizes should be stored in y but are sometimes missing
-    lib_size = self.samples.lib_size
+    lib_size = self.samples["lib_size"]
     if (lib_size.values == None).any():
         lib_size = self.counts.sum(axis=0)
 
     # Normalization factors should be stored in y but are sometimes missing
     if normalized_lib_sizes:
-        nf = self.samples.norm_factors
+        nf = self.samples["norm_factors"]
         if (nf.values != None).all():
             lib_size = lib_size * nf
 
