@@ -90,11 +90,11 @@ def exactTest(
     ---------
     pair : pair of ints or of strings
         the pair of groups to be compared. If strings, then should be the names
-        of two groups (*e.g.* two levels of :code:`self.samples.group`). If
+        of two groups (*e.g.* two levels of :code:`self.samples["group"]`). If
         integers, then groups to be compared are chosen by finding the levels
-        :code:`self.samples.group` corresponding to those indices and using
+        :code:`self.samples["group"]` corresponding to those indices and using
         those levels as the groups to be compared. If :code:`None`, then first
-        two levels of :code:`self.samples.group` (a factor) are used. Note that
+        two levels of :code:`self.samples["group"]` (a factor) are used. Note that
         the first group listed in the pair is the baseline for the comparision,
         so if the pair is :code:`("A","B")` then the comparison is :code:`B -
         A`, so genes with positive log-fold changes are up-regulated in group B
@@ -133,7 +133,7 @@ def exactTest(
         raise ValueError(f"Invalid value {rejection_region} for 'rejection_region'")
 
     # Get group names
-    group = asfactor(self.samples.group)
+    group = asfactor(self.samples["group"])
     levs_group = group.categories
     if isinstance(pair[0], int) and isinstance(pair[1], int):
         pair = levs_group[list(pair)]
@@ -173,8 +173,8 @@ def exactTest(
     # Reduce to two groups
     j = np.isin(group, pair)
     y = self.counts[:, j]
-    lib_size = self.samples.lib_size[j]
-    norm_factors = self.samples.norm_factors[j]
+    lib_size = self.samples["lib_size"][j]
+    norm_factors = self.samples["norm_factors"][j]
     group = group[j]
     # TODO row names
 

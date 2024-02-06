@@ -69,14 +69,14 @@ def glmFit_DGEList(self, design=None, dispersion=None, prior_count=0.125, start=
         object containing the data about the fit
     """
 
-    # The design matrix defaults to the oneway layout defined by self.samples.group
+    # The design matrix defaults to the oneway layout defined by self.samples["group"]
     # If there is only one group, then the design matrix is left None so that a matrix with a single intercept column will be set later by glmFit.
     if design is None:
         design = self.design
         if design is None:
-            group = asfactor(self.samples.group).droplevels()
+            group = asfactor(self.samples["group"]).droplevels()
             if group.nlevels() > 1:
-                design = dmatrix("~C(self.samples.group)")
+                design = dmatrix("~C(self.samples['group'])")
 
     if dispersion is None:
         dispersion = self.getDispersion()
