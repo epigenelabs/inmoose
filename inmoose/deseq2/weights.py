@@ -88,7 +88,7 @@ def getAndCheckWeights(obj, modelMatrix, weightThreshold=1e-2):
 
             # instead of giving an error, switch allZero to True for the problem cols
             if not weights_ok.all():
-                obj.var["allZero"][~weights_ok] = True
+                obj.var.loc[~weights_ok, "allZero"] = True
                 obj.var["weightsFail"] = ~weights_ok
                 obj.var.type["weightsFail"] = "intermediate"
                 obj.var.description["weightsFail"] = (
