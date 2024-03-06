@@ -610,18 +610,18 @@ def results_dds(
                     cooksOutlier[cooksOutlier] &= ~dontFilter
         ### END heuristic
 
-        res.pvalue[cooksOutlier] = np.nan
+        res.loc[cooksOutlier, "pvalue"] = np.nan
 
     # if original baseMean was positive, but now zero due to replaced counts,
     # fill in results
     if "replace" in obj.var and np.nansum(obj.var["replace"]) > 0:
         nowZero = obj.var["replace"] & (obj.var["baseMean"] == 0)
-        res.log2FoldChange[nowZero] = 0
+        res.loc[nowZero, "log2FoldChange"] = 0
         if addMLE:
-            res.lfcMLE[nowZero] = 0
-        res.lfcSE[nowZero] = 0
-        res.stat[nowZero] = 0
-        res.pvalue[nowZero] = 1
+            res.loc[nowZero, "lfcMLE"] = 0
+        res.loc[nowZero, "lfcSE"] = 0
+        res.loc[nowZero, "stat"] = 0
+        res.loc[nowZero, "pvalue"] = 1
 
     # add prior information
     if not obj.betaPrior:
