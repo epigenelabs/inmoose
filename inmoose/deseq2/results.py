@@ -178,7 +178,7 @@ def results_dds(
     parallel=False,
     minmu=0.5,
 ):
-    """
+    r"""
     Extract results from a :func:`.DESeq` analysis
 
     This function extracts a result table from a DESeq analysis giving base

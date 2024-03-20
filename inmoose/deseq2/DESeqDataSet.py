@@ -234,7 +234,7 @@ class DESeqDataSet(AnnData):
 
     @property
     def normalizationFactors(self):
-        """
+        r"""
         accessor for the normalization factors
 
         Gene-specific normalization factors for eacg sample can be provided as
@@ -574,7 +574,7 @@ class DESeqDataSet(AnnData):
         for f in designFactors:
             lvls = self.obs[f].dtype.categories
             mmColnames = pd.Index([f"{f}[T.{c}]" for c in lvls]).append(
-                betaPriorIn.filter(regex=f"^{f}Cntrst\d+$").index
+                betaPriorIn.filter(regex=f"^{f}Cntrst\\d+$").index
             )
             meanPriorVar = np.mean(betaPriorIn.filter(mmColnames).values)
             betaPriorOut[np.isin(betaPriorOut.index, mmColnames)] = meanPriorVar
@@ -597,7 +597,7 @@ def makeExampleDESeqDataSet(
     sizeFactors=None,
     seed=None,
 ):
-    """
+    r"""
     Make a simulated :class:`.DESeqDataSet`
 
     This function constructs a simulated dataset of Negative Binomial data
