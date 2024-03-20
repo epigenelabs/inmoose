@@ -260,7 +260,8 @@ def fitNbinomGLMs(
     # (reason is that we have other ways of estimating beta:
     # above intercept code, and below optim code)
 
-    mu = normalizationFactors * np.exp(modelMatrix @ betaRes["beta_mat"].T)
+    with np.errstate(over="ignore"):
+        mu = normalizationFactors * np.exp(modelMatrix @ betaRes["beta_mat"].T)
     logLike = nbinomLogLike(
         obj.counts(),
         mu,
@@ -522,7 +523,8 @@ def fitNbinomGLMsOptim(
         alpha = alpha_hat.iloc[col]
 
         def objectiveFn(p):
-            mu_col = nf * 2 ** (x @ p)
+            with np.errstate(over="ignore"):
+                mu_col = nf * 2 ** (x @ p)
             logLikeVector = dnbinom_mu(k, mu=mu_col, size=1 / alpha, log=True)
             if useWeights:
                 logLike = np.sum(weights[:, col] * logLikeVector)
@@ -546,7 +548,8 @@ def fitNbinomGLMsOptim(
         # with or without convergence, store the estimate from optim
         betaMatrix.iloc[col, :] = o.x
         # calculate the standard errors
-        mu_col = nf * 2 ** (x @ o.x)
+        with np.errstate(over="ignore"):
+            mu_col = nf * 2 ** (x @ o.x)
         # store the new mu vector
         mu[:, col] = mu_col
         mu_col[mu_col < minmu] = minmu

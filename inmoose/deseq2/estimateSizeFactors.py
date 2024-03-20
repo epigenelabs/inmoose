@@ -212,7 +212,8 @@ def estimateSizeFactorsForMatrix(
     if geoMeans is None:
         incomingGeoMeans = False
         if type_ == "ratio":
-            loggeomeans = np.mean(np.log(counts), 0)
+            with np.errstate(divide="ignore"):
+                loggeomeans = np.mean(np.log(counts), 0)
         elif type_ == "poscounts":
             lc = np.log(counts)
             lc[~np.isfinite(lc)] = 0
@@ -226,7 +227,8 @@ def estimateSizeFactorsForMatrix(
             raise ValueError(
                 "geoMeans should be as long as the number of columns of counts"
             )
-        loggeomeans = np.log(geoMeans)
+        with np.errstate(divide="ignore"):
+            loggeomeans = np.log(geoMeans)
 
     if np.isinf(loggeomeans).all():
         raise ValueError(
@@ -235,6 +237,7 @@ def estimateSizeFactorsForMatrix(
 
     if controlGenes is None:
 
+        @np.errstate(invalid="ignore", divide="ignore")
         def sf_compute(cnts):
             return np.exp(
                 locfunc(

@@ -226,7 +226,8 @@ def glmQLFit(
     df_residual = _residDF(zerofit, glmfit.design)
 
     # Empirical Bayes squeezing of the quasi-likelihood variance factors
-    s2 = glmfit.deviance / df_residual
+    with np.errstate(invalid="ignore"):
+        s2 = glmfit.deviance / df_residual
     s2[df_residual == 0] = 0
     s2 = np.maximum(s2, 0)
     s2_fit = squeezeVar(

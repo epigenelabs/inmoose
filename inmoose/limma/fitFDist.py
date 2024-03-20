@@ -241,7 +241,8 @@ def trigammaInverse(x):
     omit = x < 1e-6
     if omit.any():
         y = x
-        y[omit] = 1 / x[omit]
+        with np.errstate(divide="ignore"):
+            y[omit] = 1 / x[omit]
         if (~omit).any():
             y[~omit] = trigammaInverse(x[~omit])
         return y
