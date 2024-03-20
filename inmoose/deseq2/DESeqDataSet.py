@@ -671,7 +671,11 @@ def makeExampleDESeqDataSet(
 
     mu = 2.0 ** (x @ beta.T) * sizeFactors.reshape(x.shape[0], 1)
     countData = rnbinom((m, n), mu=mu, size=1 / dispersion, seed=rng)
-    countData = pd.DataFrame(countData, index=[f"sample{i}" for i in range(m)])
+    countData = pd.DataFrame(
+        countData,
+        index=[f"sample{i}" for i in range(m)],
+        columns=[f"gene{i}" for i in range(n)],
+    )
 
     if m > 1:
         design = "~condition"
