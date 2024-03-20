@@ -6,6 +6,7 @@
 - bump github actions versions
 - publish coverage report to coveralls.io
 - port `edgeR` functions for differential expression to `inmoose`
+- remove many (not all) warnings
 
 ## [0.3.1]
 
