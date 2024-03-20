@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import numpy as np
 from scipy.stats import nbinom, norm, t
 
 from .stats_cpp import nbinom_logpmf
@@ -44,6 +45,7 @@ def rnbinom(n, size, mu, seed=None):
     return nbinom(size, p).rvs(n, random_state=seed)
 
 
+@np.errstate(divide="ignore")
 def dnbinom_mu(x, size, mu, log=False):
     """mimic R dnbinom_mu function, to compute the density function of a Negative Binomial distribution.
 
