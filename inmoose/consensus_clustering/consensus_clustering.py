@@ -502,6 +502,7 @@ class consensusClustering:
             ax=ax,
         )
         plt.tick_params(rotation=45)
+        plt.ylim(0, 1)
         plt.xlabel("Number of clusters")
         plt.ylabel("Cluster consensus measuring cluster stability")
         ax.legend(bbox_to_anchor=(1, 1), title="Cluster")
