@@ -87,10 +87,11 @@ class Test(unittest.TestCase):
         dds.layers["weights"] = w
         dds = DESeq(dds, useT=True)
         res = dds.results()
-        self.assertTrue(np.isnan(res.pvalue[0]))
-        self.assertEqual(dds.var["tDegreesFreedom"][1], 15 - 1 - 3)
+        self.assertTrue(np.isnan(res.pvalue.iloc[0]))
+        self.assertEqual(dds.var["tDegreesFreedom"].iloc[1], 15 - 1 - 3)
         self.assertEqual(
-            res.pvalue[1], 2 * pt(np.abs(res.stat[1]), df=15 - 1 - 3, lower_tail=False)
+            res.pvalue.iloc[1],
+            2 * pt(np.abs(res.stat.iloc[1]), df=15 - 1 - 3, lower_tail=False),
         )
 
         # also lfcThreshold
@@ -99,14 +100,16 @@ class Test(unittest.TestCase):
             0
         ]
         self.assertEqual(
-            res.pvalue[idx], 2 * pt(res.stat[idx], df=15 - 1 - 3, lower_tail=False)
+            res.pvalue.iloc[idx],
+            2 * pt(res.stat.iloc[idx], df=15 - 1 - 3, lower_tail=False),
         )
         res = dds.results(lfcThreshold=1, altHypothesis="greater")
         idx = np.nonzero(((res.log2FoldChange > 1) & ~np.isnan(res.pvalue)).values)[0][
             0
         ]
         self.assertEqual(
-            res.pvalue[idx], pt(res.stat[idx], df=15 - 1 - 3, lower_tail=False)
+            res.pvalue.iloc[idx],
+            pt(res.stat.iloc[idx], df=15 - 1 - 3, lower_tail=False),
         )
 
         res = dds.results(lfcThreshold=1, altHypothesis="less")
@@ -114,7 +117,8 @@ class Test(unittest.TestCase):
             0
         ]
         self.assertEqual(
-            res.pvalue[idx], pt(-res.stat[idx], df=15 - 1 - 3, lower_tail=False)
+            res.pvalue.iloc[idx],
+            pt(-res.stat.iloc[idx], df=15 - 1 - 3, lower_tail=False),
         )
 
         res = dds.results(lfcThreshold=1, altHypothesis="lessAbs")
@@ -122,13 +126,15 @@ class Test(unittest.TestCase):
             ((np.abs(res.log2FoldChange) < 1) & ~np.isnan(res.pvalue)).values
         )[0][0]
         self.assertEqual(
-            res.pvalue[idx], pt(res.stat[idx], df=15 - 1 - 3, lower_tail=False)
+            res.pvalue.iloc[idx],
+            pt(res.stat.iloc[idx], df=15 - 1 - 3, lower_tail=False),
         )
 
         # also novel contrasts
         res = dds.results(contrast=["condition", "C", "B"])
-        self.assertTrue(np.isnan(res.pvalue[0]))
-        self.assertTrue(dds.var["tDegreesFreedom"][1] == 15 - 1 - 3)
+        self.assertTrue(np.isnan(res.pvalue.iloc[0]))
+        self.assertTrue(dds.var["tDegreesFreedom"].iloc[1] == 15 - 1 - 3)
         self.assertTrue(
-            res.pvalue[1] == 2 * pt(abs(res.stat[1]), df=15 - 1 - 3, lower_tail=False)
+            res.pvalue.iloc[1]
+            == 2 * pt(abs(res.stat.iloc[1]), df=15 - 1 - 3, lower_tail=False)
         )

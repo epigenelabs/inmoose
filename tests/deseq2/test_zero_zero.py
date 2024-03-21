@@ -20,19 +20,19 @@ class zero_zero(unittest.TestCase):
         dds = DESeq(dds)
 
         res = dds.results(contrast=["condition", "D", "B"])
-        self.assertEqual(res.log2FoldChange[0], 0)
+        self.assertEqual(res.log2FoldChange.iloc[0], 0)
         res = dds.results(contrast=[0, -1, 0, 1])
-        self.assertEqual(res.log2FoldChange[0], 0)
+        self.assertEqual(res.log2FoldChange.iloc[0], 0)
         res = dds.results(contrast=["condition_D_vs_A", "condition_B_vs_A"])
-        self.assertEqual(res.log2FoldChange[0], 0)
+        self.assertEqual(res.log2FoldChange.iloc[0], 0)
 
         res = dds.results(name="condition_D_vs_A")
-        self.assertNotEqual(res.log2FoldChange[0], 0)
+        self.assertNotEqual(res.log2FoldChange.iloc[0], 0)
         res = dds.results([0, 0, 0, 1])
-        self.assertNotEqual(res.log2FoldChange[0], 0)
+        self.assertNotEqual(res.log2FoldChange.iloc[0], 0)
 
         # if all samples have 0, should be NA
         res = dds.results(contrast=["condition", "D", "B"])
-        self.assertTrue(np.isnan(res.log2FoldChange[1]))
+        self.assertTrue(np.isnan(res.log2FoldChange.iloc[1]))
         res = dds.results(contrast=[0, -1, 0, 1])
-        self.assertTrue(np.isnan(res.log2FoldChange[1]))
+        self.assertTrue(np.isnan(res.log2FoldChange.iloc[1]))

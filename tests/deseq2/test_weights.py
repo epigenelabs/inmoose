@@ -23,15 +23,15 @@ class Test(unittest.TestCase):
 
         # in terms of LFC, SE and deviance
         self.assertAlmostEqual(
-            dds2.results().log2FoldChange[0],
-            dds3.results().log2FoldChange[0],
+            dds2.results().log2FoldChange.iloc[0],
+            dds3.results().log2FoldChange.iloc[0],
             delta=1e-5,
         )
         self.assertAlmostEqual(
-            dds2.results().lfcSE[0], dds3.results().lfcSE[0], delta=1e-6
+            dds2.results().lfcSE.iloc[0], dds3.results().lfcSE.iloc[0], delta=1e-6
         )
         self.assertAlmostEqual(
-            dds2.var["deviance"][0], dds3.var["deviance"][0], delta=1e-7
+            dds2.var["deviance"].iloc[0], dds3.var["deviance"].iloc[0], delta=1e-7
         )
 
         # check weights working in the optim code
@@ -54,7 +54,9 @@ class Test(unittest.TestCase):
             logLike=np.zeros(dds.n_vars),
         )
         self.assertAlmostEqual(
-            dds3.results().log2FoldChange[0], o["betaMatrix"].iloc[0, 1], delta=1e-5
+            dds3.results().log2FoldChange.iloc[0],
+            o["betaMatrix"].iloc[0, 1],
+            delta=1e-5,
         )
 
     def test_weights_with_beta_prior(self):
@@ -75,10 +77,10 @@ class Test(unittest.TestCase):
         dds3 = nbinomWaldTest(dds3)
 
         self.assertEqual(
-            dds2.results().log2FoldChange[0], dds3.results().log2FoldChange[0]
+            dds2.results().log2FoldChange.iloc[0], dds3.results().log2FoldChange.iloc[0]
         )
-        self.assertEqual(dds2.results().lfcSE[0], dds3.results().lfcSE[0])
-        self.assertEqual(dds2.var["deviance"][0], dds3.var["deviance"][0])
+        self.assertEqual(dds2.results().lfcSE.iloc[0], dds3.results().lfcSE.iloc[0])
+        self.assertEqual(dds2.var["deviance"].iloc[0], dds3.var["deviance"].iloc[0])
 
     def test_weights_downweight_outliers(self):
         """test that weights downweight outlier in dispersion estimation"""
@@ -95,10 +97,10 @@ class Test(unittest.TestCase):
         dds3 = dds3.estimateDispersions()
 
         self.assertAlmostEqual(
-            dds2.var["dispGeneEst"][0], dds3.var["dispGeneEst"][0], delta=1e-1
+            dds2.var["dispGeneEst"].iloc[0], dds3.var["dispGeneEst"].iloc[0], delta=1e-1
         )
         # MAP estimates won't be equal because of different dispersion prior widths
-        self.assertGreater(dds.var["dispMAP"][0], dds2.var["dispMAP"][0])
+        self.assertGreater(dds.var["dispMAP"].iloc[0], dds2.var["dispMAP"].iloc[0])
 
     def test_weights_warning(self):
         """test that weights failing check gives warning, passes them through"""
@@ -111,8 +113,8 @@ class Test(unittest.TestCase):
             expected_regex="for 1 genes, the weights as supplied won't allow parameter estimation",
         ):
             dds = DESeq(dds)
-        self.assertTrue(dds.var["allZero"][0])
-        self.assertTrue(dds.var["weightsFail"][0])
+        self.assertTrue(dds.var["allZero"].iloc[0])
+        self.assertTrue(dds.var["weightsFail"].iloc[0])
         res = dds.results()
 
     @unittest.skip("not sure what is tested here")

@@ -178,7 +178,7 @@ def results_dds(
     parallel=False,
     minmu=0.5,
 ):
-    """
+    r"""
     Extract results from a :func:`.DESeq` analysis
 
     This function extracts a result table from a DESeq analysis giving base
@@ -605,21 +605,23 @@ def results_dds(
                     # do not filter out the p-value for those genes
                     dontFilter = np.sum(outliers > outCount, axis=0) >= 3
                     # reset the outlier status for these genes
+                    # NB: pandas 2.2 raises a warning here, but it should not. See
+                    #     https://github.com/pandas-dev/pandas/issues/57338
                     cooksOutlier[cooksOutlier] &= ~dontFilter
         ### END heuristic
 
-        res.pvalue[cooksOutlier] = np.nan
+        res.loc[cooksOutlier, "pvalue"] = np.nan
 
     # if original baseMean was positive, but now zero due to replaced counts,
     # fill in results
     if "replace" in obj.var and np.nansum(obj.var["replace"]) > 0:
         nowZero = obj.var["replace"] & (obj.var["baseMean"] == 0)
-        res.log2FoldChange[nowZero] = 0
+        res.loc[nowZero, "log2FoldChange"] = 0
         if addMLE:
-            res.lfcMLE[nowZero] = 0
-        res.lfcSE[nowZero] = 0
-        res.stat[nowZero] = 0
-        res.pvalue[nowZero] = 1
+            res.loc[nowZero, "lfcMLE"] = 0
+        res.loc[nowZero, "lfcSE"] = 0
+        res.loc[nowZero, "stat"] = 0
+        res.loc[nowZero, "pvalue"] = 1
 
     # add prior information
     if not obj.betaPrior:
@@ -931,8 +933,8 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
             raise ValueError(
                 f"{contrastFactorName} should be the name of a factor in the obs data of the DESeqDataSet"
             )
-        if contrastFactor not in obj.obs or not pd.api.types.is_categorical_dtype(
-            obj.obs[contrastFactor]
+        if contrastFactor not in obj.obs or not isinstance(
+            obj.obs[contrastFactor].dtype, pd.api.types.CategoricalDtype
         ):
             raise ValueError(f"{contrastFactorName} is not a factor")
 

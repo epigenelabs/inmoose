@@ -128,7 +128,9 @@ class DESeqDataSet(AnnData):
                 raise ValueError(
                     "If `countData` is an AnnData, no further arguments are needed"
                 )
-        super().__init__(X=countData, obs=clinicalData, dtype=int)
+        else:
+            countData = countData.astype(int)
+        super().__init__(X=countData, obs=clinicalData)
 
         if design is not None:
             self.design = design
@@ -234,7 +236,7 @@ class DESeqDataSet(AnnData):
 
     @property
     def normalizationFactors(self):
-        """
+        r"""
         accessor for the normalization factors
 
         Gene-specific normalization factors for eacg sample can be provided as
@@ -574,7 +576,7 @@ class DESeqDataSet(AnnData):
         for f in designFactors:
             lvls = self.obs[f].dtype.categories
             mmColnames = pd.Index([f"{f}[T.{c}]" for c in lvls]).append(
-                betaPriorIn.filter(regex=f"^{f}Cntrst\d+$").index
+                betaPriorIn.filter(regex=f"^{f}Cntrst\\d+$").index
             )
             meanPriorVar = np.mean(betaPriorIn.filter(mmColnames).values)
             betaPriorOut[np.isin(betaPriorOut.index, mmColnames)] = meanPriorVar
@@ -597,7 +599,7 @@ def makeExampleDESeqDataSet(
     sizeFactors=None,
     seed=None,
 ):
-    """
+    r"""
     Make a simulated :class:`.DESeqDataSet`
 
     This function constructs a simulated dataset of Negative Binomial data
@@ -669,7 +671,11 @@ def makeExampleDESeqDataSet(
 
     mu = 2.0 ** (x @ beta.T) * sizeFactors.reshape(x.shape[0], 1)
     countData = rnbinom((m, n), mu=mu, size=1 / dispersion, seed=rng)
-    countData = pd.DataFrame(countData, index=[f"sample{i}" for i in range(m)])
+    countData = pd.DataFrame(
+        countData,
+        index=[f"sample{i}" for i in range(m)],
+        columns=[f"gene{i}" for i in range(n)],
+    )
 
     if m > 1:
         design = "~condition"

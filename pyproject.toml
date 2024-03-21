@@ -16,6 +16,7 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
   "anndata",
+  "fastcluster",
   "mpmath>=1.1.0",
   "numpy>=1.18.5",
   "pandas",

@@ -46,7 +46,7 @@ def nbinomWaldTest(
     useQR=True,
     minmu=0.5,
 ):
-    """
+    r"""
     Wald test for the GLM coefficients
 
     This function tests for significance of coefficients in a Negative Binomial
