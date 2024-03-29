@@ -2,7 +2,7 @@
 
 ## [0.4.1-dev]
 
-None
+- fix an incorrect github action version number
 
 ## [0.4.0]
 
