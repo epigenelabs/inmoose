@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.4.1-dev]
+
+None
+
 ## [0.4.0]
 
 - support for Python 3.12
