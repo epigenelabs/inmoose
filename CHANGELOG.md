@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.4.1-dev]
+## [0.4.1]
 
 - fix an incorrect github action version number
 
