@@ -1,12 +1,12 @@
 # InMoose release changelog
 
-## [0.3.2-dev]
+## [0.4.0]
 
 - support for Python 3.12
 - bump github actions versions
 - publish coverage report to coveralls.io
 - port `edgeR` functions for differential expression to `inmoose`
-- Modifiy clustering stability plot 
+- Modifiy clustering stability plot
 - remove many (not all) warnings
 
 ## [0.3.1]
