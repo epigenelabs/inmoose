@@ -22,7 +22,8 @@ import logging
 import numpy as np
 import patsy
 from scipy.special import digamma, polygamma
-from scipy.linalg import lstsq, qr
+
+from ..utils import lm_fit, ns
 
 
 def fitFDist(x, df1, covariate=None):
@@ -150,35 +151,18 @@ def fitFDist(x, df1, covariate=None):
         evar = np.sum((e - emean) ** 2 / (nok - 1))
     else:
         try:
-            # design = splines_ns(covariate, df=splinedf, intercept=True)
-            design = patsy.dmatrix("cr(covariate, df=splinedf)")
+            design = ns(covariate, df=splinedf, include_intercept=True)
         except:
             raise RuntimeError("Problem with covariate")
-        # fit = lm.fit(design,e)
-        coefficients, _, rank, _ = lstsq(design, e)
-        fitted_values = design @ coefficients
+        fit = lm_fit(design.basis, e)
         if notallok:
-            # design2 = predict(design, newx=covariate_notok)
-            (design2,) = patsy.build_design_matrices(
-                [design.design_info], {"covariate": covariate_notok}
-            )
+            design2 = design.predict(newx=covariate_notok)
             emean = np.zeros(n)
-            emean[ok] = fitted_values
-            emean[~ok] = design2 @ coefficients
+            emean[ok] = fit.fitted_values
+            emean[~ok] = design2.basis @ fit.coefficients
         else:
-            emean = fitted_values
-        # lstsq does not return the effects, so let us compute them manually
-        # Reminder: to solve AX = Y for X, we use QR decomposition of A
-        #   A = QR, where Q is orthogonal and R is upper triangular
-        # thus, AX = Y boils down to a triangular system RX = QtY
-        # Given a solution Z, it may not be exact (because the system was
-        # over-determined for example):
-        #   QtY = Qt(AZ + E) = RZ + QtE
-        # E = Y-AZ is the error, QtE is the effect
-        Q, R = qr(design, mode="full")
-        effects = Q.T @ (e - fitted_values)
-        # evar = (fit.effects[rank:] ** 2).mean()
-        evar = (effects[rank:] ** 2).mean()
+            emean = fit.fitted_values
+        evar = (fit.effects[fit.rank :] ** 2).mean()
 
     # Estimate scale and df2
     evar = evar - polygamma(1, df1 / 2).mean()
