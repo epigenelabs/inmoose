@@ -3,6 +3,7 @@
 ## [0.4.2-dev]
 
 - add experimental support for MSVC compiler
+- add R-like functions for fitting linear models in module `utils`
 
 ## [0.4.1]
 
