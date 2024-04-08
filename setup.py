@@ -1,8 +1,19 @@
 import sys
 import numpy
 from setuptools import Extension, setup
+from setuptools.command.build_ext import build_ext
 
-cxx_compile_flags = ["-std=c++17"]
+
+class build_ext_cxx17(build_ext):
+    def build_extensions(self):
+        std_flag = (
+            "-std:c++17" if self.compiler.compiler_type == "msvc" else "-std=c++17"
+        )
+        for e in self.extensions:
+            e.extra_compile_args.append(std_flag)
+        super().build_extensions()
+
+
 macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 profiling = False
 linetrace = False
@@ -19,7 +30,6 @@ common_cpp = Extension(
         "inmoose/common_cpp/matrix.cpp",
     ],
     include_dirs=[numpy.get_include()],
-    extra_compile_args=cxx_compile_flags,
     define_macros=macros,
 )
 
@@ -29,7 +39,6 @@ stats_cpp = Extension(
         "inmoose/utils/_stats.pyx",
     ],
     include_dirs=[numpy.get_include()],
-    extra_compile_args=cxx_compile_flags,
     define_macros=macros,
 )
 
@@ -47,12 +56,12 @@ edgepy_cpp = Extension(
         "inmoose/edgepy/edgepy_cpp/objects.cpp",
     ],
     include_dirs=[numpy.get_include(), "inmoose/common_cpp/"],
-    extra_compile_args=cxx_compile_flags,
     define_macros=macros,
 )
 
 
 setup(
+    cmdclass={"build_ext": build_ext_cxx17},
     packages=[
         "inmoose",
         "inmoose/consensus_clustering",
