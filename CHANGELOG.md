@@ -2,7 +2,7 @@
 
 ## [0.4.2-dev]
 
-None
+- add experimental support for MSVC compiler
 
 ## [0.4.1]
 
