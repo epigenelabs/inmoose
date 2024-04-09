@@ -5,6 +5,7 @@
 - add experimental support for MSVC compiler
 - add R-like functions for fitting linear models in module `utils`
 - add a function to compute natural cubic spines basis in module `utils`
+- add tmixture functions from R package limma
 
 ## [0.4.1]
 
