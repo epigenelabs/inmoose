@@ -7,6 +7,7 @@
 - add a function to compute natural cubic spines basis in module `utils`
 - add tmixture functions from R package limma
 - add linear model fit functions from R package limma
+- add functions handling duplicated probes from R package limma
 
 ## [0.4.1]
 
