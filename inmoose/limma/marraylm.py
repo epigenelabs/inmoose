@@ -73,4 +73,4 @@ class MArrayLM:
         self.stdev_unscaled = stdev_unscaled
         self.sigma = sigma
         self.df_residual = df_residual
-        self.cov_coef = cov_coef
+        self.cov_coefficients = cov_coef
