@@ -101,13 +101,12 @@ def lmFit(
     :code:`method="ls"` and there is no correlation structure,
     :code:`lm_series` is used.
 
+    An overview of linear model functions in limma is given by :ref:`linearmodels`.
+
     See Also
     --------
     getEAWP
         extract expression values, gene annotation and so from the data :code:`obj`.
-
-    An overview of linear model functions in limma is given by [TODO link
-    vignette section "Linear Models"].
 
     Arguments
     ---------
