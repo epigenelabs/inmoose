@@ -44,21 +44,54 @@ class Test(unittest.TestCase):
         # self.assertTrue(np.allclose(fit.coefficients, coef_ref))
 
         fit = lmFit(self.y, self.design)
-        coef_ref = np.array(
-            [
-                [1.4339472, 0.10547395],
-                [0.1877173, -0.03865874],
-                [-0.3396236, -0.12608713],
-                [-0.0854679, -0.15829963],
-                [-0.1584454, -0.05166344],
-                [0.1237074, -0.14560097],
-                [-0.3078993, 0.11066961],
-                [-0.1895274, -0.01233607],
-                [-0.1095338, -0.04503280],
-                [0.1123062, 0.09975962],
-            ]
-        )
+        coef_ref = [
+            [1.4339472, 0.10547395],
+            [0.1877173, -0.03865874],
+            [-0.3396236, -0.12608713],
+            [-0.0854679, -0.15829963],
+            [-0.1584454, -0.05166344],
+            [0.1237074, -0.14560097],
+            [-0.3078993, 0.11066961],
+            [-0.1895274, -0.01233607],
+            [-0.1095338, -0.04503280],
+            [0.1123062, 0.09975962],
+        ]
         self.assertTrue(np.allclose(fit.coefficients, coef_ref, rtol=1e-6))
+
+        self.assertTrue(np.array_equal(fit.df_residual, [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]))
+
+        sigma_ref = [
+            0.7919070,
+            0.2512174,
+            0.2908815,
+            0.3666233,
+            0.1706735,
+            0.3631793,
+            0.2461618,
+            0.2569999,
+            0.2941130,
+            0.2615085,
+        ]
+        self.assertTrue(np.allclose(fit.sigma, sigma_ref))
+
+        cov_ref = [[0.3333333, 0.0], [0.0, 0.3333333]]
+        self.assertTrue(np.allclose(fit.cov_coefficients, cov_ref))
+
+        self.assertTrue(np.allclose(fit.stdev_unscaled, 0.5773503))
+
+        Amean_ref = [
+            0.76971056,
+            0.07452928,
+            -0.23285536,
+            -0.12188377,
+            -0.10505440,
+            -0.01094676,
+            -0.09861482,
+            -0.10093174,
+            -0.07728329,
+            0.10603292,
+        ]
+        self.assertTrue(np.allclose(fit.Amean, Amean_ref))
 
     def test_contrasts_fit(self):
         fit = MArrayLM(

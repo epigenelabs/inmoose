@@ -24,6 +24,7 @@ import patsy
 import scipy
 
 from ..utils import lm_fit, lm_wfit
+from .dups import unwrapdups
 from .marraylm import MArrayLM
 
 
@@ -34,7 +35,7 @@ class EAWP:
         self.design = None
         self.weights = None
         self.probes = None
-        self.Amean = None
+        self.Amean = np.nanmean(self.exprs, axis=1)
 
 
 def lmFit(
@@ -349,12 +350,17 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
         else:
             sigma = np.full(ngenes, np.nan)
 
+        cov_coef = np.linalg.inv(design.T @ design)
+        r = np.linalg.matrix_rank(design)
+        _, _, P = scipy.linalg.qr(design, pivoting=True)
+        est = P[:r]
+        stdev_unscaled[:, est] = np.sqrt(np.diag(cov_coef))
         return MArrayLM(
             fit.coefficients.T,
             stdev_unscaled,
             sigma,
-            fit.df_residuals,
-            np.linalg.inv(design.T @ design),
+            np.full(ngenes, fit.df_residuals),
+            cov_coef,
         )
 
     # Genewise QR-decompositions are required, so iterate through genes
