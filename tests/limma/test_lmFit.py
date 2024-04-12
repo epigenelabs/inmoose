@@ -5,7 +5,7 @@ from patsy import dmatrix
 from scipy.stats import norm
 
 from inmoose.utils import Factor
-from inmoose.limma import lmFit, nonEstimable, contrasts_fit, MArrayLM
+from inmoose.limma import lmFit, nonEstimable, contrasts_fit, MArrayLM, eBayes
 
 
 class Test(unittest.TestCase):
@@ -92,6 +92,117 @@ class Test(unittest.TestCase):
             0.10603292,
         ]
         self.assertTrue(np.allclose(fit.Amean, Amean_ref))
+
+    def test_ebayes(self):
+        fit = lmFit(self.y, self.design)
+        fit2 = eBayes(fit)
+
+        self.assertTrue(np.allclose(fit2.coefficients, fit.coefficients))
+        self.assertTrue(np.allclose(fit2.sigma, fit.sigma))
+        self.assertTrue(np.allclose(fit2.stdev_unscaled, fit.stdev_unscaled))
+        self.assertTrue(np.allclose(fit2.Amean, fit.Amean))
+
+        self.assertTrue(np.abs(fit2.df_prior - 71047.76) / 71047.76 < 1e-3)
+        self.assertAlmostEqual(fit2.s2_prior, 0.1198481)
+        self.assertTrue(np.allclose(fit2.var_prior, [36.68822975, 0.08343894]))
+        self.assertTrue(
+            np.allclose(
+                fit2.s2_post,
+                [
+                    0.1198767,
+                    0.1198449,
+                    0.1198461,
+                    0.1198489,
+                    0.1198430,
+                    0.1198488,
+                    0.1198448,
+                    0.1198451,
+                    0.1198462,
+                    0.1198452,
+                ],
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                fit2.t,
+                [
+                    [7.1734231, 0.52764098],
+                    [0.9391936, -0.19341874],
+                    [-1.6992077, -0.63084025],
+                    [-0.4276087, -0.79199683],
+                    [-0.7927456, -0.25848634],
+                    [0.6189273, -0.72846394],
+                    [-1.5404929, 0.55370627],
+                    [-0.9482493, -0.06172022],
+                    [-0.5480202, -0.22530838],
+                    [0.5618936, 0.49912011],
+                ],
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                fit2.p_value,
+                [
+                    [1.076797e-08, 0.6006634],
+                    [3.532684e-01, 0.8476099],
+                    [9.704589e-02, 0.5317331],
+                    [6.712294e-01, 0.4330345],
+                    [4.326031e-01, 0.7973571],
+                    [5.394734e-01, 0.4705731],
+                    [1.313148e-01, 0.5828621],
+                    [3.486966e-01, 0.9510930],
+                    [5.867236e-01, 0.8228865],
+                    [5.773237e-01, 0.6204289],
+                ],
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                fit2.lods,
+                [
+                    [9.767247, -4.678431],
+                    [-6.507090, -4.702983],
+                    [-5.534718, -4.666348],
+                    [-6.857523, -4.643355],
+                    [-6.633502, -4.699973],
+                    [-6.756554, -4.653013],
+                    [-5.779612, -4.675576],
+                    [-6.498600, -4.706428],
+                    [-6.798220, -4.701616],
+                    [-6.790460, -4.681400],
+                ],
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                fit2.F,
+                [
+                    25.8682018,
+                    0.4597478,
+                    1.6426331,
+                    0.4050541,
+                    0.3476304,
+                    0.4568653,
+                    1.3398546,
+                    0.4514930,
+                    0.1755450,
+                    0.2824226,
+                ],
+            )
+        )
+        F_p_value_ref = [
+            5.883976e-12,
+            6.314448e-01,
+            1.934773e-01,
+            6.669423e-01,
+            7.063611e-01,
+            6.332675e-01,
+            2.618904e-01,
+            6.366787e-01,
+            8.390000e-01,
+            7.539558e-01,
+        ]
+        self.assertTrue(np.allclose(fit2.F_p_value, F_p_value_ref, rtol=1e-4))
 
     def test_contrasts_fit(self):
         fit = MArrayLM(
