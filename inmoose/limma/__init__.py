@@ -6,3 +6,4 @@ from .fitFDist import fitFDist
 from .lmfit import lmFit, nonEstimable, lm_series
 from .marraylm import MArrayLM
 from .squeezeVar import squeezeVar
+from .toptable import topTable
