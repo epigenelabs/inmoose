@@ -258,7 +258,9 @@ def _ebayes(
     df_pooled = np.nansum(df_residual)
     df_total = np.minimum(df_total, df_pooled)
     out["df_total"] = df_total
-    out["p_value"] = 2 * scipy.stats.t.cdf(-np.abs(out["t"]), df=df_total[:, None])
+    out["p_value"] = out["t"].apply(
+        lambda x: 2 * scipy.stats.t.cdf(-np.abs(x), df=df_total), axis=0
+    )
 
     # B-statistic
     var_prior_lim = np.array(stdev_coef_lim) ** 2 / np.median(out["s2_prior"])
@@ -336,6 +338,10 @@ def tmixture_matrix(tstat, stdev_unscaled, df, proportion, v0_lim=None):
         if len(v0_lim) != 2:
             raise ValueError("v0_lim must be a pair")
     ncoef = tstat.shape[1]
+    if not isinstance(tstat, np.ndarray):
+        tstat = np.array(tstat)
+    if not isinstance(stdev_unscaled, np.ndarray):
+        stdev_unscaled = np.array(stdev_unscaled)
     v0 = np.array(
         [
             tmixture_vector(tstat[:, j], stdev_unscaled[:, j], df, proportion, v0_lim)

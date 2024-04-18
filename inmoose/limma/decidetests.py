@@ -199,9 +199,13 @@ def classifyTestsF(self, cor_matrix=None, df=np.inf, p_value=0.01, fstat_only=Fa
             # Check for an adjust any coefficient variances exactly zero (usually
             # caused by an all zero contrast)
             n = self.cov_coefficients.shape[0]
+            if isinstance(self.cov_coefficients, pd.DataFrame):
+                tmp = self.cov_coefficients.values
+            else:
+                tmp = self.cov_coefficients
             for i in range(n):
-                if self.cov_coefficients[i, i] == 0:
-                    self.cov_coefficients[i, i] = 1
+                if tmp[i, i] == 0:
+                    tmp[i, i] = 1
             cor_matrix = cov2cor(self.cov_coefficients)
         if (
             (df is None)

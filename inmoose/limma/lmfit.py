@@ -20,6 +20,7 @@
 
 import logging
 import numpy as np
+import pandas as pd
 import patsy
 import scipy
 
@@ -330,8 +331,8 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
 
     # Initialize standard errors
     ngenes = M.shape[0]
-    stdev_unscaled = np.full((ngenes, nbeta), np.nan)
-    beta = np.full((ngenes, nbeta), np.nan)
+    stdev_unscaled = pd.DataFrame(np.full((ngenes, nbeta), np.nan), columns=coef_names)
+    beta = pd.DataFrame(np.full((ngenes, nbeta), np.nan), columns=coef_names)
 
     # if QR-decomposition is constant for all genes, fit all genes in one sweep
     NoProbesWts = np.all(np.isfinite(M)) and (weights is None)
@@ -354,9 +355,9 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
         r = np.linalg.matrix_rank(design)
         _, _, P = scipy.linalg.qr(design, pivoting=True)
         est = P[:r]
-        stdev_unscaled[:, est] = np.sqrt(np.diag(cov_coef))
+        stdev_unscaled.iloc[:, est] = np.sqrt(np.diag(cov_coef))
         return MArrayLM(
-            fit.coefficients.T,
+            pd.DataFrame(fit.coefficients.T, columns=coef_names),
             stdev_unscaled,
             sigma,
             np.full(ngenes, fit.df_residuals),
@@ -364,7 +365,6 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
         )
 
     # Genewise QR-decompositions are required, so iterate through genes
-    beta = stdev_unscaled
     sigma = np.full(ngenes, np.nan)
     df_residual = np.zeros(ngenes)
     for i in range(ngenes):
@@ -388,8 +388,6 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
 
     # Correlation matrix of coefficients
     cov_coef = np.linalg.inv(design.T @ design)
-    # est = QR.pivot[: QR.rank]
-    # dimnames(cov_coef) = list(coef_names[est], coef_names[est])
 
     return MArrayLM(
         coefficients=beta,
@@ -397,8 +395,6 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
         sigma=sigma,
         df_residual=df_residual,
         cov_coef=cov_coef,
-        # pivot=QR.pivot,
-        # rank=QR.rank,
     )
 
 

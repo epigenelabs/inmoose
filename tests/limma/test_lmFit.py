@@ -212,7 +212,20 @@ class Test(unittest.TestCase):
             None,
             None,
         )
+        fit.coefficients = pd.DataFrame(
+            fit.coefficients,
+            columns=[f"x{i}" for i in range(fit.coefficients.shape[1])],
+        )
+        fit.stdev_unscaled = pd.DataFrame(
+            fit.stdev_unscaled,
+            columns=[f"x{i}" for i in range(fit.stdev_unscaled.shape[1])],
+        )
         fit2 = contrasts_fit(fit, self.contrast_matrix)
+
+        self.assertTrue(isinstance(fit2.coefficients, pd.DataFrame))
+        self.assertTrue(isinstance(fit2.stdev_unscaled, pd.DataFrame))
+        self.assertTrue(isinstance(fit2.cov_coefficients, pd.DataFrame))
+
         coef_ref = pd.DataFrame(
             {
                 "First3": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18],
@@ -223,8 +236,8 @@ class Test(unittest.TestCase):
         self.assertTrue(np.allclose(coef_ref, fit2.coefficients))
         std_ref = pd.DataFrame(
             {
-                "First3": fit.stdev_unscaled[:, 0],
-                "Last3": fit.stdev_unscaled[:, 1],
+                "First3": fit.stdev_unscaled.iloc[:, 0],
+                "Last3": fit.stdev_unscaled.iloc[:, 1],
                 "Last3-First3": [
                     0.4955356,
                     0.5897269,
@@ -249,7 +262,7 @@ class Test(unittest.TestCase):
         )
         self.assertTrue(np.allclose(cov_ref, fit2.cov_coefficients))
 
-        fit.coefficients[0, 0] = np.nan
+        fit.coefficients.iloc[0, 0] = np.nan
         fit3 = contrasts_fit(fit, self.contrast_matrix)
         coef_ref = pd.DataFrame(
             {
@@ -260,7 +273,7 @@ class Test(unittest.TestCase):
         )
         self.assertTrue(np.allclose(coef_ref, fit3.coefficients, equal_nan=True))
 
-        fit.coefficients[0, 0] = 10
+        fit.coefficients.iloc[0, 0] = 10
         fit.cov_coefficients = np.cov(fit.coefficients.T)
         fit4 = contrasts_fit(fit, self.contrast_matrix)
         cov_ref = pd.DataFrame(

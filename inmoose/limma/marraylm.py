@@ -16,6 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import numpy as np
+
 
 class MArrayLM:
     """
@@ -26,9 +28,9 @@ class MArrayLM:
 
     Attributes
     ----------
-    coefficients : ndarray
+    coefficients : pd.DataFrame
         matrix containing fitted coefficients or contrasts
-    stdev_unscaled : ndarray
+    stdev_unscaled : pd.DataFrame
         matrix containing unscaled standard deviations of the coefficients or contrasts
     sigma : ndarray
         array containing residual standard deviations for each gene
@@ -40,13 +42,14 @@ class MArrayLM:
         change when a contrast is applied to the fit using
         :func:`contrasts_fit`.
     genes : pd.DataFrame, optional
-        data frame containig probe annotation
+        data frame containing probe annotation
     design : patsy.DesignMatrix, optional
         design matrix
-    cov_coefficients : ndarray, optional
+    cov_coefficients : pd.DataFrame, optional
         matrix giving the unscaled covariance matrix of the estimable coefficients
-    contrasts : ndarray, optional
+    contrasts : pd.DataFrame, optional
         matrix defining contrasts of coefficients for which results are desired
+
     s2_prior : ndarray, optional
         single value or array giving empirical Bayes estimated prior value for
         residual variances
@@ -64,8 +67,12 @@ class MArrayLM:
         array giving moderated *F*-statistics for testing all contrasts equal to zero
     F_p_value : ndarray, optional
         array giving *p*-value corresponding to :code:`F_stat`
-    t : ndarray, optional
+    t : pd.DataFrame, optional
         matrix containing empirical Bayes *t*-statistics
+    p_value : pd.DataFrame, optional
+        matrix of two-sided *p*-values corresponding to the *t*-statistics
+    lods : pd.DataFrame, optional
+        matrix giving the log-odds of differential expression (on the natural log scale)
     """
 
     def __init__(self, coefficients, stdev_unscaled, sigma, df_residual, cov_coef):
@@ -74,3 +81,67 @@ class MArrayLM:
         self.sigma = sigma
         self.df_residual = df_residual
         self.cov_coefficients = cov_coef
+
+        self.Amean = None
+        self.genes = None
+        self.design = None
+        self.contrasts = None
+        self.s2_prior = None
+        self.df_prior = None
+        self.df_total = None
+        self.s2_post = None
+        self.var_prior = None
+        self.F = None
+        self.F_p_value = None
+        self.t = None
+        self.p_value = None
+        self.lods = None
+
+    def __getitem__(self, idx):
+        row_idx, col_idx = idx
+
+        res = MArrayLM(None, None, None, None, None)
+        res.coefficients = self.coefficients.loc[row_idx, col_idx]
+        res.stdev_unscaled = self.stdev_unscaled.loc[row_idx, col_idx]
+        if self.sigma is not None:
+            res.sigma = self.sigma[row_idx]
+        if self.df_residual is not None:
+            res.df_residual = self.df_residual[row_idx]
+        if self.cov_coefficients is not None:
+            res.cov_coefficients = self.cov_coefficients.loc[col_idx, col_idx]
+
+        if self.Amean is not None:
+            res.Amean = self.Amean[row_idx]
+        if self.genes is not None:
+            res.genes = self.genes.loc[row_idx]
+        res.design = self.design
+        if self.contrasts is not None:
+            res.contrasts = self.contrasts[col_idx]
+        if self.s2_prior is not None:
+            if not isinstance(self.s2_prior, np.ndarray):
+                res.s2_prior = self.s2_prior
+            else:
+                res.s2_prior = self.s2_prior[row_idx]
+        if self.df_prior is not None:
+            if not isinstance(self.df_prior, np.ndarray):
+                res.df_prior = self.df_prior
+            else:
+                res.df_prior = self.df_prior[row_idx]
+        if self.df_total is not None:
+            res.df_total = self.df_total[row_idx]
+        if self.s2_post is not None:
+            res.s2_post = self.s2_post[row_idx]
+        if self.var_prior is not None:
+            res.var_prior = self.var_prior[row_idx]
+        if self.F is not None:
+            res.F = self.F[row_idx]
+        if self.F_p_value is not None:
+            res.F_p_value = self.F_p_value[row_idx]
+        if self.t is not None:
+            res.t = self.t.loc[row_idx, col_idx]
+        if self.p_value is not None:
+            res.p_value = self.p_value.loc[row_idx, col_idx]
+        if self.lods is not None:
+            res.lods = self.lods.loc[row_idx, col_idx]
+
+        return res
