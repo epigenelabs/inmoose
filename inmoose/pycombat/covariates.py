@@ -15,12 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-import logging
 import numpy as np
 import pandas as pd
 from patsy import dmatrix, DesignMatrix
 
-from ..utils import asfactor
+from ..utils import asfactor, LOGGER
 
 
 class VirtualCohortInput:
@@ -135,7 +134,7 @@ class VirtualCohortInput:
 
             if covar_mod.shape[0] != len(self.batch):
                 if covar_mod.shape[1] == len(self.batch):
-                    logging.warn(
+                    LOGGER.warn(
                         "The covariate matrix seems to be transposed. The computation will proceed with the input covariate matrix transposed, but you should double-check the covariate matrix."
                     )
                     covar_mod = covar_mod.T
@@ -299,13 +298,13 @@ class VirtualCohortInput:
                 f"{nan_covar_mod.sum().sum()} values are missing in covariates {', '.join(name_nan_covar_mod)}. Correct your covariates or use the cov_missing_value parameters"
             )
         elif na_cov_action == "remove":
-            logging.warnings.warn(
+            LOGGER.warn(
                 f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
             )
             keep = nan_covar_mod.sum(axis=1) == 0
             return self.counts[:, keep], self.batch[keep], self.covar_mod[keep]
         elif na_cov_action == "fill":
-            logging.warnings.warn(
+            LOGGER.warn(
                 f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
             )
 
@@ -335,7 +334,7 @@ class VirtualCohortInput:
                     f"Cannot create new categories for numerical covariates {', '.join(continuous_nan_cols)}. Please fix the NA in those covariates manually."
                 )
             if len(maybe_continuous_nan_cols) > 0:
-                logging.warnings.warn(
+                LOGGER.warn(
                     f"Creating new categories for integer covariates {', '.join(maybe_continuous_nan_cols)}. These are treated as categorical covariates, but you may want to double-check those."
                 )
 
@@ -400,12 +399,12 @@ def make_design_matrix(
         if not modified:
             break
 
-    logging.info(f"Found {vc_input.n_batch} batches")
+    LOGGER.info(f"Found {vc_input.n_batch} batches")
 
     if ref_batch is not None:
-        logging.info(f"Using batch {ref_batch} as reference batch")
+        LOGGER.info(f"Using batch {ref_batch} as reference batch")
 
-    logging.info(
+    LOGGER.info(
         f"Adjusting for {vc_input.design.shape[1] - vc_input.batch_mod.shape[1]} covariate(s) or covariate level(s)"
     )
 

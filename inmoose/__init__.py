@@ -1,3 +1,4 @@
+
 import importlib.metadata
 
 __version__ = importlib.metadata.version(__package__)
@@ -13,13 +14,10 @@ from . import common_cpp
 setdlopenflags(default_dlopen_flags)
 del default_dlopen_flags
 
+from utils import LOGGER  # noqa: F401
 from . import edgepy
 from . import pycombat
 from . import utils
 from . import consensus_clustering
 from . import deseq2
 
-import logging
-
-logging.basicConfig(level=logging.INFO, format="[{levelname}] {message}", style="{")
-logging.captureWarnings(True)

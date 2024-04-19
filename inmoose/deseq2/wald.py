@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import trim_mean
 
-from ..utils import Factor, pnorm, pt
+from ..utils import Factor, LOGGER, pnorm, pt
 from .fitNbinomGLMs import fitNbinomGLMs, fitGLMsWithPrior
 from .misc import buildMatrixWithNACols, nOrMoreInCell, buildDataFrameWithNACols
 from .weights import getAndCheckWeights
@@ -171,9 +171,9 @@ def nbinomWaldTest(
     """
 
     if not quiet:
-        logging.basicConfig(level=logging.INFO)
+        LOGGER.setLevel(logging.INFO)
     else:
-        logging.basicConfig(level=logging.WARNING)
+        LOGGER.setLevel(logging.WARN)
 
     if "dispersion" not in obj.var:
         raise ValueError(
@@ -181,7 +181,7 @@ def nbinomWaldTest(
         )
 
     if not obj.var.type.filter("results").empty:
-        logging.info("found results columns, replacing these")
+        LOGGER.info("found results columns, replacing these")
         obj = obj.removeResults()
 
     if obj.var["allZero"] is None:
@@ -368,7 +368,7 @@ def nbinomWaldTest(
     betaConv = fit["betaConv"]
 
     if np.any(~betaConv):
-        logging.info(
+        LOGGER.info(
             f"{np.sum(~betaConv)} cols did not converge in beta, labelled in obj.var['betaConv']. Use larger maxit argument with nbinomWaldTest"
         )
 

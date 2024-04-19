@@ -21,13 +21,12 @@
 
 
 from collections import OrderedDict
-import logging
 import numpy as np
 import pandas as pd
 import patsy
 from scipy.optimize import minimize, Bounds
 
-from ..utils import dnbinom_mu, dnorm
+from ..utils import dnbinom_mu, dnorm, LOGGER
 from .deseq2_cpp import fitBetaWrapper
 from .misc import renameModelMatrixColumns
 from .prior import estimateBetaPriorVar
@@ -333,7 +332,7 @@ def fitNbinomGLMs(
         raise ValueError("betaSE contains NaN")
     nNonposVar = np.sum(np.sum(betaSE == 0, axis=0) > 0)
     if warnNonposVar and nNonposVar > 0:
-        logging.warnings.warn(
+        LOGGER.warn(
             f"{nNonposVar} cols had non-positive estimates of variance for coefficients"
         )
 
