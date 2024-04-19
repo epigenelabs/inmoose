@@ -18,12 +18,11 @@
 
 # This file is based on the files 'R/topTags.R' of the Bioconductor edgeR package (version 3.38.4).
 
-import logging
-
 import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
+from ..utils import LOGGER
 from .DGEExact import DGEExact
 
 
@@ -127,7 +126,7 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
     # Absolute log fold change
     if MultipleContrasts:
         if sort_by == "logFC":
-            logging.warnings.warn(
+            LOGGER.warn(
                 "Two or more logFC columns in DGELRT object. First logFC column used to rank by logFC"
             )
         alfc = np.abs(self["log2FoldChange"].iloc[:, 0])

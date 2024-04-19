@@ -18,12 +18,10 @@
 
 # This file is based on the file 'R/fitFDist.R' of the Bioconductor limma package (version 3.55.1).
 
-import logging
-
 import numpy as np
 from scipy.special import digamma, polygamma
 
-from ..utils import lm_fit, ns
+from ..utils import lm_fit, LOGGER, ns
 
 
 def fitFDist(x, df1, covariate=None):
@@ -131,13 +129,13 @@ def fitFDist(x, df1, covariate=None):
     x = np.maximum(x, 0)
     m = np.median(x)
     if m == 0:
-        logging.warnings.warn(
+        LOGGER.warn(
             "More than half of residual variances are exactly zero: eBayes unreliable"
         )
         m = 1
     else:
         if (x == 0).any():
-            logging.warnings.warn(
+            LOGGER.warn(
                 "Zero sample variances detected, have been offset away from zero"
             )
     x = np.maximum(x, 1e-5 * m)
@@ -209,7 +207,7 @@ def trigammaInverse(x):
     if omit.any():
         y = x
         y[omit] = np.nan
-        logging.warnings.warn("NaNs produced")
+        LOGGER.warn("NaNs produced")
         if (~omit).any():
             y[~omit] = trigammaInverse(x[~omit])
         return y
@@ -244,6 +242,6 @@ def trigammaInverse(x):
         if np.max(-dif / y) < 1e-8:
             break
         if it > 50:
-            logging.warnings.warn("Iteration limit exceeded")
+            LOGGER.warn("Iteration limit exceeded")
             break
     return y

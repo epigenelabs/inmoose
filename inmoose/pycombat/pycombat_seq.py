@@ -18,12 +18,11 @@
 
 # This file is based on the file 'R/ComBat_seq.R' of the Bioconductor sva package (version 3.44.0).
 
-import logging
-
 import numpy as np
 import pandas as pd
 
 from ..edgepy import DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
+from ..utils import LOGGER
 from .covariates import make_design_matrix
 from .helper_seq import match_quantiles, vec2mat
 
@@ -112,7 +111,7 @@ def pycombat_seq(
     dge_obj = DGEList(counts=counts)
 
     ####### Estimate gene-wise dispersions within each batch #######
-    logging.info("Estimating dispersions")
+    LOGGER.info("Estimating dispersions")
 
     # Estimate common dispersion within each batch as an initial value
     def disp_common_helper(i):
@@ -156,7 +155,7 @@ def pycombat_seq(
         phi_matrix[:, batches_ind[b]] = vec2mat(genewise_disp_lst[b], batch_sizes[b])
 
     ####### Estimate parameters from NB GLM #######
-    logging.info("Fitting the GLM model")
+    LOGGER.info("Fitting the GLM model")
     # no intercept - nonEstimable; compute offset (library sizes) within function
     glm_f = dge_obj.glmFit(design=design, dispersion=phi_matrix, prior_count=1e-4)
     # compute intercept as batch-size-weighted average from batches
@@ -184,10 +183,10 @@ def pycombat_seq(
 
     ####### In each batch, compute posterior estimation through Monte-Carlo integration #######
     if shrink:
-        logging.info("Apply shrinkage - computing posterior estimates for parameters")
+        LOGGER.info("Apply shrinkage - computing posterior estimates for parameters")
         raise NotImplementedError
     else:
-        logging.info("shrinkage off - using GLM estimates for parameters")
+        LOGGER.info("shrinkage off - using GLM estimates for parameters")
         gamma_star_mat = gamma_hat
         phi_star_mat = phi_hat
 
@@ -202,7 +201,7 @@ def pycombat_seq(
     phi_star = phi_star_mat.mean(axis=1)
 
     ####### Ajust the data #######
-    logging.info("Adjusting the data")
+    LOGGER.info("Adjusting the data")
     adjust_counts = np.full(counts.shape, np.nan)
     for kk in range(n_batch):
         b = batch.categories[kk]

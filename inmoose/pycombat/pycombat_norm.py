@@ -15,13 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-import logging
 from functools import partial
 
 import mpmath as mp
 import numpy as np
 import pandas as pd
 
+from ..utils.logging import LOGGER
 from .covariates import make_design_matrix
 
 # aprior and bprior are useful to compute "hyper-prior values"
@@ -185,7 +185,7 @@ def int_eprior(sdat, g_hat, d_hat, precision):
         LH = np.nan_to_num(LH)  # corrects NaNs in likelihood
         if np.sum(LH) == 0 and test_approximation == 0:
             test_approximation = 1  # this message won't appear again
-            logging.info(
+            LOGGER.info(
                 "###\nValues too small, approximation applied to avoid division by 0.\nPrecision mode can correct this problem, but increases computation time.\n###"
             )
 
@@ -220,7 +220,9 @@ def param_fun(
     Returns:
         array list -- estimated adjusted additive and multiplicative batch effect
     """
-    if mean_only:  # if mean_only, no need for complex method: batch effect is immediately calculated
+    if (
+        mean_only
+    ):  # if mean_only, no need for complex method: batch effect is immediately calculated
         t2_n = np.multiply(t2[i], 1)
         t2_n_g_hat = np.multiply(t2_n, gamma_hat[i])
         gamma_star = postmean(
@@ -283,7 +285,7 @@ def check_mean_only(mean_only):
         ()
     """
     if mean_only:
-        logging.info("Using mean only version")
+        LOGGER.info("Using mean only version")
 
 
 def calculate_mean_var(design, batches, ref, dat, n_batches, n_batch, n_array):
@@ -302,7 +304,7 @@ def calculate_mean_var(design, batches, ref, dat, n_batches, n_batch, n_array):
         grand_mean {matrix} -- Mean for each gene and each batch
         var_pooled {matrix} -- Variance for each gene and each batch
     """
-    logging.info("Standardizing Data across genes.")
+    LOGGER.info("Standardizing Data across genes.")
     # B_hat is the vector of regression coefficients corresponding to the design matrix
     B_hat = np.linalg.solve(
         np.dot(design, np.transpose(design)), np.dot(design, np.transpose(dat))
@@ -377,7 +379,7 @@ def standardise_data(dat, stand_mean, var_pooled, n_array):
 
 
 def fit_model(design, n_batch, s_data, batches, mean_only, par_prior, precision, ref):
-    logging.info("Fitting L/S model and finding priors.")
+    LOGGER.info("Fitting L/S model and finding priors.")
 
     # fraction of design matrix related to batches
     batch_design = design[0:n_batch]
@@ -413,7 +415,7 @@ def fit_model(design, n_batch, s_data, batches, mean_only, par_prior, precision,
 
     if par_prior:
         # use param_fun function for parametric adjustments (cf. function definition)
-        logging.info("Finding parametric adjustments.")
+        LOGGER.info("Finding parametric adjustments.")
         results = list(
             map(
                 partial(
@@ -433,7 +435,7 @@ def fit_model(design, n_batch, s_data, batches, mean_only, par_prior, precision,
         )
     else:
         # use nonparam_fun for non-parametric adjustments (cf. function definition)
-        logging.info("Finding nonparametric adjustments")
+        LOGGER.info("Finding nonparametric adjustments")
         results = list(
             map(
                 partial(
@@ -496,7 +498,7 @@ def adjust_data(
     # Now we adjust the data:
     # 1. substract additive batch effect (gamma_star)
     # 2. divide by multiplicative batch effect (delta_star)
-    logging.info("Adjusting the Data")
+    LOGGER.info("Adjusting the Data")
     bayes_data = np.transpose(s_data)
     j = 0
     for i in batches:  # for each batch, specific correction

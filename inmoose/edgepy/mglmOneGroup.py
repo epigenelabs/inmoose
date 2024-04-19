@@ -19,9 +19,9 @@
 # This file is based on the file 'R/mglmOneGroup.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
-import logging
-
 import numpy as np
+
+from ..utils import LOGGER
 
 from .glm_one_group import fit_one_group
 from .makeCompressedMatrix import (
@@ -118,6 +118,6 @@ def mglmOneGroup(
 
     # Convergence achieved for all tags?
     if np.count_nonzero(output[1]) > 0:
-        logging.debug(f"max iterations exceeded for {np.count_nonzero(output[1])} tags")
+        LOGGER.debug(f"max iterations exceeded for {np.count_nonzero(output[1])} tags")
 
     return output[0]

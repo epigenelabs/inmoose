@@ -18,10 +18,9 @@
 
 # This file is based on the file 'R/estimateGLMCommonDisp.R' of the Bioconductor edgeR package (version 3.38.4).
 
-import logging
-
 import numpy as np
 
+from ..utils import LOGGER
 from .aveLogCPM import aveLogCPM
 from .dispCoxReid import dispCoxReid
 from .validDGEList import validDGEList
@@ -134,14 +133,12 @@ def estimateGLMCommonDisp(
     if design is None:
         design = np.ones((y.shape[1], 1))
     if design.shape[1] >= y.shape[1]:
-        logging.warnings.warn(
-            "No residual degree of freedom: setting dispersion to None"
-        )
+        LOGGER.warn("No residual degree of freedom: setting dispersion to None")
         return None
 
     # Check method
     if method != "CoxReid" and weights is not None:
-        logging.warnings.warn("weights only supported by CoxReid method")
+        LOGGER.warn("weights only supported by CoxReid method")
 
     # Check offset
     if offset is None:
@@ -178,6 +175,6 @@ def estimateGLMCommonDisp(
     else:
         raise ValueError(f"invalid method for dispersion evaluation: {method}")
 
-    logging.debug(f"Disp = {round(disp, 5)}, BCV = {round(np.sqrt(disp), 4)}")
+    LOGGER.debug(f"Disp = {round(disp, 5)}, BCV = {round(np.sqrt(disp), 4)}")
 
     return disp

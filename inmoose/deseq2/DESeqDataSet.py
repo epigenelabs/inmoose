@@ -20,7 +20,6 @@
 # Bioconductor DESeq2 package (version 3.16).
 
 
-import logging
 from collections import OrderedDict
 
 import numpy as np
@@ -31,6 +30,7 @@ from scipy.stats import median_abs_deviation as mad
 from scipy.stats import norm
 
 from ..utils import Factor, rnbinom
+from ..utils import LOGGER
 from .misc import buildVectorWithNACols, checkFullRank, cleanCategoricalColumnName
 
 
@@ -362,7 +362,7 @@ class DESeqDataSet(AnnData):
                 )
                 value.varLogDispEsts = varLogDispEsts
             else:
-                logging.info(
+                LOGGER.info(
                     "variance of dispersion residuals not estimated (necessary only for differential expression calling)"
                 )
 
@@ -419,8 +419,8 @@ class DESeqDataSet(AnnData):
             if "replaceCounts" in self.layers:
                 cnts = self.layers["replaceCounts"]
             else:
-                logging.warnings.warn(
-                    "there is no layer named 'replacedCounts', using original. calling DESeq() will replace outliers if they are detected and store this layer."
+                LOGGER.warn(
+                    "There is no layer named 'replacedCounts', using original. calling DESeq() will replace outliers if they are detected and store this layer."
                 )
                 cnts = self.X
         else:

@@ -11,3 +11,4 @@ from .stats import dnorm as dnorm
 from .stats import pnorm as pnorm
 from .stats import pt as pt
 from .stats import rnbinom as rnbinom
+from .logging import LOGGER

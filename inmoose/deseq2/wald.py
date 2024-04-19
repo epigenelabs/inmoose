@@ -20,16 +20,13 @@
 # (version 3.16).
 
 
-import logging
-
 import numpy as np
 import pandas as pd
 from scipy.stats import trim_mean
 
-from ..utils import Factor, pnorm, pt
+from ..utils import Factor, LOGGER, pnorm, pt
 from .fitNbinomGLMs import fitGLMsWithPrior, fitNbinomGLMs
 from .misc import buildDataFrameWithNACols, buildMatrixWithNACols, nOrMoreInCell
-from .weights import getAndCheckWeights
 
 
 def nbinomWaldTest(
@@ -172,9 +169,9 @@ def nbinomWaldTest(
     """
 
     if not quiet:
-        logging.basicConfig(level=logging.INFO)
+        LOGGER.setLevel(logging.INFO)
     else:
-        logging.basicConfig(level=logging.WARNING)
+        LOGGER.setLevel(logging.WARN)
 
     if "dispersion" not in obj.var:
         raise ValueError(
@@ -182,7 +179,7 @@ def nbinomWaldTest(
         )
 
     if not obj.var.type.filter("results").empty:
-        logging.info("found results columns, replacing these")
+        LOGGER.info("found results columns, replacing these")
         obj = obj.removeResults()
 
     if obj.var["allZero"] is None:
@@ -303,12 +300,9 @@ def nbinomWaldTest(
     modelMatrixNames = modelMatrix.design_info.column_names
     betaMatrix = fit["betaMatrix"]
     assert isinstance(betaMatrix, pd.DataFrame)
-    assert (
-        betaMatrix.shape
-        == (
-            objNZ.n_vars,
-            len(modelMatrixNames),
-        )
+    assert betaMatrix.shape == (
+        objNZ.n_vars,
+        len(modelMatrixNames),
     ), f"betaMatrix shape {betaMatrix.shape} is wrong, should be {(objNZ.n_vars, len(modelMatrixNames))}"
     betaMatrix.index = objNZ.var_names
     assert np.array_equal(betaMatrix.columns, modelMatrixNames)
@@ -371,7 +365,7 @@ def nbinomWaldTest(
     betaConv = fit["betaConv"]
 
     if np.any(~betaConv):
-        logging.info(
+        LOGGER.info(
             f"{np.sum(~betaConv)} cols did not converge in beta, labelled in obj.var['betaConv']. Use larger maxit argument with nbinomWaldTest"
         )
 
