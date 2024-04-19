@@ -14,7 +14,7 @@ from . import common_cpp
 setdlopenflags(default_dlopen_flags)
 del default_dlopen_flags
 
-from utils import LOGGER  # noqa: F401
+from .utils import LOGGER  # noqa: F401
 from . import edgepy
 from . import pycombat
 from . import utils
