@@ -133,14 +133,14 @@ def estimateGLMCommonDisp(
     if design is None:
         design = np.ones((y.shape[1], 1))
     if design.shape[1] >= y.shape[1]:
-        LOGGER.warn(
+        LOGGER.warning(
             "No residual degree of freedom: setting dispersion to None"
         )
         return None
 
     # Check method
     if method != "CoxReid" and weights is not None:
-        LOGGER.warn("weights only supported by CoxReid method")
+        LOGGER.warning("weights only supported by CoxReid method")
 
     # Check offset
     if offset is None:

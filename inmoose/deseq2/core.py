@@ -218,7 +218,7 @@ def DESeq(
     if fitType == "glmGamPoi":
         minReplicatesForReplace = np.inf
         if parallel:
-            LOGGER.warn(
+            LOGGER.warning(
                 "parallelization of DESeq() is not implemented for fitType='glmGamPoi'"
             )
 
@@ -267,7 +267,7 @@ def DESeq(
     if test == "Wald" and reduced is not None:
         raise ValueError("'reduced' ignored when test='Wald'")
     if dispersionEstimator == "glmGamPoi" and test == "Wald":
-        LOGGER.warn(
+        LOGGER.warning(
             "glmGamPoi dispersion estimator should be used in combination with a LRT and not a Wald test"
         )
 
@@ -277,7 +277,7 @@ def DESeq(
 
         # warn if the design is just an intercept
         if [len(t.factors) for t in obj.design.design_info.terms] == [0]:
-            LOGGER.warn(
+            LOGGER.warning(
                 "the design is ~1 (just an intercept). Is this intended?"
             )
 
