@@ -45,7 +45,7 @@ def predFC_DGEList(
         dispersion = self.getDispersion()
     if dispersion is None:
         dispersion = 0
-        LOGGER.warn("dispersion set to zero")
+        LOGGER.warning("dispersion set to zero")
 
     return predFC(
         y=self.counts,

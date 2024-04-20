@@ -95,7 +95,7 @@ def getAndCheckWeights(obj, modelMatrix, weightThreshold=1e-2):
                 obj.var.description["weightsFail"] = (
                     "weights fail to allow parameter estimation"
                 )
-                LOGGER.warn(
+                LOGGER.warning(
                     f"for {np.sum(~weights_ok)} genes, the weights as supplied won't allow parameter estimation, producing a degenerate design matrix. These columns have been flagged in dds.var['weightsFail'] and treated as if the column contained all zeros (dds.var['allZero'] set to True). If you are blocking for donors/organisms, consider design = ~0+donor+condition."
                 )
 

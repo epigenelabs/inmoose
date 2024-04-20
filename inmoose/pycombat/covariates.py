@@ -137,7 +137,7 @@ class VirtualCohortInput:
 
             if covar_mod.shape[0] != len(self.batch):
                 if covar_mod.shape[1] == len(self.batch):
-                    LOGGER.warn(
+                    LOGGER.warning(
                         "The covariate matrix seems to be transposed. The computation will proceed with the input covariate matrix transposed, but you should double-check the covariate matrix."
                     )
                     covar_mod = covar_mod.T
@@ -303,7 +303,7 @@ class VirtualCohortInput:
                 f"{nan_covar_mod.sum().sum()} values are missing in covariates {', '.join(name_nan_covar_mod)}. Correct your covariates or use the cov_missing_value parameters"
             )
         elif na_cov_action == "remove":
-            LOGGER.warn(
+            LOGGER.warning(
                 f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
             )
             keep = nan_covar_mod.sum(axis=1) == 0
@@ -319,7 +319,7 @@ class VirtualCohortInput:
                 self.list_genes,
             )
         elif na_cov_action == "fill":
-            LOGGER.warn(
+            LOGGER.warning(
                 f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
             )
 
@@ -349,7 +349,7 @@ class VirtualCohortInput:
                     f"Cannot create new categories for numerical covariates {', '.join(continuous_nan_cols)}. Please fix the NA in those covariates manually."
                 )
             if len(maybe_continuous_nan_cols) > 0:
-                LOGGER.warn(
+                LOGGER.warning(
                     f"Creating new categories for integer covariates {', '.join(maybe_continuous_nan_cols)}. These are treated as categorical covariates, but you may want to double-check those."
                 )
 

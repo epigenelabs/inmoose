@@ -51,7 +51,7 @@ def movingAverageByCol(x, width=5, full_length=True):
     (n, m) = x.shape
     if width > n:
         width = n
-        LOGGER.warn("reducing moving average width to x.shape[0]")
+        LOGGER.warning("reducing moving average width to x.shape[0]")
 
     if full_length:
         half1 = ceil(width / 2)

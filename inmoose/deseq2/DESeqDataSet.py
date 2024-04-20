@@ -419,7 +419,7 @@ class DESeqDataSet(AnnData):
             if "replaceCounts" in self.layers:
                 cnts = self.layers["replaceCounts"]
             else:
-                LOGGER.warn(
+                LOGGER.warning(
                     "There is no layer named 'replacedCounts', using original. calling DESeq() will replace outliers if they are detected and store this layer."
                 )
                 cnts = self.X

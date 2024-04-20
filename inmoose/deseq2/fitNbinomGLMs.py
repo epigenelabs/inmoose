@@ -333,7 +333,7 @@ def fitNbinomGLMs(
         raise ValueError("betaSE contains NaN")
     nNonposVar = np.sum(np.sum(betaSE == 0, axis=0) > 0)
     if warnNonposVar and nNonposVar > 0:
-        LOGGER.warn(
+        LOGGER.warning(
             f"{nNonposVar} cols had non-positive estimates of variance for coefficients"
         )
 

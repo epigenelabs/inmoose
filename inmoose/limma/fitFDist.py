@@ -129,13 +129,13 @@ def fitFDist(x, df1, covariate=None):
     x = np.maximum(x, 0)
     m = np.median(x)
     if m == 0:
-        LOGGER.warn(
+        LOGGER.warning(
             "More than half of residual variances are exactly zero: eBayes unreliable"
         )
         m = 1
     else:
         if (x == 0).any():
-            LOGGER.warn(
+            LOGGER.warning(
                 "Zero sample variances detected, have been offset away from zero"
             )
     x = np.maximum(x, 1e-5 * m)
@@ -207,7 +207,7 @@ def trigammaInverse(x):
     if omit.any():
         y = x
         y[omit] = np.nan
-        LOGGER.warn("NaNs produced")
+        LOGGER.warning("NaNs produced")
         if (~omit).any():
             y[~omit] = trigammaInverse(x[~omit])
         return y
@@ -242,6 +242,6 @@ def trigammaInverse(x):
         if np.max(-dif / y) < 1e-8:
             break
         if it > 50:
-            LOGGER.warn("Iteration limit exceeded")
+            LOGGER.warning("Iteration limit exceeded")
             break
     return y

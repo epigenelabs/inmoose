@@ -144,7 +144,7 @@ class ns:
             nIknots = df - 1 - include_intercept
             if nIknots < 0:
                 nIknots = 0
-                LOGGER.warn("df was too small, used {1+include_intercept}")
+                LOGGER.warning("df was too small, used {1+include_intercept}")
 
             if nIknots > 0:
                 knots = np.linspace(0, 1, num=nIknots + 2)[1:-1]

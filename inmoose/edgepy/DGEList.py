@@ -143,7 +143,7 @@ class DGEList(object):
         if minlibsize == 0:
             if np.logical_and(lib_size == 0, (counts.sum(axis=0) > 0)).any():
                 raise ValueError("library size set to zero but counts are nonzero")
-            LOGGER.warn("library size of zero detected")
+            LOGGER.warning("library size of zero detected")
 
         # Check norm_factors
         if norm_factors is None:
