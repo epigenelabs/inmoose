@@ -105,7 +105,7 @@ def tmixture_vector(tstat, stdev_unscaled, df, proportion, v0_lim=None):
 
     Returns
     -------
-    ndarray
+    float
         estimated :code:`v0` value
     """
     if tstat.shape != stdev_unscaled.shape:
