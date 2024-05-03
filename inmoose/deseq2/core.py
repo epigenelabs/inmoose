@@ -32,6 +32,7 @@ from .outliers import refitWithoutOutliers
 from .wald import nbinomWaldTest
 from ..utils import LOGGER
 
+
 def DESeq(
     obj,
     test="Wald",
@@ -278,9 +279,7 @@ def DESeq(
 
         # warn if the design is just an intercept
         if [len(t.factors) for t in obj.design.design_info.terms] == [0]:
-            LOGGER.warning(
-                "the design is ~1 (just an intercept). Is this intended?"
-            )
+            LOGGER.warning("the design is ~1 (just an intercept). Is this intended?")
 
         if full.design_info.describe() != obj.design.design_info.describe():
             raise ValueError("'full' specified as formula should match obj.design")
