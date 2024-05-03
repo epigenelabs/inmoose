@@ -20,6 +20,7 @@ import logging
 import numpy as np
 import patsy
 import pandas as pd
+import re
 import scipy
 
 from ..utils import Factor, cov2cor
@@ -60,10 +61,18 @@ def makeContrasts(contrasts, levels):
         res[i] = 1
         return res
 
-    gl = {l: indicator(i, levels.nlevels()) for i, l in enumerate(levels.categories)}
+    def rename(n):
+        return re.sub("([a-zA-Z0-9]+)\[((T.)?[a-zA-Z0-9]+)\]", "\\1_\\2", n)
+
+    gl = {
+        rename(l): indicator(i, levels.nlevels())
+        for i, l in enumerate(levels.categories)
+    }
     if not isinstance(contrasts, list):
         contrasts = [contrasts]
-    return pd.DataFrame({c: eval(c, gl) for c in contrasts}, index=levels.categories)
+    return pd.DataFrame(
+        {c: eval(rename(c), gl) for c in contrasts}, index=levels.categories
+    )
 
 
 def contrasts_fit(fit, contrasts=None, coefficients=None):
