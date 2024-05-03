@@ -32,11 +32,14 @@ from .marraylm import MArrayLM
 class EAWP:
 
     def __init__(self, obj):
-        self.exprs = np.asarray(obj)
+        if not isinstance(obj, pd.DataFrame):
+            self.exprs = pd.DataFrame(obj)
+        else:
+            self.exprs = obj.copy()
         self.design = None
         self.weights = None
         self.probes = None
-        self.Amean = np.nanmean(self.exprs, axis=1)
+        self.Amean = self.exprs.mean(axis=1)
 
 
 def lmFit(
@@ -218,7 +221,7 @@ def lmFit(
     if method == "robust":
         raise NotImplementedError("robust method for lmFit is not implemented yet")
         # fit = mrlm(
-        #    y.expres, design=design, ndups=ndups, spacing=spacing, weights=weights
+        #    y.exprs, design=design, ndups=ndups, spacing=spacing, weights=weights
         # )
     else:
         if ndups < 2 and block is None:
@@ -270,7 +273,7 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
 
     Arguments
     ---------
-    M : array_like
+    M : pd.DataFrame
         numeric matrix containing log-ratio or log-expression values for a
         series of microarrays, rows correspond to genes and columns to arrays
     design
@@ -331,8 +334,12 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
 
     # Initialize standard errors
     ngenes = M.shape[0]
-    stdev_unscaled = pd.DataFrame(np.full((ngenes, nbeta), np.nan), columns=coef_names)
-    beta = pd.DataFrame(np.full((ngenes, nbeta), np.nan), columns=coef_names)
+    stdev_unscaled = pd.DataFrame(
+        np.full((ngenes, nbeta), np.nan), columns=coef_names, index=M.index
+    )
+    beta = pd.DataFrame(
+        np.full((ngenes, nbeta), np.nan), columns=coef_names, index=M.index
+    )
 
     # if QR-decomposition is constant for all genes, fit all genes in one sweep
     NoProbesWts = np.all(np.isfinite(M)) and (weights is None)
@@ -352,14 +359,18 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
             sigma = np.full(ngenes, np.nan)
 
         cov_coef = np.linalg.inv(design.T @ design)
+        cov_coef = pd.DataFrame(cov_coef, index=coef_names, columns=coef_names)
         r = np.linalg.matrix_rank(design)
         _, _, P = scipy.linalg.qr(design, pivoting=True)
         est = P[:r]
         stdev_unscaled.iloc[:, est] = np.sqrt(np.diag(cov_coef))
+        coef = fit.coefficients.T
+        coef.index = M.index
+        coef.columns = coef_names
         return MArrayLM(
-            pd.DataFrame(fit.coefficients.T, columns=coef_names),
+            coef,
             stdev_unscaled,
-            sigma,
+            pd.Series(sigma, index=M.index),
             np.full(ngenes, fit.df_residuals),
             cov_coef,
         )
@@ -368,7 +379,7 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
     sigma = np.full(ngenes, np.nan)
     df_residual = np.zeros(ngenes)
     for i in range(ngenes):
-        y = M[i, :]
+        y = M.iloc[i, :]
         obs = np.isfinite(y)
         if obs.sum() > 0:
             X = design[obs, :]

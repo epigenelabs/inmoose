@@ -12,11 +12,16 @@ class Test(unittest.TestCase):
     def setUp(self):
         y = norm.rvs(size=(10, 6), scale=0.3, random_state=42)
         y[0, :2] += 2
-        self.y = y
+        self.y = pd.DataFrame(
+            y,
+            index=[f"gene{i}" for i in range(10)],
+            columns=[f"sample{i}" for i in range(6)],
+        )
         group = Factor([1, 1, 1, 2, 2, 2])
         self.design = dmatrix("0+group")
         self.contrast_matrix = pd.DataFrame(
-            {"First3": [1, 0], "Last3": [0, 1], "Last3-First3": [-1, 1]}
+            {"First3": [1, 0], "Last3": [0, 1], "Last3-First3": [-1, 1]},
+            index=["group1", "group2"],
         )
 
     def test_nonEstimable(self):
@@ -44,70 +49,101 @@ class Test(unittest.TestCase):
         # self.assertTrue(np.allclose(fit.coefficients, coef_ref))
 
         fit = lmFit(self.y, self.design)
-        coef_ref = [
-            [1.4339472, 0.10547395],
-            [0.1877173, -0.03865874],
-            [-0.3396236, -0.12608713],
-            [-0.0854679, -0.15829963],
-            [-0.1584454, -0.05166344],
-            [0.1237074, -0.14560097],
-            [-0.3078993, 0.11066961],
-            [-0.1895274, -0.01233607],
-            [-0.1095338, -0.04503280],
-            [0.1123062, 0.09975962],
-        ]
-        self.assertTrue(np.allclose(fit.coefficients, coef_ref, rtol=1e-6))
+        coef_ref = pd.DataFrame(
+            {
+                "group[1]": [
+                    1.4339472,
+                    0.1877173,
+                    -0.3396236,
+                    -0.0854679,
+                    -0.1584454,
+                    0.1237074,
+                    -0.3078993,
+                    -0.1895274,
+                    -0.1095338,
+                    0.1123062,
+                ],
+                "group[2]": [
+                    0.10547395,
+                    -0.03865874,
+                    -0.12608713,
+                    -0.15829963,
+                    -0.05166344,
+                    -0.14560097,
+                    0.11066961,
+                    -0.01233607,
+                    -0.04503280,
+                    0.09975962,
+                ],
+            },
+            index=self.y.index,
+        )
+
+        pd.testing.assert_frame_equal(fit.coefficients, coef_ref, rtol=1e-6)
 
         self.assertTrue(np.array_equal(fit.df_residual, [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]))
 
-        sigma_ref = [
-            0.7919070,
-            0.2512174,
-            0.2908815,
-            0.3666233,
-            0.1706735,
-            0.3631793,
-            0.2461618,
-            0.2569999,
-            0.2941130,
-            0.2615085,
-        ]
-        self.assertTrue(np.allclose(fit.sigma, sigma_ref))
+        sigma_ref = pd.Series(
+            [
+                0.7919070,
+                0.2512174,
+                0.2908815,
+                0.3666233,
+                0.1706735,
+                0.3631793,
+                0.2461618,
+                0.2569999,
+                0.2941130,
+                0.2615085,
+            ],
+            index=self.y.index,
+        )
+        pd.testing.assert_series_equal(fit.sigma, sigma_ref)
 
-        cov_ref = [[0.3333333, 0.0], [0.0, 0.3333333]]
-        self.assertTrue(np.allclose(fit.cov_coefficients, cov_ref))
+        cov_ref = pd.DataFrame(
+            {"group[1]": [0.3333333, 0.0], "group[2]": [0.0, 0.3333333]},
+            index=["group[1]", "group[2]"],
+        )
+        pd.testing.assert_frame_equal(fit.cov_coefficients, cov_ref)
 
         self.assertTrue(np.allclose(fit.stdev_unscaled, 0.5773503))
+        self.assertTrue(np.array_equal(fit.stdev_unscaled.index, self.y.index))
+        self.assertTrue(
+            np.array_equal(fit.stdev_unscaled.columns, fit.coefficients.columns)
+        )
 
-        Amean_ref = [
-            0.76971056,
-            0.07452928,
-            -0.23285536,
-            -0.12188377,
-            -0.10505440,
-            -0.01094676,
-            -0.09861482,
-            -0.10093174,
-            -0.07728329,
-            0.10603292,
-        ]
-        self.assertTrue(np.allclose(fit.Amean, Amean_ref))
+        Amean_ref = pd.Series(
+            [
+                0.76971056,
+                0.07452928,
+                -0.23285536,
+                -0.12188377,
+                -0.10505440,
+                -0.01094676,
+                -0.09861482,
+                -0.10093174,
+                -0.07728329,
+                0.10603292,
+            ],
+            index=self.y.index,
+        )
+        pd.testing.assert_series_equal(fit.Amean, Amean_ref)
 
     def test_ebayes(self):
         fit = lmFit(self.y, self.design)
         fit2 = eBayes(fit)
 
-        self.assertTrue(np.allclose(fit2.coefficients, fit.coefficients))
-        self.assertTrue(np.allclose(fit2.sigma, fit.sigma))
-        self.assertTrue(np.allclose(fit2.stdev_unscaled, fit.stdev_unscaled))
-        self.assertTrue(np.allclose(fit2.Amean, fit.Amean))
+        pd.testing.assert_frame_equal(fit2.coefficients, fit.coefficients)
+        pd.testing.assert_series_equal(fit2.sigma, fit.sigma)
+        pd.testing.assert_frame_equal(fit2.stdev_unscaled, fit.stdev_unscaled)
+        pd.testing.assert_series_equal(fit2.Amean, fit.Amean)
 
         self.assertTrue(np.abs(fit2.df_prior - 71047.76) / 71047.76 < 1e-3)
         self.assertAlmostEqual(fit2.s2_prior, 0.1198481)
         self.assertTrue(np.allclose(fit2.var_prior, [36.68822975, 0.08343894]))
-        self.assertTrue(
-            np.allclose(
-                fit2.s2_post,
+        pd.testing.assert_series_equal(
+            fit2.s2_post,
+            pd.Series(
                 [
                     0.1198767,
                     0.1198449,
@@ -120,58 +156,104 @@ class Test(unittest.TestCase):
                     0.1198462,
                     0.1198452,
                 ],
-            )
+                index=self.y.index,
+            ),
         )
-        self.assertTrue(
-            np.allclose(
-                fit2.t,
-                [
-                    [7.1734231, 0.52764098],
-                    [0.9391936, -0.19341874],
-                    [-1.6992077, -0.63084025],
-                    [-0.4276087, -0.79199683],
-                    [-0.7927456, -0.25848634],
-                    [0.6189273, -0.72846394],
-                    [-1.5404929, 0.55370627],
-                    [-0.9482493, -0.06172022],
-                    [-0.5480202, -0.22530838],
-                    [0.5618936, 0.49912011],
-                ],
-            )
+        pd.testing.assert_frame_equal(
+            fit2.t,
+            pd.DataFrame(
+                {
+                    "group[1]": [
+                        7.1734231,
+                        0.9391936,
+                        -1.6992077,
+                        -0.4276087,
+                        -0.7927456,
+                        0.6189273,
+                        -1.5404929,
+                        -0.9482493,
+                        -0.5480202,
+                        0.5618936,
+                    ],
+                    "group[2]": [
+                        0.52764098,
+                        -0.19341874,
+                        -0.63084025,
+                        -0.79199683,
+                        -0.25848634,
+                        -0.72846394,
+                        0.55370627,
+                        -0.06172022,
+                        -0.22530838,
+                        0.49912011,
+                    ],
+                },
+                index=self.y.index,
+            ),
         )
-        self.assertTrue(
-            np.allclose(
-                fit2.p_value,
-                [
-                    [1.076797e-08, 0.6006634],
-                    [3.532684e-01, 0.8476099],
-                    [9.704589e-02, 0.5317331],
-                    [6.712294e-01, 0.4330345],
-                    [4.326031e-01, 0.7973571],
-                    [5.394734e-01, 0.4705731],
-                    [1.313148e-01, 0.5828621],
-                    [3.486966e-01, 0.9510930],
-                    [5.867236e-01, 0.8228865],
-                    [5.773237e-01, 0.6204289],
-                ],
-            )
+        pd.testing.assert_frame_equal(
+            fit2.p_value,
+            pd.DataFrame(
+                {
+                    "group[1]": [
+                        1.076797e-08,
+                        3.532684e-01,
+                        9.704589e-02,
+                        6.712294e-01,
+                        4.326031e-01,
+                        5.394734e-01,
+                        1.313148e-01,
+                        3.486966e-01,
+                        5.867236e-01,
+                        5.773237e-01,
+                    ],
+                    "group[2]": [
+                        0.6006634,
+                        0.8476099,
+                        0.5317331,
+                        0.4330345,
+                        0.7973571,
+                        0.4705731,
+                        0.5828621,
+                        0.9510930,
+                        0.8228865,
+                        0.6204289,
+                    ],
+                },
+                index=self.y.index,
+            ),
         )
-        self.assertTrue(
-            np.allclose(
-                fit2.lods,
-                [
-                    [9.767247, -4.678431],
-                    [-6.507090, -4.702983],
-                    [-5.534718, -4.666348],
-                    [-6.857523, -4.643355],
-                    [-6.633502, -4.699973],
-                    [-6.756554, -4.653013],
-                    [-5.779612, -4.675576],
-                    [-6.498600, -4.706428],
-                    [-6.798220, -4.701616],
-                    [-6.790460, -4.681400],
-                ],
-            )
+        pd.testing.assert_frame_equal(
+            fit2.lods,
+            pd.DataFrame(
+                {
+                    "group[1]": [
+                        9.767247,
+                        -6.507090,
+                        -5.534718,
+                        -6.857523,
+                        -6.633502,
+                        -6.756554,
+                        -5.779612,
+                        -6.498600,
+                        -6.798220,
+                        -6.790460,
+                    ],
+                    "group[2]": [
+                        -4.678431,
+                        -4.702983,
+                        -4.666348,
+                        -4.643355,
+                        -4.699973,
+                        -4.653013,
+                        -4.675576,
+                        -4.706428,
+                        -4.701616,
+                        -4.681400,
+                    ],
+                },
+                index=self.y.index,
+            ),
         )
         self.assertTrue(
             np.allclose(
@@ -214,26 +296,25 @@ class Test(unittest.TestCase):
         )
         fit.coefficients = pd.DataFrame(
             fit.coefficients,
+            index=self.y.index,
             columns=[f"x{i}" for i in range(fit.coefficients.shape[1])],
         )
         fit.stdev_unscaled = pd.DataFrame(
             fit.stdev_unscaled,
+            index=self.y.index,
             columns=[f"x{i}" for i in range(fit.stdev_unscaled.shape[1])],
         )
         fit2 = contrasts_fit(fit, self.contrast_matrix)
 
-        self.assertTrue(isinstance(fit2.coefficients, pd.DataFrame))
-        self.assertTrue(isinstance(fit2.stdev_unscaled, pd.DataFrame))
-        self.assertTrue(isinstance(fit2.cov_coefficients, pd.DataFrame))
-
         coef_ref = pd.DataFrame(
             {
-                "First3": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18],
-                "Last3": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
-                "Last3-First3": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            }
+                "First3": [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0],
+                "Last3": [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0, 17.0, 19.0],
+                "Last3-First3": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            },
+            index=self.y.index,
         )
-        self.assertTrue(np.allclose(coef_ref, fit2.coefficients))
+        pd.testing.assert_frame_equal(coef_ref, fit2.coefficients)
         std_ref = pd.DataFrame(
             {
                 "First3": fit.stdev_unscaled.iloc[:, 0],
@@ -250,28 +331,35 @@ class Test(unittest.TestCase):
                     1.2494443,
                     1.3437096,
                 ],
-            }
+            },
+            index=self.y.index,
         )
-        self.assertTrue(np.allclose(std_ref, fit2.stdev_unscaled))
+        pd.testing.assert_frame_equal(std_ref, fit2.stdev_unscaled)
         cov_ref = pd.DataFrame(
             {
                 "First3": [0.4377778, 0.0, -0.4377778],
                 "Last3": [0.0, 0.4811111, 0.4811111],
                 "Last3-First3": [-0.4377778, 0.4811111, 0.9188889],
-            }
+            },
+            index=["First3", "Last3", "Last3-First3"],
         )
-        self.assertTrue(np.allclose(cov_ref, fit2.cov_coefficients))
+        pd.testing.assert_frame_equal(cov_ref, fit2.cov_coefficients)
 
         fit.coefficients.iloc[0, 0] = np.nan
         fit3 = contrasts_fit(fit, self.contrast_matrix)
         coef_ref = pd.DataFrame(
             {
-                "First3": [np.nan, 2, 4, 6, 8, 10, 12, 14, 16, 18],
-                "Last3": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
-                "Last3-First3": [np.nan, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            }
+                "First3": [np.nan, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0],
+                "Last3": [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0, 17.0, 19.0],
+                "Last3-First3": [np.nan, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            },
+            index=self.y.index,
         )
+        # NB: np.allclose instead of pd.testing.assert_frame_equal here to also
+        # check columns with nan values
         self.assertTrue(np.allclose(coef_ref, fit3.coefficients, equal_nan=True))
+        self.assertTrue(np.array_equal(coef_ref.index, fit3.coefficients.index))
+        self.assertTrue(np.array_equal(coef_ref.columns, fit3.coefficients.columns))
 
         fit.coefficients.iloc[0, 0] = 10
         fit.cov_coefficients = np.cov(fit.coefficients.T)
@@ -281,9 +369,10 @@ class Test(unittest.TestCase):
                 "First3": [26.66667, 26.66667, 4.586534e-15],
                 "Last3": [26.66667, 36.66667, 10.0],
                 "Last3-First3": [4.586534e-15, 10.0, 10.0],
-            }
+            },
+            index=["First3", "Last3", "Last3-First3"],
         )
-        self.assertTrue(np.allclose(cov_ref, fit4.cov_coefficients))
+        pd.testing.assert_frame_equal(cov_ref, fit4.cov_coefficients)
 
     def test_topTable(self):
         fit = lmFit(self.y, self.design)
@@ -291,7 +380,7 @@ class Test(unittest.TestCase):
         tt = topTable(fit2)
         tt_ref = pd.DataFrame(
             {
-                "x1": [
+                "group[1]": [
                     1.4339472,
                     -0.3396236,
                     -0.3078993,
@@ -303,7 +392,7 @@ class Test(unittest.TestCase):
                     0.1123062,
                     -0.1095338,
                 ],
-                "x2": [
+                "group[2]": [
                     0.10547395,
                     -0.12608713,
                     0.11066961,
@@ -364,10 +453,20 @@ class Test(unittest.TestCase):
                     8.390000e-01,
                 ],
             },
-            index=[0, 2, 6, 1, 5, 7, 3, 4, 9, 8],
+            index=[
+                "gene0",
+                "gene2",
+                "gene6",
+                "gene1",
+                "gene5",
+                "gene7",
+                "gene3",
+                "gene4",
+                "gene9",
+                "gene8",
+            ],
         )
-        self.assertTrue(np.array_equal(tt.index, tt_ref.index))
-        self.assertTrue(np.allclose(tt, tt_ref, rtol=1e-4))
+        pd.testing.assert_frame_equal(tt, tt_ref, rtol=1e-4)
 
         fit_con = eBayes(contrasts_fit(fit, self.contrast_matrix))
         tt = topTable(
@@ -472,8 +571,17 @@ class Test(unittest.TestCase):
                     -6.525565,
                 ],
             },
-            index=[0, 6, 5, 1, 2, 7, 4, 3, 8, 9],
+            index=[
+                "gene0",
+                "gene6",
+                "gene5",
+                "gene1",
+                "gene2",
+                "gene7",
+                "gene4",
+                "gene3",
+                "gene8",
+                "gene9",
+            ],
         )
-
-        self.assertTrue(np.array_equal(tt.index, tt_ref.index))
-        self.assertTrue(np.allclose(tt, tt_ref, rtol=1e-4))
+        pd.testing.assert_frame_equal(tt, tt_ref)

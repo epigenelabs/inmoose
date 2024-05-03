@@ -237,7 +237,8 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
         fit.stdev_unscaled[i] = 1e30
 
     # New coefficients
-    fit.coefficients = fit.coefficients.values @ contrasts
+    fit.coefficients = fit.coefficients @ contrasts.values
+    fit.coefficients.columns = contrasts.columns
 
     # Test whether design was orthogonal
     if len(cormatrix) < 2:
@@ -252,7 +253,8 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
 
     # New standard deviations
     if orthog:
-        fit.stdev_unscaled = np.sqrt(fit.stdev_unscaled.values**2 @ contrasts**2)
+        fit.stdev_unscaled = np.sqrt(fit.stdev_unscaled**2 @ contrasts.values**2)
+        fit.stdev_unscaled.columns = contrasts.columns
     else:
         R = scipy.linalg.cholesky(cormatrix)
         ngenes = fit.stdev_unscaled.shape[0]
