@@ -133,9 +133,7 @@ def estimateGLMCommonDisp(
     if design is None:
         design = np.ones((y.shape[1], 1))
     if design.shape[1] >= y.shape[1]:
-        LOGGER.warning(
-            "No residual degree of freedom: setting dispersion to None"
-        )
+        LOGGER.warning("No residual degree of freedom: setting dispersion to None")
         return None
 
     # Check method

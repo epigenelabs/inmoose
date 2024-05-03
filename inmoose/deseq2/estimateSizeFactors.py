@@ -23,6 +23,7 @@
 import numpy as np
 from ..utils import LOGGER
 
+
 def estimateSizeFactors_dds(
     obj,
     type_="ratio",

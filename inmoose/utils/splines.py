@@ -24,6 +24,7 @@ import numpy as np
 from scipy.interpolate import splev
 from ..utils import LOGGER
 
+
 def spline_design(knots, x, order, derivs=0):
     """
     Evaluate the design matrix for the B-splines defined by :code:`knots` at the values in :code:`x`.

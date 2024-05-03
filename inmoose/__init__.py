@@ -1,4 +1,3 @@
-
 import importlib.metadata
 
 __version__ = importlib.metadata.version(__package__)
@@ -20,4 +19,3 @@ from . import pycombat
 from . import utils
 from . import consensus_clustering
 from . import deseq2
-

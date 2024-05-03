@@ -23,6 +23,7 @@ import numpy as np
 from math import ceil, floor
 from ..utils import LOGGER
 
+
 def movingAverageByCol(x, width=5, full_length=True):
     """
     Moving average smoother for matrix columns.

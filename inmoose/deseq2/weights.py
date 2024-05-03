@@ -24,6 +24,7 @@ import numpy as np
 
 from ..utils import LOGGER
 
+
 def getAndCheckWeights(obj, modelMatrix, weightThreshold=1e-2):
     """
     Check and retrive weights
