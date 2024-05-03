@@ -5,7 +5,15 @@ from patsy import dmatrix
 from scipy.stats import norm
 
 from inmoose.utils import Factor
-from inmoose.limma import lmFit, nonEstimable, contrasts_fit, MArrayLM, eBayes, topTable
+from inmoose.limma import (
+    lmFit,
+    nonEstimable,
+    contrasts_fit,
+    MArrayLM,
+    eBayes,
+    topTable,
+    makeContrasts,
+)
 
 
 class Test(unittest.TestCase):
@@ -21,7 +29,13 @@ class Test(unittest.TestCase):
         self.design = dmatrix("0+group")
         self.contrast_matrix = pd.DataFrame(
             {"First3": [1, 0], "Last3": [0, 1], "Last3-First3": [-1, 1]},
-            index=["group1", "group2"],
+            index=["group[1]", "group[2]"],
+        )
+
+        condition = Factor([1, 2, 1, 2, 1, 2])
+        self.design_covariates = dmatrix("0+group+condition")
+        self.contrast_covariates = makeContrasts(
+            "group[1]-group[2]", self.design_covariates
         )
 
     def test_nonEstimable(self):
@@ -128,6 +142,93 @@ class Test(unittest.TestCase):
             index=self.y.index,
         )
         pd.testing.assert_series_equal(fit.Amean, Amean_ref)
+
+        fit = lmFit(self.y, self.design_covariates)
+        coef_ref = pd.DataFrame(
+            {
+                "group[1]": [
+                    1.25887380,
+                    0.15199740,
+                    -0.32547401,
+                    0.04372743,
+                    -0.23850795,
+                    0.11380454,
+                    -0.21018122,
+                    -0.24579036,
+                    -0.04420018,
+                    0.07044161,
+                ],
+                "group[2]": [
+                    -0.24467280,
+                    -0.11009858,
+                    -0.09778799,
+                    0.10009102,
+                    -0.21178860,
+                    -0.16540676,
+                    0.30610568,
+                    -0.12486200,
+                    0.08563443,
+                    0.01603041,
+                ],
+                "condition[T.2]": [
+                    0.52522013,
+                    0.10715975,
+                    -0.04244871,
+                    -0.38758597,
+                    0.24018774,
+                    0.02970869,
+                    -0.29315411,
+                    0.16878888,
+                    -0.19600084,
+                    0.12559381,
+                ],
+            },
+            index=self.y.index,
+        )
+        pd.testing.assert_frame_equal(fit.coefficients, coef_ref)
+
+        std_ref = pd.DataFrame(
+            {
+                "group[1]": [
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                    0.6454972,
+                ],
+                "group[2]": [
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                    0.8164966,
+                ],
+                "condition[T.2]": [
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                ],
+            },
+            index=self.y.index,
+        )
+        pd.testing.assert_frame_equal(std_ref, fit.stdev_unscaled)
 
     def test_ebayes(self):
         fit = lmFit(self.y, self.design)
@@ -295,14 +396,10 @@ class Test(unittest.TestCase):
             None,
         )
         fit.coefficients = pd.DataFrame(
-            fit.coefficients,
-            index=self.y.index,
-            columns=[f"x{i}" for i in range(fit.coefficients.shape[1])],
+            fit.coefficients, index=self.y.index, columns=self.contrast_matrix.index
         )
         fit.stdev_unscaled = pd.DataFrame(
-            fit.stdev_unscaled,
-            index=self.y.index,
-            columns=[f"x{i}" for i in range(fit.stdev_unscaled.shape[1])],
+            fit.stdev_unscaled, index=self.y.index, columns=self.contrast_matrix.index
         )
         fit2 = contrasts_fit(fit, self.contrast_matrix)
 
@@ -373,6 +470,45 @@ class Test(unittest.TestCase):
             index=["First3", "Last3", "Last3-First3"],
         )
         pd.testing.assert_frame_equal(cov_ref, fit4.cov_coefficients)
+
+        fit_covariates = lmFit(self.y, self.design_covariates)
+        fit5 = contrasts_fit(fit_covariates, self.contrast_covariates)
+        coef_ref = pd.DataFrame(
+            {
+                "group[1]-group[2]": [
+                    1.50354659,
+                    0.26209598,
+                    -0.22768602,
+                    -0.05636359,
+                    -0.02671935,
+                    0.27921130,
+                    -0.51628690,
+                    -0.12092836,
+                    -0.12983461,
+                    0.05441120,
+                ]
+            },
+            index=self.y.index,
+        )
+        pd.testing.assert_frame_equal(coef_ref, fit5.coefficients)
+        std_ref = pd.DataFrame(
+            {
+                "group[1]-group[2]": [
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                    0.8660254,
+                ]
+            },
+            index=self.y.index,
+        )
+        pd.testing.assert_frame_equal(std_ref, fit5.stdev_unscaled)
 
     def test_topTable(self):
         fit = lmFit(self.y, self.design)
@@ -585,3 +721,126 @@ class Test(unittest.TestCase):
             ],
         )
         pd.testing.assert_frame_equal(tt, tt_ref)
+
+        fit_covariates = lmFit(self.y, self.design_covariates)
+        fit_con = eBayes(contrasts_fit(fit_covariates, self.contrast_covariates))
+        tt = topTable(
+            fit_con,
+            sort_by="logFC",
+            number=np.inf,
+            coef="group[1]-group[2]",
+            confint=0.9,
+        )
+        tt_ref = pd.DataFrame(
+            {
+                "logFC": [
+                    1.50354659,
+                    -0.51628690,
+                    0.27921130,
+                    0.26209598,
+                    -0.22768602,
+                    -0.12983461,
+                    -0.12092836,
+                    -0.05636359,
+                    0.05441120,
+                    -0.02671935,
+                ],
+                "CI_L": [
+                    0.8648869,
+                    -1.0243969,
+                    -0.2572811,
+                    -0.2539541,
+                    -0.7508157,
+                    -0.6500231,
+                    -0.6361908,
+                    -0.5795862,
+                    -0.4627464,
+                    -0.5283325,
+                ],
+                "CI_R": [
+                    2.14220625,
+                    -0.00817689,
+                    0.81570373,
+                    0.77814600,
+                    0.29544369,
+                    0.39035389,
+                    0.39433411,
+                    0.46685905,
+                    0.57156875,
+                    0.47489385,
+                ],
+                "AveExpr": [
+                    0.76971056,
+                    -0.09861482,
+                    -0.01094676,
+                    0.07452928,
+                    -0.23285536,
+                    -0.07728329,
+                    -0.10093174,
+                    -0.12188377,
+                    0.10603292,
+                    -0.10505440,
+                ],
+                "t": [
+                    3.99964506,
+                    -1.72626474,
+                    0.88418560,
+                    0.86286448,
+                    -0.73943674,
+                    -0.42403702,
+                    -0.39872522,
+                    -0.18301479,
+                    0.17874729,
+                    -0.09049633,
+                ],
+                "P_Value": [
+                    0.0003984447,
+                    0.0949021452,
+                    0.3838419907,
+                    0.3952665823,
+                    0.4655642755,
+                    0.6746565581,
+                    0.6930059814,
+                    0.8560553406,
+                    0.8593745912,
+                    0.9285127413,
+                ],
+                "adj_P_Val": [
+                    0.003984447,
+                    0.474510726,
+                    0.928512741,
+                    0.928512741,
+                    0.928512741,
+                    0.928512741,
+                    0.928512741,
+                    0.928512741,
+                    0.928512741,
+                    0.928512741,
+                ],
+                "B": [
+                    -0.004229386,
+                    -4.932498541,
+                    -5.967152704,
+                    -5.985354042,
+                    -6.082385044,
+                    -6.264205210,
+                    -6.274594085,
+                    -6.337355229,
+                    -6.338129087,
+                    -6.350044879,
+                ],
+            },
+            index=[
+                "gene0",
+                "gene6",
+                "gene5",
+                "gene1",
+                "gene2",
+                "gene8",
+                "gene7",
+                "gene3",
+                "gene9",
+                "gene4",
+            ],
+        )
+        pd.testing.assert_frame_equal(tt, tt_ref, rtol=1e-3)
