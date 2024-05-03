@@ -237,8 +237,7 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
         fit.stdev_unscaled[i] = 1e30
 
     # New coefficients
-    fit.coefficients = fit.coefficients @ contrasts.values
-    fit.coefficients.columns = contrasts.columns
+    fit.coefficients = fit.coefficients @ contrasts
 
     # Test whether design was orthogonal
     if len(cormatrix) < 2:
@@ -253,17 +252,18 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
 
     # New standard deviations
     if orthog:
-        fit.stdev_unscaled = np.sqrt(fit.stdev_unscaled**2 @ contrasts.values**2)
-        fit.stdev_unscaled.columns = contrasts.columns
+        fit.stdev_unscaled = np.sqrt(fit.stdev_unscaled**2 @ contrasts**2)
     else:
         R = scipy.linalg.cholesky(cormatrix)
+        if isinstance(cormatrix, pd.DataFrame):
+            R = pd.DataFrame(R, index=cormatrix.index, columns=cormatrix.columns)
         ngenes = fit.stdev_unscaled.shape[0]
         ncont = contrasts.shape[1]
         U = np.ones((ngenes, ncont))
         U = pd.DataFrame(U, index=fit.stdev_unscaled.index, columns=contrasts.columns)
         o = np.ones((1, ncoef))
         for i in range(ngenes):
-            RUC = R @ (fit.stdev_unscaled.values[i, :][:, None] * contrasts)
+            RUC = R @ (contrasts.T * fit.stdev_unscaled.iloc[i, :]).T
             U.iloc[i, :] = np.sqrt(o @ RUC**2)
         fit.stdev_unscaled = U
 

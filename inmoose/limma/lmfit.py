@@ -360,10 +360,7 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
 
         cov_coef = np.linalg.inv(design.T @ design)
         cov_coef = pd.DataFrame(cov_coef, index=coef_names, columns=coef_names)
-        r = np.linalg.matrix_rank(design)
-        _, _, P = scipy.linalg.qr(design, pivoting=True)
-        est = P[:r]
-        stdev_unscaled.iloc[:, est] = np.sqrt(np.diag(cov_coef))
+        stdev_unscaled.loc[:, coef_names] = np.sqrt(np.diag(cov_coef))
         coef = fit.coefficients.T
         coef.index = M.index
         coef.columns = coef_names
