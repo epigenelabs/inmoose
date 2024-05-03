@@ -21,6 +21,7 @@
 
 import logging
 import numpy as np
+import pandas as pd
 import scipy
 
 from .decidetests import classifyTestsF
@@ -218,6 +219,7 @@ def _ebayes(
 ):
     coefficients = fit.coefficients
     stdev_unscaled = fit.stdev_unscaled
+    assert np.array_equal(coefficients.index, stdev_unscaled.index)
     sigma = fit.sigma
     df_residual = fit.df_residual
     if (
@@ -250,10 +252,10 @@ def _ebayes(
         winsor_tail_p=winsor_tail_p,
     )
     out["s2_prior"] = out["var_prior"]
-    out["s2_post"] = out["var_post"]
+    out["s2_post"] = pd.Series(out["var_post"], index=fit.coefficients.index)
     del out["var_prior"]
     del out["var_post"]
-    out["t"] = coefficients / stdev_unscaled / np.sqrt(out["s2_post"][:, None])
+    out["t"] = coefficients / stdev_unscaled / np.sqrt(out["s2_post"].values[:, None])
     df_total = df_residual + out["df_prior"]
     df_pooled = np.nansum(df_residual)
     df_total = np.minimum(df_total, df_pooled)

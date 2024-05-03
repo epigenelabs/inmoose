@@ -264,7 +264,15 @@ def _topTableF(
         genelist = pd.DataFrame({"ProbeID": genelist})
 
     # Check row names
-    rn = np.arange(M.shape[0])
+    rn = M.index
+    if len(np.unique(rn)) != len(rn):
+        if genelist is None:
+            genelist = pd.DataFrame({"ID": rn})
+        else:
+            if "ID" in genelist.columns:
+                genelist["ID0"] = rn
+            else:
+                genelist["ID"] = rn
 
     # Check sort_by
     if sort_by not in ["F", "none"]:
@@ -311,7 +319,7 @@ def _topTableF(
         tab = pd.DataFrame(M.iloc[o, :])
     else:
         tab = pd.DataFrame(genelist[o, :], M[o, :])
-    tab["AveExpr"] = Amean[o]
+    tab["AveExpr"] = Amean.iloc[o]
     tab["F"] = Fstat[o]
     tab["P_Value"] = Fp[o]
     tab["adj_P_Val"] = adj_P_Value[o]
@@ -465,7 +473,7 @@ def _topTableT(
 
     # Assemble output data frame
     if genelist is None:
-        tab = pd.DataFrame({"logFC": M[top]})
+        tab = pd.DataFrame({"logFC": M.iloc[top]})
     else:
         tab = pd.DataFrame(genelist.loc[top, :])
         tab["logFC"] = M[top]
@@ -476,21 +484,21 @@ def _topTableT(
         else:
             alpha = 0.975
         margin_error = (
-            np.sqrt(eb.s2_post[top])
-            * fit.stdev_unscaled.loc[top, coef]
+            np.sqrt(eb.s2_post.iloc[top])
+            * fit.stdev_unscaled[coef].iloc[top]
             * scipy.stats.t.ppf(alpha, df=eb.df_total[top])
         )
-        tab["CI_L"] = M[top] - margin_error
-        tab["CI_R"] = M[top] + margin_error
+        tab["CI_L"] = M.iloc[top] - margin_error
+        tab["CI_R"] = M.iloc[top] + margin_error
 
     if A is not None:
-        tab["AveExpr"] = A[top]
-    tab["t"] = tstat[top]
-    tab["P_Value"] = P_Value[top]
+        tab["AveExpr"] = A.iloc[top]
+    tab["t"] = tstat.iloc[top]
+    tab["P_Value"] = P_Value.iloc[top]
     tab["adj_P_Val"] = adj_P_Value[top]
 
     if include_B:
-        tab["B"] = B[top]
+        tab["B"] = B.iloc[top]
     tab.index = rn[top]
 
     # Resort table
