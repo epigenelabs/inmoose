@@ -1,1 +1,1 @@
-from .splat import sim_rnaseq
+from .splat import sim_rnaseq as sim_rnaseq

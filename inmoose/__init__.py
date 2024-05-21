@@ -8,16 +8,16 @@ from os import RTLD_GLOBAL
 
 default_dlopen_flags = getdlopenflags()
 setdlopenflags(default_dlopen_flags | RTLD_GLOBAL)
-from . import common_cpp
+from . import common_cpp as common_cpp
 
 setdlopenflags(default_dlopen_flags)
 del default_dlopen_flags
 
-from . import edgepy
-from . import pycombat
-from . import utils
-from . import consensus_clustering
-from . import deseq2
+from . import edgepy as edgepy
+from . import pycombat as pycombat
+from . import utils as utils
+from . import consensus_clustering as consensus_clustering
+from . import deseq2 as deseq2
 
 import logging
 
