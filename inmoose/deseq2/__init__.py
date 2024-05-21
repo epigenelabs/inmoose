@@ -1,17 +1,26 @@
-from .core import DESeq
-from .DESeqDataSet import DESeqDataSet, makeExampleDESeqDataSet
-from .DESeqTransform import DESeqTransform
+from .core import DESeq as DESeq
+from .DESeqDataSet import DESeqDataSet as DESeqDataSet
+from .DESeqDataSet import makeExampleDESeqDataSet as makeExampleDESeqDataSet
+from .DESeqTransform import DESeqTransform as DESeqTransform
 from .dispersions import (
-    estimateDispersionsGeneEst,
-    estimateDispersionsFit,
-    estimateDispersionsMAP,
-    estimateDispersionsPriorVar,
+    estimateDispersionsFit as estimateDispersionsFit,
 )
-from .estimateSizeFactors import estimateSizeFactorsForMatrix
-from .lrt import nbinomLRT
-from .outliers import replaceOutliers
-from .parallel import estimateMLEForBetaPriorVar
-from .prior import estimateBetaPriorVar
-from .replicates import collapseReplicates
-from .vst import varianceStabilizingTransformation
-from .wald import nbinomWaldTest
+from .dispersions import (
+    estimateDispersionsGeneEst as estimateDispersionsGeneEst,
+)
+from .dispersions import (
+    estimateDispersionsMAP as estimateDispersionsMAP,
+)
+from .dispersions import (
+    estimateDispersionsPriorVar as estimateDispersionsPriorVar,
+)
+from .estimateSizeFactors import (
+    estimateSizeFactorsForMatrix as estimateSizeFactorsForMatrix,
+)
+from .lrt import nbinomLRT as nbinomLRT
+from .outliers import replaceOutliers as replaceOutliers
+from .parallel import estimateMLEForBetaPriorVar as estimateMLEForBetaPriorVar
+from .prior import estimateBetaPriorVar as estimateBetaPriorVar
+from .replicates import collapseReplicates as collapseReplicates
+from .vst import varianceStabilizingTransformation as varianceStabilizingTransformation
+from .wald import nbinomWaldTest as nbinomWaldTest

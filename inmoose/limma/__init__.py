@@ -1,9 +1,16 @@
-from .contrasts import contrasts_fit, makeContrasts
-from .decidetests import classifyTestsF, TestResults
-from .dups import unwrapdups, uniquegenelist
-from .ebayes import tmixture_matrix, tmixture_vector, eBayes
-from .fitFDist import fitFDist
-from .lmfit import lmFit, nonEstimable, lm_series
-from .marraylm import MArrayLM
-from .squeezeVar import squeezeVar
-from .toptable import topTable
+from .contrasts import contrasts_fit as contrasts_fit
+from .contrasts import makeContrasts as makeContrasts
+from .decidetests import TestResults as TestResults
+from .decidetests import classifyTestsF as classifyTestsF
+from .dups import uniquegenelist as uniquegenelist
+from .dups import unwrapdups as unwrapdups
+from .ebayes import eBayes as eBayes
+from .ebayes import tmixture_matrix as tmixture_matrix
+from .ebayes import tmixture_vector as tmixture_vector
+from .fitFDist import fitFDist as fitFDist
+from .lmfit import lm_series as lm_series
+from .lmfit import lmFit as lmFit
+from .lmfit import nonEstimable as nonEstimable
+from .marraylm import MArrayLM as MArrayLM
+from .squeezeVar import squeezeVar as squeezeVar
+from .toptable import topTable as topTable

@@ -1,0 +1,5 @@
+[lint.per-file-ignores]
+"__init__.py" = ["E402"]
+
+[format]
+exclude = ["inmoose/__init__.py"]
