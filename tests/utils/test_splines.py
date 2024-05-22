@@ -5,7 +5,6 @@ from inmoose.utils import ns, spline_design
 
 
 class Test(unittest.TestCase):
-
     def test_splineDesign(self):
         spline = spline_design(np.arange(10), [4.5, 5, 5.5], 4)
         self.assertTrue(

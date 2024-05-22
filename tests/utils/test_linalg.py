@@ -6,7 +6,6 @@ from inmoose.utils import cov2cor
 
 
 class Test(unittest.TestCase):
-
     def test_cov2cor(self):
         M = np.arange(25).reshape((5, 5))
         cov = np.cov(M)

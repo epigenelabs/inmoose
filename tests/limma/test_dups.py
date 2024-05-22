@@ -5,7 +5,6 @@ from inmoose.limma import unwrapdups, uniquegenelist
 
 
 class Test(unittest.TestCase):
-
     def test_unwrapdups(self):
         M = np.arange(12).reshape((4, 3))
         self.assertTrue(np.array_equal(unwrapdups(M, ndups=1), M))

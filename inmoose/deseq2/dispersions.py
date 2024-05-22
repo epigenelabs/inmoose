@@ -798,7 +798,7 @@ def estimateDispersionsPriorVar(obj, minDisp=1e-8, modelMatrix=None):
         modelMatrix = objNZ.design
     # estimate the variance of the distribution of the
     # log dispersion estimates around the fitted value
-    #dispResiduals = np.log(objNZ.var["dispGeneEst"]) - np.log(objNZ.var["dispFit"])
+    # dispResiduals = np.log(objNZ.var["dispGeneEst"]) - np.log(objNZ.var["dispFit"])
     if np.nansum(aboveMinDisp) == 0:
         raise ValueError("no data found which is greater than minDisp")
 

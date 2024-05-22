@@ -7,7 +7,6 @@ from inmoose.limma import makeContrasts
 
 
 class Test(unittest.TestCase):
-
     def test_makeContrasts(self):
         self.assertTrue(
             np.array_equal(
