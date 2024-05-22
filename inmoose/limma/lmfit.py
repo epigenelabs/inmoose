@@ -19,18 +19,18 @@
 # This file is based on the file 'R/lmfit.R' of the Bioconductor limma package (version 3.55.1).
 
 import logging
+
 import numpy as np
 import pandas as pd
 import patsy
 import scipy
 
 from ..utils import lm_fit, lm_wfit
-from .dups import unwrapdups
+from .dups import uniquegenelist, unwrapdups
 from .marraylm import MArrayLM
 
 
 class EAWP:
-
     def __init__(self, obj):
         if not isinstance(obj, pd.DataFrame):
             self.exprs = pd.DataFrame(obj)
@@ -321,7 +321,7 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
 
     # Check weights
     if weights is not None:
-        weights = asMatrixWeights(weights, M.shape)
+        weights = np.broadcast_to(weights, M.shape)
         weights[weights <= 0] = np.nan
         M[~np.isfinite(weights)] = np.nan
 

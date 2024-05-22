@@ -19,11 +19,12 @@
 # This file is based on the file 'R/DGEList.R' of the Bioconductor edgeR package (version 3.38.4).
 
 import logging
+
 import numpy as np
 import pandas as pd
 
-from .edgepy_cpp import is_integer_array
 from ..utils import Factor
+from .edgepy_cpp import is_integer_array
 from .utils import _isAllZero
 
 
@@ -166,7 +167,7 @@ class DGEList(object):
         if (
             group is None
             and samples is not None
-            and (samples[group_col].values != None).all()
+            and (samples[group_col].values != None).all()  # noqa: E711
         ):
             group = samples[group_col].values
             samples = samples.drop(columns=[group_col])
@@ -225,7 +226,7 @@ class DGEList(object):
 
         lib_size = self.samples["lib_size"]
         norm_factors = self.samples["norm_factors"]
-        if (norm_factors.values != None).all():
+        if (norm_factors.values != None).all():  # noqa: E711
             lib_size = lib_size * norm_factors
         return np.log(lib_size)
 

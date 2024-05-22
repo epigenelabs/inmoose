@@ -18,6 +18,7 @@
 
 # This file is based on the file 'R/toptable.R' of the Bioconductor limma package (version 3.55.1).
 
+import logging
 
 import numpy as np
 import pandas as pd

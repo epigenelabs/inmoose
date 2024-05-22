@@ -21,13 +21,15 @@
 
 
 import logging
+
 import numpy as np
 import scipy.stats
 from scipy.stats import trim_mean
 
 from .dispersions import estimateDispersionsGeneEst, estimateDispersionsMAP
+from .lrt import nbinomLRT
 from .misc import nOrMoreInCell
-from .wald import nbinomWaldTest
+from .wald import nbinomWaldTest, recordMaxCooks
 
 
 def refitWithoutOutliers(

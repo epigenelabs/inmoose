@@ -36,4 +36,4 @@ from .systematicSubset import systematicSubset as systematicSubset
 from .topTags import topTags as topTags
 from .validDGEList import validDGEList as validDGEList
 
-from .edgepy_cpp import * # noqa: F403
+from .edgepy_cpp import *  # noqa: F403

@@ -20,9 +20,9 @@
 # (version 3.16).
 
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 def plotDispEsts_dds(
@@ -85,7 +85,9 @@ def plotDispEsts_dds(
     if CV:
         f = np.sqrt
     else:
-        f = lambda x: x
+
+        def f(x):
+            return x
 
     py = f(self.var["dispGeneEst"][sel])
     if ymin is None:

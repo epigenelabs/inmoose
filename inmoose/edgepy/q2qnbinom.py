@@ -18,7 +18,6 @@
 
 # This file is based on the file 'R/q2qnbinom.R' of the Bioconductor edgeR package (version 3.38.4).
 
-import numpy as np
 from .edgepy_cpp import _q2qnbinom
 
 

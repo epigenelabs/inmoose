@@ -20,6 +20,7 @@
 
 
 import numpy as np
+
 from ..utils import gl
 
 
@@ -43,11 +44,11 @@ def validDGEList(y):
         raise RuntimeError("No count matrix")
     y.counts = np.asarray(y.counts, order="F")
     nlib = y.counts.shape[1]
-    if (y.samples.group.values == None).any():
+    if (y.samples.group.values == None).any():  # noqa: E711
         y.samples.group = gl(1, nlib)
-    if (y.samples.lib_size.values == None).any():
+    if (y.samples.lib_size.values == None).any():  # noqa: E711
         y.samples.lib_size = y.counts.sum(axis=0)
-    if (y.samples.norm_factors.values == None).any():
+    if (y.samples.norm_factors.values == None).any():  # noqa: E711
         y.samples.norm_factors = np.ones(nlib)
 
     return y

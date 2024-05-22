@@ -17,10 +17,11 @@
 
 import copy
 import logging
-import numpy as np
-import patsy
-import pandas as pd
 import re
+
+import numpy as np
+import pandas as pd
+import patsy
 import scipy
 
 from ..utils import Factor, cov2cor
@@ -65,8 +66,8 @@ def makeContrasts(contrasts, levels):
         return re.sub("([a-zA-Z0-9]+)\[((T.)?[a-zA-Z0-9]+)\]", "\\1_\\2", n)
 
     gl = {
-        rename(l): indicator(i, levels.nlevels())
-        for i, l in enumerate(levels.categories)
+        rename(L): indicator(i, levels.nlevels())
+        for i, L in enumerate(levels.categories)
     }
     if not isinstance(contrasts, list):
         contrasts = [contrasts]

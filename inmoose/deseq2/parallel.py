@@ -25,9 +25,9 @@ import pandas as pd
 
 from .fitNbinomGLMs import fitNbinomGLMs
 from .misc import (
-    renameModelMatrixColumns,
     buildDataFrameWithNACols,
     buildMatrixWithNACols,
+    renameModelMatrixColumns,
 )
 
 
@@ -64,7 +64,6 @@ def estimateMLEForBetaPriorVar(
     modelMatrix = fit["modelMatrix"]
     modelMatrixNames = modelMatrix.design_info.column_names
     H = fit["hat_diagonals"]
-    betaMatrix = fit["betaMatrix"]
 
     convertNames = renameModelMatrixColumns(obj.obs, objNZ.design)
     modelMatrixNames = [

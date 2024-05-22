@@ -19,13 +19,13 @@
 # This file is based on the file 'R/ComBat_seq.R' of the Bioconductor sva package (version 3.44.0).
 
 import logging
+
 import numpy as np
 import pandas as pd
 
 from ..edgepy import DGEList, estimateGLMCommonDisp, estimateGLMTagwiseDisp, glmFit
-from ..utils import asfactor
 from .covariates import make_design_matrix
-from .helper_seq import vec2mat, match_quantiles
+from .helper_seq import match_quantiles, vec2mat
 
 
 def pycombat_seq(
