@@ -22,11 +22,11 @@ import numpy as np
 import patsy
 import scipy
 
+from ..limma import squeezeVar
 from .aveLogCPM import aveLogCPM
 from .DGEGLM import DGEGLM
 from .glmFit import glmFit, glmLRT
 from .residDF import _residDF
-from ..limma import squeezeVar
 
 
 def glmQLFit_DGEList(

@@ -1,5 +1,10 @@
+[lint]
+extend-select = ["I"]
+
 [lint.per-file-ignores]
 "__init__.py" = ["E402"]
+"inmoose/__init__.py" = ["I"]
+"inmoose/edgepy/__init__.py" = ["I"]
 
 [format]
 exclude = ["inmoose/__init__.py"]

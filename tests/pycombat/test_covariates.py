@@ -1,9 +1,10 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 import patsy
 
-from inmoose.pycombat.covariates import make_design_matrix, VirtualCohortInput
+from inmoose.pycombat.covariates import VirtualCohortInput, make_design_matrix
 
 
 class Test(unittest.TestCase):

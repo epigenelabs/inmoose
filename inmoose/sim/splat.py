@@ -22,8 +22,8 @@ Yet it is a completely independent implementation.
 """
 
 import numpy as np
-from scipy.stats import gamma, lognorm, chi2, poisson, bernoulli
 from scipy.special import expit
+from scipy.stats import bernoulli, chi2, gamma, lognorm, poisson
 
 
 def get_lognorm_factors(size, sel_prob, neg_prob, loc, scale, random_state):

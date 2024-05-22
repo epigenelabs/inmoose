@@ -20,12 +20,13 @@
 # package (version 3.16).
 
 
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
 import patsy
-from scipy.optimize import minimize, Bounds
+from scipy.optimize import Bounds, minimize
 
 from ..utils import dnbinom_mu, dnorm
 from .deseq2_cpp import fitBetaWrapper

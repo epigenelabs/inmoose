@@ -1,17 +1,18 @@
 import unittest
+
 import numpy as np
 import patsy
 
-from inmoose.utils import Factor, pt
 from inmoose.deseq2 import (
-    makeExampleDESeqDataSet,
-    nbinomWaldTest,
-    nbinomLRT,
     DESeq,
-    estimateMLEForBetaPriorVar,
     estimateBetaPriorVar,
     estimateDispersionsGeneEst,
+    estimateMLEForBetaPriorVar,
+    makeExampleDESeqDataSet,
+    nbinomLRT,
+    nbinomWaldTest,
 )
+from inmoose.utils import Factor, pt
 
 
 class Test(unittest.TestCase):

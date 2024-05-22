@@ -1,9 +1,10 @@
 import unittest
+
 import numpy as np
 import patsy
 
+from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet
 from inmoose.utils import Factor
-from inmoose.deseq2 import makeExampleDESeqDataSet, DESeq
 
 
 @unittest.skip("lfcShrink is not implemented")

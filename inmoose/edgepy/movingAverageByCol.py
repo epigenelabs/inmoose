@@ -20,8 +20,9 @@
 
 
 import logging
-import numpy as np
 from math import ceil, floor
+
+import numpy as np
 
 
 def movingAverageByCol(x, width=5, full_length=True):

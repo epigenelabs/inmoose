@@ -19,7 +19,7 @@
 
 
 import numpy as np
-from scipy.stats import norm, gamma, nbinom
+from scipy.stats import gamma, nbinom, norm
 
 
 def rbinom(n, size, prob=None, mu=None, seed=None):

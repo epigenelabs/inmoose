@@ -21,6 +21,7 @@
 # As per StackOverflow terms of service (see https://stackoverflow.com/help/licensing), original code is licensed under CC BY SA 4.0, which is compatible with GPL3 (see https://creativecommons.org/2015/10/08/cc-by-sa-4-0-now-one-way-compatible-with-gplv3/)
 
 import logging
+
 import numpy as np
 from scipy.interpolate import splev
 

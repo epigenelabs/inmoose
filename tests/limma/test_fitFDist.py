@@ -1,7 +1,7 @@
 import unittest
+
 import numpy as np
 
-from inmoose.limma import fitFDist
 from inmoose.limma.fitFDist import trigammaInverse
 
 

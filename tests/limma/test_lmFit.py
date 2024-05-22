@@ -1,19 +1,20 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 from patsy import dmatrix
 from scipy.stats import norm
 
-from inmoose.utils import Factor
 from inmoose.limma import (
-    lmFit,
-    nonEstimable,
-    contrasts_fit,
     MArrayLM,
+    contrasts_fit,
     eBayes,
-    topTable,
+    lmFit,
     makeContrasts,
+    nonEstimable,
+    topTable,
 )
+from inmoose.utils import Factor
 
 
 class Test(unittest.TestCase):

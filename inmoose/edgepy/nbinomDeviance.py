@@ -20,8 +20,9 @@
 
 
 import numpy as np
+
+from .edgepy_cpp import cxx_compute_nbdev_nosum, cxx_compute_nbdev_sum
 from .makeCompressedMatrix import _compressDispersions, _compressWeights
-from .edgepy_cpp import cxx_compute_nbdev_sum, cxx_compute_nbdev_nosum
 
 
 def nbinomDeviance(y, mean, dispersion=0, weights=None):

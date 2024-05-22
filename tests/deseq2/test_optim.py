@@ -1,9 +1,10 @@
 import unittest
+
 import numpy as np
 import patsy
 import scipy.stats
 
-from inmoose.deseq2 import makeExampleDESeqDataSet, DESeq
+from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet
 from inmoose.deseq2.fitNbinomGLMs import fitNbinomGLMs
 
 

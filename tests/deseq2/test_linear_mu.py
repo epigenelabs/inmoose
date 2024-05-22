@@ -1,12 +1,13 @@
 import unittest
+
 import numpy as np
 
 from inmoose.deseq2 import (
     DESeqDataSet,
-    makeExampleDESeqDataSet,
-    estimateDispersionsGeneEst,
     estimateDispersionsFit,
+    estimateDispersionsGeneEst,
     estimateDispersionsMAP,
+    makeExampleDESeqDataSet,
     nbinomWaldTest,
 )
 

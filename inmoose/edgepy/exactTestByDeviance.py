@@ -22,8 +22,8 @@ import numpy as np
 from scipy.stats import nbinom
 
 from .binomTest import binomTest
-from .exactTestDoubleTail import exactTestDoubleTail
 from .edgepy_cpp import compute_unit_nb_deviance
+from .exactTestDoubleTail import exactTestDoubleTail
 
 
 def exactTestByDeviance(y1, y2, dispersion=0.0):

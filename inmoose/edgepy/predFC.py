@@ -20,6 +20,7 @@
 
 
 import logging
+
 import numpy as np
 
 from .addPriorCount import addPriorCount

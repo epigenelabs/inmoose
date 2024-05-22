@@ -22,6 +22,7 @@
 import numpy as np
 import pandas as pd
 import scipy
+from patsy import DesignMatrix, dmatrix
 
 from ..utils import asfactor
 from .DGEGLM import DGEGLM
@@ -31,8 +32,6 @@ from .mglmLevenberg import mglmLevenberg
 from .mglmOneWay import designAsFactor, mglmOneWay
 from .nbinomDeviance import nbinomDeviance
 from .predFC import predFC
-
-from patsy import dmatrix, DesignMatrix
 
 
 def glmFit_DGEList(self, design=None, dispersion=None, prior_count=0.125, start=None):

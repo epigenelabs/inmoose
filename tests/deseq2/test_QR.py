@@ -1,7 +1,8 @@
 import unittest
+
 import numpy as np
 
-from inmoose.deseq2 import makeExampleDESeqDataSet, DESeq, nbinomWaldTest
+from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet, nbinomWaldTest
 
 
 class Test(unittest.TestCase):

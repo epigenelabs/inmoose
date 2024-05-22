@@ -19,6 +19,7 @@
 # This file is based on the file 'R/exactTestBySmallP.R' of the Bioconductor edgeR package (version 3.38.4).
 
 import numpy as np
+
 from ..utils import dnbinom_mu as dnbinom
 from .binomTest import binomTest
 from .exactTestDoubleTail import exactTestDoubleTail

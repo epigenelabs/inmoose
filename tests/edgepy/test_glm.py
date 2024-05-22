@@ -1,9 +1,10 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 
-from inmoose.utils import rnbinom
 from inmoose.edgepy import DGEList, glmFit, glmLRT, glmQLFTest
+from inmoose.utils import rnbinom
 
 
 class test_DGEGLM(unittest.TestCase):

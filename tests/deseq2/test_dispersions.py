@@ -1,21 +1,21 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 import patsy
 from scipy.optimize import minimize
-import scipy.stats
 
-from inmoose.utils import Factor, dnbinom_mu, dnorm
 from inmoose.deseq2 import (
-    DESeqDataSet,
-    makeExampleDESeqDataSet,
     DESeq,
-    estimateDispersionsGeneEst,
+    DESeqDataSet,
     estimateDispersionsFit,
+    estimateDispersionsGeneEst,
     estimateDispersionsMAP,
+    makeExampleDESeqDataSet,
 )
-from inmoose.deseq2.fitNbinomGLMs import fitNbinomGLMs
 from inmoose.deseq2.deseq2_cpp import fitDisp
+from inmoose.deseq2.fitNbinomGLMs import fitNbinomGLMs
+from inmoose.utils import Factor, dnbinom_mu, dnorm
 
 
 class Test(unittest.TestCase):

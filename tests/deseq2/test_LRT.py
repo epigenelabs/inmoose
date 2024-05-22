@@ -1,7 +1,7 @@
 import unittest
 
+from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet, nbinomLRT
 from inmoose.utils import Factor
-from inmoose.deseq2 import makeExampleDESeqDataSet, DESeq, nbinomLRT
 
 
 class Test(unittest.TestCase):

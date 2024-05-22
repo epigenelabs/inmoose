@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 
+from inmoose.edgepy import DGEList, aveLogCPM
 from inmoose.utils import rnbinom
-from inmoose.edgepy import aveLogCPM, DGEList
 
 
 class test_aveLogCPM(unittest.TestCase):

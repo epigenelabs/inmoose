@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 
-from inmoose.utils import rnbinom
 from inmoose.edgepy import DGEList, adjustedProfileLik
+from inmoose.utils import rnbinom
 
 
 class test_APL(unittest.TestCase):

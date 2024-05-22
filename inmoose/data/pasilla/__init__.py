@@ -7,8 +7,9 @@ def pasilla():
     NOVA1 and NOVA2, on the transcriptome [Brooks2011]_.
     """
     import importlib.resources
-    import pandas as pd
+
     import anndata as ad
+    import pandas as pd
 
     data_dir = importlib.resources.files("inmoose.data.pasilla")
     cts = pd.read_csv(
