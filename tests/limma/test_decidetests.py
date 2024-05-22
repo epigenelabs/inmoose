@@ -5,7 +5,6 @@ from inmoose.limma import classifyTestsF
 
 
 class Test(unittest.TestCase):
-
     def test_classifyTestsF(self):
         M = np.arange(1, 13).reshape((3, 4))
         self.assertTrue(

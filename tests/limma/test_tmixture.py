@@ -5,7 +5,6 @@ from inmoose.limma import tmixture_matrix, tmixture_vector
 
 
 class Test(unittest.TestCase):
-
     def test_tmixture_matrix(self):
         self.assertTrue(
             np.allclose(

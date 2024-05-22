@@ -5,7 +5,6 @@ from inmoose.utils import lm_fit, lm_wfit
 
 
 class Test(unittest.TestCase):
-
     def assertArrayEqual(self, x, y, tol=1e-6):
         self.assertTrue(np.allclose(x, y, atol=tol))
 
