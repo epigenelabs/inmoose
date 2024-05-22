@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
         dds = dds.estimateSizeFactors()
         dds = dds.estimateDispersions()
         mm = patsy.dmatrix("~condition", dds.obs)
-        mm0 = patsy.dmatrix("~1", dds.obs)
+        # mm0 = patsy.dmatrix("~1", dds.obs)
         with self.assertRaisesRegex(
             ValueError,
             expected_regex="user-supplied model matrix with betaPrior=True requires supplying betaPriorVar",

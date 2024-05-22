@@ -9,7 +9,7 @@ from inmoose.utils import Factor
 class Test(unittest.TestCase):
     def test_results(self):
         """test that results work as expected and throw errors"""
-        ## test contrasts
+        # test contrasts
         dds = makeExampleDESeqDataSet(n=200, m=12, seed=42)
         dds.obs["condition"] = Factor(np.repeat([1, 2, 3], 4))
         dds.obs["group"] = Factor(np.repeat([[1, 2]], 6, axis=0).flatten())
@@ -313,8 +313,8 @@ low counts [2]     : 0, 0.00%
         """test that custom filters can be provided to results()"""
         dds = makeExampleDESeqDataSet(n=200, m=4, betaSD=np.repeat([0, 2], [150, 50]))
         dds = DESeq(dds)
-        res = dds.results()
-        method = "BH"
-        alpha = 0.1
+        _res = dds.results()
+        _method = "BH"
+        _alpha = 0.1
 
         raise NotImplementedError()

@@ -36,4 +36,4 @@ class Test(unittest.TestCase):
         dds2 = estimateDispersionsFit(dds2, fitType="mean")
         dds2 = estimateDispersionsMAP(dds2)
         dds2 = nbinomWaldTest(dds2)
-        res = dds2.results()
+        dds2.results()
