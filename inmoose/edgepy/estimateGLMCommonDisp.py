@@ -19,6 +19,7 @@
 # This file is based on the file 'R/estimateGLMCommonDisp.R' of the Bioconductor edgeR package (version 3.38.4).
 
 import logging
+
 import numpy as np
 
 from .aveLogCPM import aveLogCPM
@@ -161,13 +162,19 @@ def estimateGLMCommonDisp(
             weights=weights,
         )
     elif method == "Pearson":
-        disp = dispPearson(
-            y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM
+        raise NotImplementedError(
+            "method 'Pearson' for dispersion estimation is not implemented"
         )
+        # disp = dispPearson(
+        #    y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM
+        # )
     elif method == "deviance":
-        disp = dispDeviance(
-            y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM
+        raise NotImplementedError(
+            "method 'deviance' for dispersion estimation is not implemented"
         )
+        # disp = dispDeviance(
+        #    y, design=design, offset=offset, subset=subset, AveLogCPM=AveLogCPM
+        # )
     else:
         raise ValueError(f"invalid method for dispersion evaluation: {method}")
 

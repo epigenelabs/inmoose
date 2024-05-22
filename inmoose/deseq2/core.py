@@ -21,6 +21,7 @@
 
 
 import logging
+
 import numpy as np
 import pandas as pd
 import patsy
@@ -344,19 +345,22 @@ def DESeq(
                     "parallelization not implemented for non-expanded matrix with beta priors"
                 )
 
-        obj = DESeqParallel(
-            obj,
-            test=test,
-            fitType=fitType,
-            betaPrior=betaPrior,
-            full=full,
-            reduced=reduced,
-            quiet=quiet,
-            modelMatrix=modelMatrix,
-            useT=useT,
-            minmu=minmu,
-            BPPARAM=BPPARAM,
+        raise NotImplementedError(
+            "parallelization is not implemented in inmoose for now"
         )
+        # obj = DESeqParallel(
+        #    obj,
+        #    test=test,
+        #    fitType=fitType,
+        #    betaPrior=betaPrior,
+        #    full=full,
+        #    reduced=reduced,
+        #    quiet=quiet,
+        #    modelMatrix=modelMatrix,
+        #    useT=useT,
+        #    minmu=minmu,
+        #    BPPARAM=BPPARAM,
+        # )
 
     # if there are sufficient replicates, then pass through to refitting function
     sufficientReps = nOrMoreInCell(obj.modelMatrix, minReplicatesForReplace).any()

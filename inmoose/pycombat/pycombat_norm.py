@@ -16,13 +16,13 @@
 # -----------------------------------------------------------------------------
 
 import logging
-import numpy as np
 from functools import partial
+
 import mpmath as mp
+import numpy as np
 import pandas as pd
 
 from .covariates import make_design_matrix
-
 
 # aprior and bprior are useful to compute "hyper-prior values"
 # -> prior parameters used to estimate the prior gamma distribution for multiplicative batch effect
@@ -167,7 +167,7 @@ def int_eprior(sdat, g_hat, d_hat, precision):
         sum2 = np.dot(np.transpose(resid2), j)
         # /begin{handling high precision computing}
         temp_2d = 2 * d
-        if precision == None:
+        if precision is None:
             LH = np.power(1 / (np.pi * temp_2d), n / 2) * np.exp(
                 np.negative(sum2) / (temp_2d)
             )
@@ -220,9 +220,7 @@ def param_fun(
     Returns:
         array list -- estimated adjusted additive and multiplicative batch effect
     """
-    if (
-        mean_only
-    ):  # if mean_only, no need for complex method: batch effect is immediately calculated
+    if mean_only:  # if mean_only, no need for complex method: batch effect is immediately calculated
         t2_n = np.multiply(t2[i], 1)
         t2_n_g_hat = np.multiply(t2_n, gamma_hat[i])
         gamma_star = postmean(
@@ -284,7 +282,7 @@ def check_mean_only(mean_only):
     Returns:
         ()
     """
-    if mean_only == True:
+    if mean_only:
         logging.info("Using mean only version")
 
 

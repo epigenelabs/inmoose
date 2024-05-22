@@ -24,11 +24,11 @@ import numpy as np
 import pandas as pd
 import patsy
 import scipy.stats
-from statsmodels.stats.multitest import multipletests
 from statsmodels.nonparametric.smoothers_lowess import lowess
+from statsmodels.stats.multitest import multipletests
 
-from ..utils import pnorm, pt
 from .. import __version__
+from ..utils import pnorm, pt
 from .deseq2_cpp import fitBeta
 from .misc import buildDataFrameWithNACols, getFactorName
 
@@ -412,7 +412,10 @@ def results_dds(
         test = obj.test
     elif test == "Wald" and obj.test == "LRT":
         # initially test was LRT, now need to add Wald statistics and p-values
-        obj = makeWaldTest(obj)
+        raise NotImplementedError(
+            "adding Wald statistics to LRT object is not implemented"
+        )
+        # obj = makeWaldTest(obj)
     elif test == "LRT" and obj.test == "Wald":
         raise ValueError(
             "the LRT requires the user to run nbinomLRT or DESeq(obj, test='LRT')"
@@ -435,7 +438,7 @@ def results_dds(
     if saveCols is not None:
         try:
             obj.var[saveCols]
-        except:
+        except KeyError:
             raise ValueError(f"invalid value for saveCols: {saveCols}")
 
     hasIntercept = patsy.INTERCEPT in obj.design.design_info.terms
@@ -472,9 +475,6 @@ def results_dds(
             raise ValueError("'name' should be a string")
 
     # done with input argument testing
-
-    WaldResults = f"WaldPvalue_{name}" in obj.obs
-    LRTResults = "LRTPValue" in obj.obs
 
     # this will be used in cleanContrast, and in the lfcThreshold chunks below
     useT = "tDegreesFreedom" in obj.var
@@ -551,9 +551,13 @@ def results_dds(
 
         if useT:
             df = obj.var["tDegreesFreedom"]
-            pfunc = lambda q: pt(q, df=df, lower_tail=False)
+
+            def pfunc(q):
+                return pt(q, df=df, lower_tail=False)
         else:
-            pfunc = lambda q: pnorm(q, lower_tail=False)
+
+            def pfunc(q):
+                return pnorm(q, lower_tail=False)
 
         if altHypothesis == "greaterAbs":
             newStat = np.sign(LFC) * np.maximum((np.abs(LFC) - T) / SE, 0)
@@ -583,11 +587,11 @@ def results_dds(
 
     # apply cutoff based on maximum Cook's distance
     # NB: cooksCutoff is not necessarily a Boolean
-    performCooksCutoff = not (cooksCutoff == False)
+    performCooksCutoff = not (cooksCutoff == False)  # noqa: E712
     if performCooksCutoff:
         cooksOutlier = obj.var["maxCooks"] > cooksCutoff
 
-        ### BEGIN heuristic to avoid filtering genes with low count outliers
+        # BEGIN heuristic to avoid filtering genes with low count outliers
         # as according to Cook's cutoff. only for two group designs.
         # do not filter if three or more counts are larger
         if np.any(cooksOutlier[~np.isnan(cooksOutlier)]):
@@ -608,7 +612,7 @@ def results_dds(
                     # NB: pandas 2.2 raises a warning here, but it should not. See
                     #     https://github.com/pandas-dev/pandas/issues/57338
                     cooksOutlier[cooksOutlier] &= ~dontFilter
-        ### END heuristic
+        # END heuristic
 
         res.loc[cooksOutlier, "pvalue"] = np.nan
 

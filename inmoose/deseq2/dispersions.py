@@ -21,18 +21,19 @@
 
 
 import logging
+
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 from scipy.special import polygamma
 from scipy.stats import trim_mean
-import statsmodels.api as sm
 from statsmodels.tools.sm_exceptions import DomainWarning
 
 from ..utils import Factor
+from .deseq2_cpp import fitDispGridWrapper, fitDispWrapper
 from .fitNbinomGLMs import fitNbinomGLMs
-from .misc import checkFullRank, buildMatrixWithNACols, buildVectorWithNACols
+from .misc import buildMatrixWithNACols, buildVectorWithNACols, checkFullRank
 from .weights import getAndCheckWeights
-from .deseq2_cpp import fitDispWrapper, fitDispGridWrapper
 
 
 def estimateDispersions_dds(
@@ -523,7 +524,10 @@ def estimateDispersionsFit(obj, fitType="parametric", minDisp=1e-8, quiet=False)
         useForMean = objNZ.var["dispGeneEst"] > 10 * minDisp
         useForMean = useForMean & ~np.isnan(objNZ.var["dispGeneEst"])
         meanDisp = trim_mean(objNZ.var["dispGeneEst"][useForMean], 0.001)
-        dispFunction = lambda means: meanDisp
+
+        def dispFunction(means):
+            return meanDisp
+
         dispFunction.mean = meanDisp
 
     if fitType == "glmGamPoi":
@@ -794,7 +798,7 @@ def estimateDispersionsPriorVar(obj, minDisp=1e-8, modelMatrix=None):
         modelMatrix = objNZ.design
     # estimate the variance of the distribution of the
     # log dispersion estimates around the fitted value
-    dispResiduals = np.log(objNZ.var["dispGeneEst"]) - np.log(objNZ.var["dispFit"])
+    #dispResiduals = np.log(objNZ.var["dispGeneEst"]) - np.log(objNZ.var["dispFit"])
     if np.nansum(aboveMinDisp) == 0:
         raise ValueError("no data found which is greater than minDisp")
 
@@ -942,6 +946,9 @@ def parametricDispersionFit(means, disps):
             raise RuntimeError("dispersion fit did not converge")
 
     coefs.index = ["asymptDisp", "extraPois"]
-    ans = lambda q: coefs.iloc[0] + coefs.iloc[1] / q
+
+    def ans(q):
+        return coefs.iloc[0] + coefs.iloc[1] / q
+
     ans.coefficients = coefs
     return ans

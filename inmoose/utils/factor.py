@@ -16,7 +16,6 @@
 # -----------------------------------------------------------------------------
 
 
-import numpy as np
 from pandas import Categorical
 
 

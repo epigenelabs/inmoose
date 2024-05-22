@@ -16,9 +16,10 @@
 # -----------------------------------------------------------------------------
 
 import logging
+
 import numpy as np
 import pandas as pd
-from patsy import dmatrix, DesignMatrix
+from patsy import DesignMatrix, dmatrix
 
 from ..utils import asfactor
 
@@ -292,9 +293,7 @@ class VirtualCohortInput:
         """
         nan_covar_mod = self.covar_mod.isna()
         if na_cov_action == "raise":
-            name_nan_covar_mod = nan_covar_mod.loc[
-                :, nan_covar_mod.any() == True
-            ].columns
+            name_nan_covar_mod = nan_covar_mod.loc[:, nan_covar_mod.any()].columns
             raise ValueError(
                 f"{nan_covar_mod.sum().sum()} values are missing in covariates {', '.join(name_nan_covar_mod)}. Correct your covariates or use the cov_missing_value parameters"
             )

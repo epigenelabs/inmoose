@@ -29,9 +29,8 @@
 
 import numpy as np
 import pandas as pd
+from scipy.special import digamma, polygamma, xlog1py, xlogy
 from scipy.special import loggamma as lgamma
-from scipy.special import digamma, polygamma
-from scipy.special import xlog1py, xlogy
 
 from ..utils import dnbinom_mu
 
@@ -1053,8 +1052,8 @@ def fitBeta(
     #   hat_diagonals[:,j] = np.diag(xw[j] @ xtwxr_inv[j] @ xw[j].T)
     # but it avoids computing full matrix products just to retrieve the diags
     for k in range(x_p):
-        for l in range(x_p):
-            hat_diagonals[:, :] += (xw[:, :, k] * xw[:, :, l]).T * xtwxr_inv[:, k, l]
+        for m in range(x_p):
+            hat_diagonals[:, :] += (xw[:, :, k] * xw[:, :, m]).T * xtwxr_inv[:, k, m]
 
     # sigma is the covariance matrix for the betas
     sigma = xtwxr_inv @ x.T @ (x * w_vec.T[:, :, None]) @ xtwxr_inv

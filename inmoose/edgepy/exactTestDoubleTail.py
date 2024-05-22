@@ -19,8 +19,10 @@
 # This file is based on the file 'R/exactTestDoubleTail.R' of the Bioconductor edgeR package (version 3.38.4).
 
 import numpy as np
+
 from ..utils import dnbinom_mu as dnbinom
 from .binomTest import binomTest
+from .exactTestBetaApprox import exactTestBetaApprox
 
 
 def exactTestDoubleTail(y1, y2, dispersion=0, big_count=900):

@@ -20,17 +20,18 @@
 
 
 from inspect import signature
+
 import numpy as np
 
-from .utils import _isAllZero
+from .edgepy_cpp import cxx_ave_log_cpm
 from .makeCompressedMatrix import (
     _compressDispersions,
-    _compressWeights,
     _compressOffsets,
     _compressPrior,
+    _compressWeights,
 )
 from .mglmOneGroup import mglmOneGroup
-from .edgepy_cpp import cxx_ave_log_cpm
+from .utils import _isAllZero
 
 
 def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion=None):
@@ -61,13 +62,13 @@ def aveLogCPM_DGEList(self, normalized_lib_sizes=True, prior_count=2, dispersion
     """
     # Library sizes should be stored in y but are sometimes missing
     lib_size = self.samples["lib_size"]
-    if (lib_size.values == None).any():
+    if (lib_size.values == None).any():  # noqa: E711
         lib_size = self.counts.sum(axis=0)
 
     # Normalization factors should be stored in y but are sometimes missing
     if normalized_lib_sizes:
         nf = self.samples["norm_factors"]
-        if (nf.values != None).all():
+        if (nf.values != None).all():  # noqa: E711
             lib_size = lib_size * nf
 
     # Dispersion supplied as argument takes precedence over value in object

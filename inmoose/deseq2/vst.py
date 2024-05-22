@@ -20,14 +20,15 @@
 # 3.16).
 
 
-from anndata import AnnData
 import numpy as np
+from anndata import AnnData
+from scipy.interpolate import CubicSpline
 
 from . import (
     DESeqDataSet,
     DESeqTransform,
-    estimateDispersionsGeneEst,
     estimateDispersionsFit,
+    estimateDispersionsGeneEst,
 )
 
 
@@ -168,20 +169,23 @@ def getVarianceStabilizedData(obj):
     ncounts = obj.counts(normalized=True)
     if obj.dispersionFunction.fitType == "parametric":
         coefs = obj.dispersionFunction.coefficients
-        vst_fn = lambda q: np.log(
-            (
-                1
-                + coefs["extraPois"]
-                + 2 * coefs["asymptDisp"] * q
-                + 2
-                * np.sqrt(
-                    coefs["asymptDisp"]
-                    * q
-                    * (1 + coefs["extraPois"] + coefs["asymptDisp"] * q)
+
+        def vst_fn(q):
+            return np.log(
+                (
+                    1
+                    + coefs["extraPois"]
+                    + 2 * coefs["asymptDisp"] * q
+                    + 2
+                    * np.sqrt(
+                        coefs["asymptDisp"]
+                        * q
+                        * (1 + coefs["extraPois"] + coefs["asymptDisp"] * q)
+                    )
                 )
-            )
-            / (4 * coefs["asymptDisp"])
-        ) / np.log(2)
+                / (4 * coefs["asymptDisp"])
+            ) / np.log(2)
+
         return vst_fn(ncounts)
 
     elif obj.dispersionFunction.fitType == "local":
@@ -200,12 +204,12 @@ def getVarianceStabilizedData(obj):
         xim = (1 / sf).mean()
         baseVarsAtGrid = obj.dispersionFunction(xg) * xg**2 + xim * xg
         integrand = 1 / np.sqrt(baseVarsAtGrid)
-        splf = splinefun(
+        splf = CubicSpline(
             np.arcsinh((xg[1:] + xg[:-1]) / 2),
             ((xg[1:] - xg[:-1]) * (integrand[1:] + integrand[:-1]) / 2).cumsum(),
         )
-        h1 = quantile(ncounts.mean(axis=1), 0.95)
-        h2 = quantile(ncounts.mean(axis=1), 0.999)
+        h1 = np.quantile(ncounts.mean(axis=1), 0.95)
+        h2 = np.quantile(ncounts.mean(axis=1), 0.999)
         eta = (np.log2(h2) - np.log2(h1)) / (
             splf(np.arcsinh(h2)) - splf(np.arcsinh(h1))
         )
@@ -220,9 +224,12 @@ def getVarianceStabilizedData(obj):
         alpha = obj.dispersionFunction.mean
         # the following stabilizes NB counts with fixed dispersion alpha
         # and converges to log2(q) as q => infinity
-        vst_fn = lambda q: (
-            2 * np.arcsinh(np.sqrt(alpha * q)) - np.log(alpha) - np.log(4)
-        ) / np.log(2)
+
+        def vst_fn(q):
+            return (
+                2 * np.arcsinh(np.sqrt(alpha * q)) - np.log(alpha) - np.log(4)
+            ) / np.log(2)
+
         return vst_fn(ncounts)
     else:
         raise ValueError("fitType is not parametric, local or mean")

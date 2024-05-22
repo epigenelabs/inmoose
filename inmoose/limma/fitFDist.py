@@ -19,8 +19,8 @@
 # This file is based on the file 'R/fitFDist.R' of the Bioconductor limma package (version 3.55.1).
 
 import logging
+
 import numpy as np
-import patsy
 from scipy.special import digamma, polygamma
 
 from ..utils import lm_fit, ns
@@ -152,7 +152,7 @@ def fitFDist(x, df1, covariate=None):
     else:
         try:
             design = ns(covariate, df=splinedf, include_intercept=True)
-        except:
+        except:  # noqa: E722
             raise RuntimeError("Problem with covariate")
         fit = lm_fit(design.basis, e)
         if notallok:
