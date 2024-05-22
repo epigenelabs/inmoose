@@ -26,14 +26,14 @@ class Test(unittest.TestCase):
             index=[f"gene{i}" for i in range(10)],
             columns=[f"sample{i}" for i in range(6)],
         )
-        group = Factor([1, 1, 1, 2, 2, 2])
+        group = Factor([1, 1, 1, 2, 2, 2])  # noqa: F841
         self.design = dmatrix("0+group")
         self.contrast_matrix = pd.DataFrame(
             {"First3": [1, 0], "Last3": [0, 1], "Last3-First3": [-1, 1]},
             index=["group[1]", "group[2]"],
         )
 
-        condition = Factor([1, 2, 1, 2, 1, 2])
+        condition = Factor([1, 2, 1, 2, 1, 2])  # noqa: F841
         self.design_covariates = dmatrix("0+group+condition")
         self.contrast_covariates = makeContrasts(
             "group[1]-group[2]", self.design_covariates

@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         m2.design_info = m1.design_info
         m1 = m2
         m1.design_info.column_name_indexes.popitem()
-        m0 = patsy.dmatrix("~ group + condition", dds.obs)
+        # m0 = patsy.dmatrix("~ group + condition", dds.obs)
 
         # TODO
         # dds = DESeq(dds, full=m1, reduced=m0, test="LRT")

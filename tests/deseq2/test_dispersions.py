@@ -182,7 +182,7 @@ class Test(unittest.TestCase):
         dds = makeExampleDESeqDataSet()
         dds = dds.estimateSizeFactors()
         # ddsLocal = dds.copy().estimateDispersions(fitType="local")
-        ddsMean = dds.copy().estimateDispersions(fitType="mean")
+        dds.copy().estimateDispersions(fitType="mean")
         ddsMed = estimateDispersionsGeneEst(dds.copy())
         useForMedian = ddsMed.var["dispGeneEst"] > 1e-7
         medianDisp = np.nanmedian(ddsMed.var["dispGeneEst"][useForMedian])

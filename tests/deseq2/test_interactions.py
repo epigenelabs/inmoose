@@ -26,11 +26,11 @@ class Test(unittest.TestCase):
         # also lfcShrink
         res = dds.results(name="conditionB.groupY")
         with self.assertRaises(NotImplementedError):
-            res = lfcShrink(dds, coef=4, res=res, type="normal")
+            res = lfcShrink(dds, coef=4, res=res, type="normal")  # noqa: F821
 
         res = dds.results(contrast=["condition", "B", "A"])
         with self.assertRaises(NotImplementedError):
-            res = lfcShrink(
+            res = lfcShrink(  # noqa: F821
                 dds, contrast=["condition", "B", "A"], res=res, type="normal"
             )
 
@@ -38,5 +38,5 @@ class Test(unittest.TestCase):
         dds2 = dds.copy()
         dds2.design = patsy.dmatrix("~ condition + group + condition:group", dds2.obs)
         dds2 = DESeq(dds2)
-        res2 = dds2.results(name="conditionB.groupY")
-        res2 = lfcShrink(dds2, coef=4, res=res, type="normal")
+        dds2.results(name="conditionB.groupY")
+        lfcShrink(dds2, coef=4, res=res, type="normal")  # noqa: F821

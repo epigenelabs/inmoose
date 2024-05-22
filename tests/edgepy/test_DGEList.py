@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from inmoose.edgepy import DGEList, validDGEList
@@ -11,7 +12,6 @@ class test_utils(unittest.TestCase):
         self.assertEqual(_isAllZero(np.array([])), False)
         self.assertEqual(_isAllZero(np.array([0, 0, 0])), True)
         self.assertEqual(_isAllZero(np.array([2, 1, 0])), False)
-        arr = np.array([np.NaN, 0, -1, np.PINF, 1, np.NINF])
         with self.assertRaisesRegex(
             ValueError, expected_regex="NaN counts are not allowed"
         ):
@@ -94,6 +94,6 @@ class test_DGEList(unittest.TestCase):
             validDGEList(d)
         d = DGEList([[42]])
         d = validDGEList(d)
-        self.assertFalse((d.samples.group.values == None).any())
-        self.assertFalse((d.samples.lib_size.values == None).any())
-        self.assertFalse((d.samples.norm_factors.values == None).any())
+        self.assertFalse((d.samples.group.values == None).any())  # noqa: E711
+        self.assertFalse((d.samples.lib_size.values == None).any())  # noqa: E711
+        self.assertFalse((d.samples.norm_factors.values == None).any())  # noqa: E711

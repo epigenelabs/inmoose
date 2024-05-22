@@ -116,7 +116,7 @@ class Test(unittest.TestCase):
             dds = DESeq(dds)
         self.assertTrue(dds.var["allZero"].iloc[0])
         self.assertTrue(dds.var["weightsFail"].iloc[0])
-        res = dds.results()
+        dds.results()
 
     @unittest.skip("not sure what is tested here")
     def test_weights_CR(self):
@@ -140,4 +140,4 @@ class Test(unittest.TestCase):
         dds.counts()[50 : (50 + o), :] = 1
         dds.sizeFactors = 1
         dds = dds.estimateDispersions(fitType="mean")
-        dds2 = dds.estimateDispersions(fitType="mean", useCR=False)
+        dds.estimateDispersions(fitType="mean", useCR=False)
