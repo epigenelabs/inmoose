@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 
-from inmoose.utils import rnbinom
 from inmoose.edgepy import addPriorCount
+from inmoose.utils import rnbinom
 
 
 class test_addPriorCount(unittest.TestCase):

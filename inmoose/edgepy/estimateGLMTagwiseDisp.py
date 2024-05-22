@@ -20,6 +20,7 @@
 
 
 import logging
+
 import numpy as np
 
 from .aveLogCPM import aveLogCPM

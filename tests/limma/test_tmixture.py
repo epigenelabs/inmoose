@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from inmoose.limma import tmixture_matrix, tmixture_vector

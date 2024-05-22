@@ -20,15 +20,16 @@
 
 
 import numpy as np
+from scipy.linalg import solve
+
 from ..utils import Factor, asfactor
+from .edgepy_cpp import cxx_get_one_way_fitted
 from .makeCompressedMatrix import (
-    _compressOffsets,
     _compressDispersions,
+    _compressOffsets,
     _compressWeights,
 )
 from .mglmOneGroup import mglmOneGroup
-from .edgepy_cpp import cxx_get_one_way_fitted
-from scipy.linalg import solve
 
 
 def designAsFactor(design):

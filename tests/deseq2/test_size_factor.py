@@ -1,11 +1,12 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 import patsy
 
 from inmoose.deseq2 import (
-    estimateSizeFactorsForMatrix,
     DESeqDataSet,
+    estimateSizeFactorsForMatrix,
     makeExampleDESeqDataSet,
 )
 

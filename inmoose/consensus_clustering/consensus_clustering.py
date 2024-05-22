@@ -19,13 +19,14 @@
 # This file is based on the file 'consensusClustering.py' of the repository
 # github.com/ZigaSajovic/Consensus_Clustering (as of July 30, 2021).
 
-import logging
-import numpy as np
-from itertools import combinations
 import bisect
-import seaborn as sn
+import logging
+from itertools import combinations
+
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import seaborn as sn
 
 
 class consensusClustering:

@@ -1,12 +1,13 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 import scipy.stats
 from scipy.optimize import minimize
 
-from inmoose.utils import Factor, dnbinom_mu, dnorm
 from inmoose.deseq2 import DESeqDataSet
 from inmoose.deseq2.fitNbinomGLMs import fitNbinomGLMs
+from inmoose.utils import Factor, dnbinom_mu, dnorm
 
 
 class Test(unittest.TestCase):

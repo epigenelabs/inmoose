@@ -1,7 +1,8 @@
 import unittest
+
 import numpy as np
 
-from inmoose.deseq2 import makeExampleDESeqDataSet, collapseReplicates
+from inmoose.deseq2 import collapseReplicates, makeExampleDESeqDataSet
 
 
 class Test(unittest.TestCase):

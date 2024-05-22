@@ -19,8 +19,9 @@
 # This file is based on the file 'R/systematicSubset.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
-import numpy as np
 from math import floor
+
+import numpy as np
 
 
 def systematicSubset(n, order_by):

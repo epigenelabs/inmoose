@@ -1,7 +1,7 @@
 import unittest
+
 import numpy as np
 
-from inmoose.utils import rnbinom
 from inmoose.edgepy import (
     DGEList,
     dispCoxReid,
@@ -9,6 +9,7 @@ from inmoose.edgepy import (
     movingAverageByCol,
     systematicSubset,
 )
+from inmoose.utils import rnbinom
 
 
 class test_dispersion(unittest.TestCase):

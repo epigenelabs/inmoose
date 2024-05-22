@@ -1,9 +1,10 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 
+from inmoose.edgepy import DGEList, binomTest, exactTest, exactTestBetaApprox, topTags
 from inmoose.utils import rnbinom
-from inmoose.edgepy import DGEList, exactTest, binomTest, exactTestBetaApprox, topTags
 
 
 class Test(unittest.TestCase):

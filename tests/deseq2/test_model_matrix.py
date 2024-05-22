@@ -1,11 +1,12 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 import patsy
 import scipy.stats
 
+from inmoose.deseq2 import DESeq, DESeqDataSet, makeExampleDESeqDataSet
 from inmoose.utils import Factor
-from inmoose.deseq2 import makeExampleDESeqDataSet, DESeq, DESeqDataSet
 
 
 class Test(unittest.TestCase):

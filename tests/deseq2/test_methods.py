@@ -1,9 +1,10 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 
-from inmoose.utils import Factor
 from inmoose.deseq2 import DESeqDataSet
+from inmoose.utils import Factor
 
 
 class Test(unittest.TestCase):

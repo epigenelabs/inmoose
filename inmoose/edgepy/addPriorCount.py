@@ -20,8 +20,9 @@
 
 
 import numpy as np
-from .makeCompressedMatrix import _compressOffsets, _compressPrior, makeCompressedMatrix
+
 from .edgepy_cpp import cxx_add_prior_count
+from .makeCompressedMatrix import _compressOffsets, _compressPrior, makeCompressedMatrix
 
 
 def addPriorCount(y, lib_size=None, offset=None, prior_count=1):

@@ -1,10 +1,11 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 
-from inmoose.utils import Factor
-from inmoose.deseq2 import makeExampleDESeqDataSet, DESeq, nbinomWaldTest
+from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet, nbinomWaldTest
 from inmoose.deseq2.fitNbinomGLMs import fitNbinomGLMsOptim
+from inmoose.utils import Factor
 
 
 class Test(unittest.TestCase):

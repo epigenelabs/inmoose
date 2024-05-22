@@ -20,15 +20,16 @@
 
 
 import logging
+
 import numpy as np
 
+from .edgepy_cpp import cxx_fit_one_group
 from .makeCompressedMatrix import (
     _compressDispersions,
     _compressOffsets,
     _compressWeights,
 )
 from .utils import _isAllZero
-from .edgepy_cpp import cxx_fit_one_group
 
 
 def mglmOneGroup(

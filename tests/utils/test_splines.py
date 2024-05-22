@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from inmoose.utils import ns, spline_design

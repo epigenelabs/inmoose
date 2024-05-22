@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 
+from inmoose.edgepy import designAsFactor, mglmLevenberg, mglmOneGroup, mglmOneWay
 from inmoose.utils import Factor, rnbinom
-from inmoose.edgepy import mglmLevenberg, mglmOneGroup, mglmOneWay, designAsFactor
 
 
 class test_mglm(unittest.TestCase):

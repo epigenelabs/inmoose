@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 from scipy.stats import f
 
-from inmoose.deseq2 import makeExampleDESeqDataSet, DESeq, replaceOutliers
+from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet, replaceOutliers
 
 
 class Test(unittest.TestCase):

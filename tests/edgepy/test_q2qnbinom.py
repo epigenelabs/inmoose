@@ -1,6 +1,6 @@
 import unittest
+
 import numpy as np
-from scipy.stats import nbinom
 
 from inmoose.edgepy import q2qnbinom
 

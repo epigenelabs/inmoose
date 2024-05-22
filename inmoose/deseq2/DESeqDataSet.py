@@ -20,8 +20,9 @@
 # Bioconductor DESeq2 package (version 3.16).
 
 
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
 import patsy
@@ -99,8 +100,8 @@ class DESeqDataSet(AnnData):
 
     from .dispersions import estimateDispersions_dds as estimateDispersions
     from .estimateSizeFactors import estimateSizeFactors_dds as estimateSizeFactors
-    from .results import results_dds as results
     from .plot import plotDispEsts_dds as plotDispEsts
+    from .results import results_dds as results
 
     def __init__(self, countData, clinicalData=None, design=None, ignoreRank=False):
         """

@@ -1,9 +1,10 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 
-from inmoose.utils import rnbinom
 from inmoose.pycombat import pycombat_seq
+from inmoose.utils import rnbinom
 
 
 class test_pycombatseq(unittest.TestCase):

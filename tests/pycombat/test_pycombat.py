@@ -1,19 +1,21 @@
 import unittest
+
 import numpy as np
 import pandas as pd
 
+from inmoose.pycombat import pycombat_norm
 from inmoose.pycombat.covariates import make_design_matrix
-from inmoose.pycombat.pycombat_norm import check_mean_only
 from inmoose.pycombat.pycombat_norm import (
+    adjust_data,
+    calculate_mean_var,
+    calculate_stand_mean,
+    check_mean_only,
     compute_prior,
+    fit_model,
     postmean,
     postvar,
-    it_sol,
-    int_eprior,
+    standardise_data,
 )
-from inmoose.pycombat.pycombat_norm import calculate_mean_var, calculate_stand_mean
-from inmoose.pycombat.pycombat_norm import standardise_data, fit_model, adjust_data
-from inmoose.pycombat import pycombat_norm
 
 
 class test_pycombat(unittest.TestCase):

@@ -1,7 +1,8 @@
 import unittest
+
 import numpy as np
 
-from inmoose.limma import unwrapdups, uniquegenelist
+from inmoose.limma import uniquegenelist, unwrapdups
 
 
 class Test(unittest.TestCase):

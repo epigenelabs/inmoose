@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from inmoose.utils import lm_fit, lm_wfit

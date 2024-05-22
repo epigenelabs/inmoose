@@ -20,13 +20,14 @@
 
 
 import numpy as np
+
+from .edgepy_cpp import cxx_compute_apl
+from .glmFit import glmFit
 from .makeCompressedMatrix import (
-    _compressOffsets,
     _compressDispersions,
+    _compressOffsets,
     _compressWeights,
 )
-from .glmFit import glmFit
-from .edgepy_cpp import cxx_compute_apl
 
 
 def adjustedProfileLik(

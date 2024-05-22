@@ -21,7 +21,7 @@
 
 import numpy as np
 
-from .edgepy_cpp import cxx_get_levenberg_start, cxx_fit_levenberg
+from .edgepy_cpp import cxx_fit_levenberg, cxx_get_levenberg_start
 from .makeCompressedMatrix import (
     _compressDispersions,
     _compressOffsets,

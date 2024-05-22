@@ -1,7 +1,8 @@
 import unittest
+
 import numpy as np
 
-from inmoose.utils import Factor, gl, asfactor
+from inmoose.utils import Factor, asfactor, gl
 
 
 class test_factor(unittest.TestCase):
