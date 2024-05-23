@@ -1,3 +1,4 @@
+from .logging import LOGGER
 from .factor import Factor, gl, asfactor
 from .linalg import cov2cor
 from .lm import lm_fit, lm_wfit

@@ -21,7 +21,6 @@
 
 
 from collections import OrderedDict
-import logging
 import numpy as np
 import pandas as pd
 import patsy
@@ -30,6 +29,7 @@ from scipy.stats import median_abs_deviation as mad
 from scipy.stats import norm
 
 from ..utils import Factor, rnbinom
+from ..utils import LOGGER
 from .misc import buildVectorWithNACols, checkFullRank, cleanCategoricalColumnName
 
 
@@ -361,7 +361,7 @@ class DESeqDataSet(AnnData):
                 )
                 value.varLogDispEsts = varLogDispEsts
             else:
-                logging.info(
+                LOGGER.info(
                     "variance of dispersion residuals not estimated (necessary only for differential expression calling)"
                 )
 
@@ -418,8 +418,8 @@ class DESeqDataSet(AnnData):
             if "replaceCounts" in self.layers:
                 cnts = self.layers["replaceCounts"]
             else:
-                logging.warnings.warn(
-                    "there is no layer named 'replacedCounts', using original. calling DESeq() will replace outliers if they are detected and store this layer."
+                LOGGER.warning(
+                    "There is no layer named 'replacedCounts', using original. calling DESeq() will replace outliers if they are detected and store this layer."
                 )
                 cnts = self.X
         else:
