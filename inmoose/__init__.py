@@ -18,6 +18,7 @@ from . import pycombat as pycombat
 from . import utils as utils
 from . import consensus_clustering as consensus_clustering
 from . import deseq2 as deseq2
+from . import diffexp as diffexp
 
 import logging
 

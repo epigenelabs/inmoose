@@ -28,6 +28,7 @@ from statsmodels.nonparametric.smoothers_lowess import lowess
 from statsmodels.stats.multitest import multipletests
 
 from .. import __version__
+from ..diffexp import DEResults
 from ..utils import pnorm, pt
 from .deseq2_cpp import fitBeta
 from .misc import buildDataFrameWithNACols, getFactorName
@@ -42,7 +43,7 @@ def p_adjust(*args, **kwargs):
     return multipletests(*args, **kwargs)[1]
 
 
-class DESeqResults(pd.DataFrame):
+class DESeqResults(DEResults):
     """
     a class to store a results table
 
@@ -55,8 +56,6 @@ class DESeqResults(pd.DataFrame):
     priorInfo : array-like
         a list giving information on the log fold change prior
     """
-
-    from .plot import plotMA_res as plotMA
 
     _metadata = [
         "priorInfo",
@@ -380,7 +379,7 @@ def results_dds(
     Returns
     -------
     DESeqResults
-        a results table (subclass of :class:`pandas.DataFrame`), containing the
+        a results table (subclass of :class:`~.DEResults`), containing the
         following results columns: :code:`"baseMean"`,
         :code:`"log2FoldChange"`, :code:`"lfcSE"`, :code:`"stat"`,
         :code:`"pvalue"` and :code:`"pad"`.  The :code:`"lfcSE"` gives the
