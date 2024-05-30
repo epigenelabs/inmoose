@@ -53,7 +53,7 @@ def mglmOneGroup(
     dispersions, offsets and weights. It is low-level in that it
     operates on atomic objects (matrices and vectors).
 
-    This function fits an intercept only moel to each response vector. In other
+    This function fits an intercept only model to each response vector. In other
     words, it treats all the libraries as belonging to one group. It implements
     Fisher scoring with a score-statistic stopping criterion for each gene.  It
     treats the dispersion parameter of the negative binomial distribution as a
