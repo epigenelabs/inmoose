@@ -177,7 +177,7 @@ def fitFDist(x, df1, covariate=None):
             # evar>0 estimate, which is larger.
             s20 = x.mean()
         else:
-            s20 = emean.exp()
+            s20 = np.exp(emean)
 
     return {"scale": s20, "df2": df2}
 

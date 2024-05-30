@@ -530,7 +530,7 @@ def results_dds(
         res = pd.concat([res, mleContrast(obj, contrast)], axis=1)
         res = res[["baseMean", "log2FoldChange", "lfcMLE", "lfcSE", "stat", "pvalue"]]
         # if an all zero contrast, also zero out the lfcMLE
-        res["lfcMLE"][(res["log2FoldChange"] == 0) & (res["stat"] == 0)] = 0
+        res.loc[(res["log2FoldChange"] == 0) & (res["stat"] == 0), "lfcMLE"] = 0
 
     # only if we need to generate new p-values
     if not (lfcThreshold == 0 and altHypothesis == "greaterAbs"):
@@ -1162,9 +1162,9 @@ def cleanContrast(obj, contrast, expanded, listValues, test, useT, minmu):
     contrastAllZero = contrastAllZero & ~obj.var["allZero"]
     contrastAllZero.index = res.index
     if np.sum(contrastAllZero) > 0:
-        res.log2FoldChange[contrastAllZero] = 0
-        res.stat[contrastAllZero] = 0
-        res.pvalue[contrastAllZero] = 1
+        res.loc[contrastAllZero, "log2FoldChange"] = 0
+        res.loc[contrastAllZero, "stat"] = 0
+        res.loc[contrastAllZero, "pvalue"] = 1
 
     # if test is "LRT", overwrite the statistic and p-value
     # (we only ran contrast for the coefficient)
