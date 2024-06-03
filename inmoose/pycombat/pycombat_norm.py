@@ -616,7 +616,7 @@ def pycombat_norm(
         dat,
     )
 
-    if dataframe_instance == True:
+    if dataframe_instance:
         return pd.DataFrame(bayes_data, columns=list_samples, index=list_genes)
     else:
         return bayes_data

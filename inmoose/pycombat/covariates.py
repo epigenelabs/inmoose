@@ -252,7 +252,7 @@ class VirtualCohortInput:
             counts, batch, covar, list_samples, list_genes = self.fix_na_cov(
                 na_cov_action
             )
-            if self.dataframe_instance == True:
+            if self.dataframe_instance:
                 counts = pd.DataFrame(counts, index=list_genes, columns=list_samples)
             if self.ref_batch_idx is not None:
                 ref_batch = self.batch[self.ref_batch_idx]
@@ -309,7 +309,7 @@ class VirtualCohortInput:
                 f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
             )
             keep = nan_covar_mod.sum(axis=1) == 0
-            if self.dataframe_instance == True:
+            if self.dataframe_instance:
                 list_samples = self.list_samples[keep]
             else:
                 list_samples = None

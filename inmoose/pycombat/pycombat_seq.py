@@ -227,7 +227,7 @@ def pycombat_seq(
     adjust_counts_whole[keep, :] = adjust_counts
     adjust_counts_whole[rm, :] = countsOri[rm, :]
 
-    if dataframe_instance == True:
+    if dataframe_instance:
         return pd.DataFrame(adjust_counts_whole, columns=list_samples, index=list_genes)
     else:
         return adjust_counts_whole
