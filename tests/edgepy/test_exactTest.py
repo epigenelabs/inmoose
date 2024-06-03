@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         e = exactTest(self.d, rejection_region="doubletail")
         table_ref = pd.DataFrame(
             {
-                "logFC": [
+                "log2FoldChange": [
                     0.00000000,
                     3.51533881,
                     -0.63058208,
@@ -42,6 +42,30 @@ class Test(unittest.TestCase):
                     -0.40296414,
                     0.11776420,
                     0.08922781,
+                ],
+                "lfcSE": [
+                    4.879406,
+                    4.343170,
+                    0.748468,
+                    0.831304,
+                    0.786678,
+                    0.780016,
+                    0.755259,
+                    0.868254,
+                    0.786410,
+                    0.934109,
+                    0.730749,
+                    0.796331,
+                    0.731355,
+                    0.735686,
+                    0.741946,
+                    0.750018,
+                    0.776667,
+                    0.830651,
+                    0.717838,
+                    0.716268,
+                    0.751390,
+                    0.771176,
                 ],
                 "logCPM": [
                     12.12019,
@@ -67,7 +91,7 @@ class Test(unittest.TestCase):
                     15.82620,
                     15.52722,
                 ],
-                "PValue": [
+                "pvalue": [
                     1.00000000,
                     0.67966025,
                     0.37574431,
@@ -91,17 +115,10 @@ class Test(unittest.TestCase):
                     0.99845052,
                     1.00000000,
                 ],
-            }
+            },
+            index=[f"gene{i}" for i in range(22)],
         )
-        self.assertTrue(
-            np.allclose(table_ref["logFC"], e.table["logFC"], atol=1e-6, rtol=0),
-        )
-        self.assertTrue(
-            np.allclose(table_ref["logCPM"], e.table["logCPM"], atol=1e-5, rtol=0)
-        )
-        self.assertTrue(
-            np.allclose(table_ref["PValue"], e.table["PValue"], atol=1e-6, rtol=0)
-        )
+        pd.testing.assert_frame_equal(table_ref, e, check_frame_type=False)
 
     @unittest.skip("R returns NAs, need to find meaningful test data")
     def test_exactTest_deviance(self):
@@ -182,21 +199,19 @@ class Test(unittest.TestCase):
                 ],
             }
         )
+        self.assertTrue(np.allclose(table_ref["logFC"], e["logFC"], atol=1e-6, rtol=0))
         self.assertTrue(
-            np.allclose(table_ref["logFC"], e.table["logFC"], atol=1e-6, rtol=0)
+            np.allclose(table_ref["logCPM"], e["logCPM"], atol=1e-5, rtol=0)
         )
         self.assertTrue(
-            np.allclose(table_ref["logCPM"], e.table["logCPM"], atol=1e-5, rtol=0)
-        )
-        self.assertTrue(
-            np.allclose(table_ref["PValue"], e.table["PValue"], atol=1e-6, rtol=0)
+            np.allclose(table_ref["PValue"], e["PValue"], atol=1e-6, rtol=0)
         )
 
     def test_exactTest_smallp(self):
         e = exactTest(self.d, rejection_region="smallp")
         table_ref = pd.DataFrame(
             {
-                "logFC": [
+                "log2FoldChange": [
                     0.00000000,
                     3.51533881,
                     -0.63058208,
@@ -219,6 +234,30 @@ class Test(unittest.TestCase):
                     -0.40296414,
                     0.11776420,
                     0.08922781,
+                ],
+                "lfcSE": [
+                    4.879406,
+                    4.343170,
+                    0.748468,
+                    0.831304,
+                    0.786678,
+                    0.780016,
+                    0.755259,
+                    0.868254,
+                    0.786410,
+                    0.934109,
+                    0.730749,
+                    0.796331,
+                    0.731355,
+                    0.735686,
+                    0.741946,
+                    0.750018,
+                    0.776667,
+                    0.830651,
+                    0.717838,
+                    0.716268,
+                    0.751390,
+                    0.771176,
                 ],
                 "logCPM": [
                     12.12019,
@@ -244,7 +283,7 @@ class Test(unittest.TestCase):
                     15.82620,
                     15.52722,
                 ],
-                "PValue": [
+                "pvalue": [
                     1.00000000,
                     0.03903554,
                     0.03903554,
@@ -268,17 +307,10 @@ class Test(unittest.TestCase):
                     0.03903554,
                     0.03903554,
                 ],
-            }
+            },
+            index=[f"gene{i}" for i in range(22)],
         )
-        self.assertTrue(
-            np.allclose(table_ref["logFC"], e.table["logFC"], atol=1e-6, rtol=0)
-        )
-        self.assertTrue(
-            np.allclose(table_ref["logCPM"], e.table["logCPM"], atol=1e-5, rtol=0)
-        )
-        self.assertTrue(
-            np.allclose(table_ref["PValue"], e.table["PValue"], atol=1e-6, rtol=0)
-        )
+        pd.testing.assert_frame_equal(table_ref, e, check_frame_type=False)
 
     def test_exactTestBetaApprox(self):
         pref = [6.988452e-145, 5.981632e-124]
@@ -319,5 +351,19 @@ class Test(unittest.TestCase):
     def test_topTags(self):
         t = topTags(exactTest(self.d))
         self.assertTrue(
-            np.array_equal(t.table.index, [9, 7, 17, 10, 12, 18, 13, 2, 15, 19])
+            np.array_equal(
+                t.table.index,
+                [
+                    "gene9",
+                    "gene7",
+                    "gene17",
+                    "gene10",
+                    "gene12",
+                    "gene18",
+                    "gene13",
+                    "gene2",
+                    "gene15",
+                    "gene19",
+                ],
+            )
         )

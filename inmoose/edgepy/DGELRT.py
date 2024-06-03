@@ -16,13 +16,27 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import pandas as pd
 
-class DGELRT:
-    def __init__(self, glmfit):
-        self.table = None
-        self.coefficients_full = None
-        self.coefficients_null = None
-        self.design = None
-        for n, v in vars(glmfit).items():
-            if n != "counts":
-                self.__setattr__(n, v)
+from ..diffexp import DEResults
+
+
+class DGELRT(DEResults):
+    _metadata = ["fit", "comparison", "df_test", "df_total"]
+
+    @property
+    def _constructor(self):
+        def f(*args, **kwargs):
+            return DGELRT(*args, glmfit=self.fit, **kwargs)
+
+        return f
+
+    @property
+    def _constructor_sliced(self):
+        return pd.Series
+
+    def __init__(self, df, glmfit, *args, **kwargs):
+        super().__init__(df, *args, **kwargs)
+        self.fit = glmfit
+        # self.coefficients_full = None
+        # self.coefficients_null = None

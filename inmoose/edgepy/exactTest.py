@@ -117,14 +117,20 @@ def exactTest(
     Returns
     -------
     DGEExact
-        object containing the following components:
+        dataframe with two additional components:
 
-        - :code:`table`, dataframe containing columns for the log2-fold-change
-          (:code:`"logFC"`), the average log2-counts-per-million
-          (:code:`"logCPM"`) and the two-sided *p*-value (:code:`"PValue"`).
         - :code:`comparison`, string giving the names of the two groups being compared.
         - :code:`genes`, dataframe containing annotation for each gene; taken
           from :code:`self`
+
+        The dataframe columns has the same rows as :code:`self` and contains
+        the following columns:
+
+        - :code:`"log2FoldChange"`, log2-fold-change of expression between
+          conditions being tested.
+        - :code:`"lfcSE"`, standard error of log2-fold-change.
+        - :code:`"logCPM"`, average log2-counts per million.
+        - :code:`"pvalue"`, the two-sided *p*-values.
     """
     # Check input
     if len(pair) != 2:
@@ -208,6 +214,31 @@ def exactTest(
     )
     logFC = (np.asarray(abundance2) - np.asarray(abundance1)) / np.log(2)
 
+    # following parts is inspired from DESeq2 function fitBeta
+    # x is the design matrix -- here, 2 groups, so a matrix of shape (n1+n2,2)
+    # fitted1 and fitted2 are the fitted values in groups 1 and 2, respectively
+    # contrast is the contrast matrix between groups 1 and 2
+    x = np.zeros((n1 + n2, 2))
+    x[:n1, 0] = 1
+    x[n1:, 1] = 1
+    contrast = np.array([[-1], [1]])
+
+    fitted1 = np.exp(abundance1[:, None] + np.asarray(offset_aug[j1]))
+    wvec1 = fitted1 / (1.0 + dispersion[:, None] * fitted1)
+    fitted2 = np.exp(abundance2[:, None] + np.asarray(offset_aug[j2]))
+    wvec2 = fitted2 / (1.0 + dispersion[:, None] * fitted2)
+    w_vec = np.hstack([wvec1, wvec2])
+
+    ridge = np.diag(np.repeat(1e-6 / (np.log(2) ** 2), x.shape[1]))
+    xtwxr_inv = np.linalg.inv(x.T @ (x * w_vec[:, :, None]) + ridge)
+    assert xtwxr_inv.shape == (y.shape[0], 2, 2)
+    # sigma is the covariance matrix for the logFC
+    sigma = xtwxr_inv @ x.T @ (x * w_vec[:, :, None]) @ xtwxr_inv
+    assert sigma.shape == (y.shape[0], 2, 2)
+    lfcSE = np.sqrt(contrast.T @ sigma @ contrast) / np.log(2)
+    lfcSE = lfcSE.squeeze()
+    assert lfcSE.shape == logFC.shape, f"{lfcSE.shape} vs {logFC.shape}"
+
     # Equalize library sizes
     abundance = mglmOneGroup(y.to_numpy(), dispersion=dispersion, offset=offset)
     e = np.exp(abundance)
@@ -236,6 +267,13 @@ def exactTest(
     AveLogCPM = self.AveLogCPM
     if AveLogCPM is None:
         AveLogCPM = self.aveLogCPM()
-    de_out = pd.DataFrame({"logFC": logFC, "logCPM": AveLogCPM, "PValue": exact_pvals})
-    # TODO get row names
+    de_out = pd.DataFrame(
+        {
+            "log2FoldChange": logFC,
+            "lfcSE": lfcSE,
+            "logCPM": AveLogCPM,
+            "pvalue": exact_pvals,
+        },
+        index=self.counts.index,
+    )
     return DGEExact(table=de_out, comparison=pair, genes=self.genes)

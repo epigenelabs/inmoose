@@ -16,9 +16,28 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import pandas as pd
 
-class DGEExact:
-    def __init__(self, table, comparison, genes):
-        self.table = table
+from ..diffexp import DEResults
+
+
+class DGEExact(DEResults):
+    _metadata = ["comparison", "genes"]
+
+    @property
+    def _constructor(self):
+        def f(*args, **kwargs):
+            return DGEExact(
+                *args, comparison=self.comparison, genes=self.genes, **kwargs
+            )
+
+        return f
+
+    @property
+    def _constructor_slided(self):
+        return pd.Series
+
+    def __init__(self, table, comparison, genes, *args, **kwargs):
+        super().__init__(table, *args, **kwargs)
         self.comparison = comparison
         self.genes = genes
