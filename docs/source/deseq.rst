@@ -1,15 +1,11 @@
-================================
-Differential Expression Analysis
-================================
+======
+deseq2
+======
 
 .. currentmodule:: inmoose.deseq2
 
-InMoose offers a Python port of the well-known R Bioconductor `DESeq2 package
+This module is a partial port of the R Bioconductor `DESeq2 package
 <https://bioconductor.org/packages/release/bioc/html/DESeq2.html>`_ [Love2014]_.
-
-Note that not all features of the R package are necessarily ported. Extending
-the functionality of this module will be based on user requests, so do not
-hesitate to open an issue if your favorite DESeq2 feature is missing.
 
 .. repl::
    from inmoose.deseq2 import *
