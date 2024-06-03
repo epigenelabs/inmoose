@@ -10,12 +10,12 @@ This module is a partial port in Python of the R Bioconductor `limma package
 Introduction
 ============
 
-:mod:`limma` is package for the analysis of gene expression microarray data, especially
-the use of linear models for analysing designed experiments and the assessment
-of differential expression. :mod:`limma` provides the ability to analyse
-comparisons between many RNA targets simultaneously in arbitrarily complicated
-designed experiments. Empirical Bayesian methods are used to provide stable
-results even when the number of arrays is small. The linear model and
+:mod:`limma` is a package for the analysis of gene expression microarray data,
+especially the use of linear models for analysing designed experiments and the
+assessment of differential expression. :mod:`limma` provides the ability to
+analyse comparisons between many RNA targets simultaneously in arbitrarily
+complicated designed experiments. Empirical Bayesian methods are used to provide
+stable results even when the number of arrays is small. The linear model and
 differential expression functions apply to all gene expression technologies,
 including microarrays, RNA-Seq and quantitative PCR.
 
@@ -252,6 +252,11 @@ References
    M. Kavallaris, G.K. Smyth, H.S. Scott. 2008. Integrative analysis of RUNX1
    downstream pathways and target genes. *BMC Genomics* 9(363).
    :doi:`10.1186/1471-2164-9-363`
+
+.. [Ritchie2015] M.E. Ritchie, B. Phipson, D. Wu, Y. Hu, C.W. Law, W. Shi, G.K.
+   Smyth. 2015. Limma powers differential expression analyses for RNA-sequencing
+   and microarray studies. *Nucleic Acids Research* 43(7).
+   :doi:`10.1093/nar/gkv007`
 
 .. [Sartor2006] M.A. Sartor, C.R. Tomlinson, S.C. Wesselkamper, S. Sivaganesan,
    G.D. Leikauf, M. Medvedovic. 2006. Intensity-based hierarchical Bayes method

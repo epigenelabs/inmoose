@@ -21,10 +21,10 @@ Documentation is hosted on [readthedocs.org](https://inmoose.readthedocs.io/en/l
 
 InMoose provides features to correct technical biases, also called batch
 effects, in transcriptomic data:
-- for microarray data, InMoose supersedes pyCombat [1], a Python 3
+- for microarray data, InMoose supersedes pyCombat [1], a Python3
   implementation of ComBat [2], one of the most widely used tool for batch effect
   correction on microarray data.
-- for RNASeq, InMoose features a port to Python3 of ComBat-Seq [3], one of the
+- for RNASeq data, InMoose features a port to Python3 of ComBat-Seq [3], one of the
   most widely used tool for batch effect correction on RNASeq data.
 
 To use these functions, simply import them and call them with default
@@ -41,6 +41,19 @@ rnaseq_corrected = pycombat_seq(rnaseq_data, rnaseq_batches)
 * `microarray_batches`, `rnaseq_batches`: list of batch indices, describing the
   batch for each sample. The list of batches should contain as many elements as
   the number of samples in the expression matrix.
+
+# Differential Expression Analysis
+
+InMoose provides features to analyse diffentially expressed genes in bulk
+transcriptomic data:
+- for microarray data, InMoose features a port of limma [4], the *de
+  facto* standard tool for differential expression analysis on microarray data.
+- for RNASeq data, InMoose features a ports to Python3 of edgeR [5] and DESeq2
+  [6], two of the most widely used tools for differential expression analysis on
+  RNASeq data.
+
+See the dedicated sections of the
+[documentation](https://inmoose.readthedocs.io/en/latest/).
 
 # Consensus clustering
 InMoose provides features to compute consensus clustering, a resampling based algorithm compatible with any clustering algorithms which class implementation is instantiated with parameter `n_clusters`, and possess a `fit_predict` method, which is invoked on data.

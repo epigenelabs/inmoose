@@ -14,12 +14,13 @@ namely ComBat [1]_ and ComBat-Seq [2]_.
 
    pycombat
    data
-   deseq
+   diffexp
 
 .. toctree::
    :maxdepth: 1
    :caption: API
 
+   deseq
    edgepy
    limma
    sim
