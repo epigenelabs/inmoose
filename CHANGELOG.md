@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.4.2-dev]
+## [0.5.0]
 
 - add experimental support for MSVC compiler
 - add R-like functions for fitting linear models in module `utils`
