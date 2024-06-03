@@ -280,7 +280,7 @@ class test_glm(unittest.TestCase):
         s = glmQLFTest(self.d.glmQLFit())
         table_ref = pd.DataFrame(
             {
-                "logFC": [
+                "log2FoldChange": [
                     0.00000,
                     4.086109e00,
                     -0.3727030,
@@ -303,6 +303,30 @@ class test_glm(unittest.TestCase):
                     -0.14979766,
                     0.4185838,
                     0.1836532,
+                ],
+                "lfcSE": [
+                    0.00000,
+                    0.119306,
+                    0.308323,
+                    0.339974,
+                    0.312279,
+                    0.323978,
+                    0.299188,
+                    0.293219,
+                    0.324064,
+                    0.310603,
+                    0.298936,
+                    0.316756,
+                    0.298942,
+                    0.304455,
+                    0.297726,
+                    0.284142,
+                    0.323617,
+                    0.291959,
+                    0.280812,
+                    0.275328,
+                    0.294518,
+                    0.308360,
                 ],
                 "logCPM": [
                     10.95644,
@@ -328,7 +352,7 @@ class test_glm(unittest.TestCase):
                     14.6566606,
                     14.3657820,
                 ],
-                "F": [
+                "stat": [
                     0.000000e00,
                     5.998382e05,
                     4.845263e-01,
@@ -352,7 +376,7 @@ class test_glm(unittest.TestCase):
                     6.947198e-01,
                     1.651446e-01,
                 ],
-                "PValue": [
+                "pvalue": [
                     1.00000000,
                     0.01861634,
                     0.50988854,
@@ -378,16 +402,7 @@ class test_glm(unittest.TestCase):
                 ],
             }
         )
-        self.assertTrue(
-            np.allclose(table_ref["logFC"], s.table["logFC"], atol=1e-4, rtol=0)
-        )
-        self.assertTrue(
-            np.allclose(table_ref["logCPM"], s.table["logCPM"], atol=1e-4, rtol=0)
-        )
-        self.assertTrue(np.allclose(table_ref["F"], s.table["F"], rtol=1e-6))
-        self.assertTrue(
-            np.allclose(table_ref["PValue"], s.table["PValue"], atol=1e-6, rtol=0)
-        )
+        pd.testing.assert_frame_equal(table_ref, s, check_frame_type=False, rtol=1e-4)
 
     def test_glmLRT(self):
         # first estimate common dispersion
@@ -395,7 +410,7 @@ class test_glm(unittest.TestCase):
         s = glmLRT(self.d.glmFit())
         table_ref = pd.DataFrame(
             {
-                "logFC": [
+                "log2FoldChange": [
                     0.00000,
                     4.08610921,
                     -0.3727030,
@@ -418,6 +433,30 @@ class test_glm(unittest.TestCase):
                     -0.1497977,
                     0.4185838,
                     0.18365325,
+                ],
+                "lfcSE": [
+                    0.00000,
+                    0.119306,
+                    0.308323,
+                    0.339974,
+                    0.312279,
+                    0.323978,
+                    0.299188,
+                    0.293219,
+                    0.324064,
+                    0.310603,
+                    0.298936,
+                    0.316756,
+                    0.298942,
+                    0.304455,
+                    0.297726,
+                    0.284142,
+                    0.323617,
+                    0.291959,
+                    0.280812,
+                    0.275328,
+                    0.294518,
+                    0.308360,
                 ],
                 "logCPM": [
                     10.95644,
@@ -443,7 +482,7 @@ class test_glm(unittest.TestCase):
                     14.6566606,
                     14.36578202,
                 ],
-                "LR": [
+                "stat": [
                     0.000000e00,
                     4.980113e00,
                     3.161407e-01,
@@ -467,7 +506,7 @@ class test_glm(unittest.TestCase):
                     4.162483e-01,
                     7.679356e-02,
                 ],
-                "PValue": [
+                "pvalue": [
                     1.00000000,
                     0.02564032,
                     0.57393623,
@@ -493,13 +532,4 @@ class test_glm(unittest.TestCase):
                 ],
             }
         )
-        self.assertTrue(
-            np.allclose(table_ref["logFC"], s.table["logFC"], atol=1e-4, rtol=0)
-        )
-        self.assertTrue(
-            np.allclose(table_ref["logCPM"], s.table["logCPM"], atol=1e-4, rtol=0)
-        )
-        self.assertTrue(np.allclose(table_ref["LR"], s.table["LR"], atol=1e-5, rtol=0))
-        self.assertTrue(
-            np.allclose(table_ref["PValue"], s.table["PValue"], atol=1e-5, rtol=0)
-        )
+        pd.testing.assert_frame_equal(table_ref, s, check_frame_type=False, rtol=1e-4)

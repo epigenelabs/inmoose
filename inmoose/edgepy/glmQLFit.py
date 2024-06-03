@@ -290,11 +290,10 @@ def glmQLFTest(glmfit, coef=None, contrast=None, poisson_bound=True):
     -------
     DGELRT
         an object of class :class:`DGELRT` with the same components as produced
-        by :func:`glmLRT`, except that the :code:`"LR"` column of the
-        :code:`table` becomes :code:`"F"` and contains quasi-likelihood
-        F-statistics. It also stored :code:`df_total`, an array containing the
-        denominator degrees of freedom for the F-test, equal to :code:`df_prior
-        + df_residual_zeros`.
+        by :func:`glmLRT`, except that the :code:`"stat"` column of the
+        :code:`table` contains quasi-likelihood F-statistics. It also stored
+        :code:`df_total`, an array containing the denominator degrees of
+        freedom for the F-test, equal to :code:`df_prior + df_residual_zeros`.
     """
 
     if coef is None:
@@ -307,7 +306,7 @@ def glmQLFTest(glmfit, coef=None, contrast=None, poisson_bound=True):
     out = glmLRT(glmfit, coef=coef, contrast=contrast)
 
     # compute the QL F-statistic
-    F_stat = out.table["LR"] / out.df_test / glmfit.var_post
+    F_stat = out["stat"] / out.df_test / glmfit.var_post
     df_total = glmfit.df_prior + glmfit.df_residual_zeros
     max_df_residual = glmfit.counts.shape[1] - glmfit.design.shape[1]
     df_total = np.minimum(df_total, glmfit.counts.shape[0] * max_df_residual)
@@ -329,11 +328,10 @@ def glmQLFTest(glmfit, coef=None, contrast=None, poisson_bound=True):
                 dispersion=0,
             )
             pois_res = glmLRT(pois_fit, coef=coef, contrast=contrast)
-            F_pvalue[i] = np.maximum(F_pvalue[i], pois_res.table["PValue"])
+            F_pvalue[i] = np.maximum(F_pvalue[i], pois_res["pvalue"])
 
-    del out.table["LR"]
-    out.table["F"] = F_stat
-    out.table["PValue"] = F_pvalue
+    out["stat"] = F_stat
+    out["pvalue"] = F_pvalue
     out.df_total = df_total
 
     return out

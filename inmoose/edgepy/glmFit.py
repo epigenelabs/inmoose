@@ -64,7 +64,7 @@ def glmFit_DGEList(self, design=None, dispersion=None, prior_count=0.125, start=
 
     Returns
     -------
-    DGEList
+    DGEGLM
         object containing the data about the fit
     """
 
@@ -149,7 +149,7 @@ def glmFit(
         columns as replicate libraries.
     dispersion : float or array_like
         scalar, vector or matrix of negative binomial dispersions. Can be a
-        common value for all genese, a vector of dispersion values with one for
+        common value for all genes, a vector of dispersion values with one for
         each gene, or a matrix of dispersion values with one for each
         observation.
     offset : float or array_like, optional
@@ -285,6 +285,17 @@ def glmFit(
             weights=weights,
         ) * np.log(2)
 
+    # counts N,M
+    # design M,P
+    assert y.shape[1] == design.shape[0]
+    w_vec = fit.fitted_values / (1.0 + dispersion_mat * fit.fitted_values)
+    if weights is not None:
+        w_vec = weights * w_vec
+    ridge = np.diag(np.repeat(1e-6 / (np.log(2) ** 2), design.shape[1]))
+    xtwxr_inv = np.linalg.inv(design.T @ (design * w_vec[:, :, None]) + ridge)
+    sigma = xtwxr_inv @ design.T @ (design * w_vec[:, :, None]) @ xtwxr_inv
+    fit.coeff_SE = np.diagonal(sigma, axis1=-2, axis2=-1)
+
     # FIXME (from original R source) we are not allowing missing values, so df.residual must be same for all tags
     fit.df_residual = np.full(ntag, nlib - design.shape[1])
     fit.design = design
@@ -327,22 +338,22 @@ def glmLRT(glmfit, coef=None, contrast=None):
     Returns
     -------
     DGELRT
-        object with the same components as for :func:`glmFit` plus the following:
+        dataframe with two additional components:
 
-        - :code:`table`, data frame with the same rows as :code:`y` containing
-          the log2-fold-changes, likelihood ratio statistics and *p*-values,
-          ready to be displayed by :func:`topTags`.
+        - :code:`fit` containing the result of :func:`glmFit`
         - :code:`comparison`, string describing the coefficient or the contrast
-          being tested.
+          being tested
 
-        The dataframe :code:`table` contains the following columns:
+        The dataframe has the same rows as :code:`y` and is ready to be
+        displayed by :func:`topTags`. It contains the following columns:
 
-        - :code:`"logFC"`, log2-fold-change of expression between conditions
-          being tested.
+        - :code:`"log2FoldChange"`, log2-fold-change of expression between
+          conditions being tested.
+        - :code:`"lfcSE"`, standard error of log2-fold-change.
         - :code:`"logCPM"`, average log2-counts per million, the average taken
           over all libraries in :code:`y`.
-        - :code:`LR`, likelihood ratio statistics.
-        - :code:`PValue`, *p*-values.
+        - :code:`"stat"`, likelihood ratio statistics.
+        - :code:`"pvalue"`, *p*-values.
     """
     if coef is None:
         coef = glmfit.design.shape[1] - 1
@@ -379,6 +390,7 @@ def glmLRT(glmfit, coef=None, contrast=None):
         else:
             coef_name = [coef_names[c] for c in coef]
         logFC = glmfit.coefficients[:, coef] / np.log(2)
+        lfcSE = glmfit.coeff_SE[:, coef] / np.log(2)
     else:
         # TODO make sure contrast is a matrix
         if contrast.shape[0] != glmfit.coefficients.shape[1]:
@@ -391,6 +403,7 @@ def glmLRT(glmfit, coef=None, contrast=None):
             raise ValueError("contrasts are all zero")
         coef = np.arange(ncontrasts)
         logFC = (glmfit.coefficients @ contrast) / np.log(2)
+        lfcSE = (glmfit.coeff_SE @ contrast) / np.log(2)
         if ncontrasts > 1:
             coef_name = f"LR test on {ncontrasts} degrees of freedom"
         else:
@@ -427,14 +440,19 @@ def glmLRT(glmfit, coef=None, contrast=None):
     if logFC.ndim > 1:
         for i in range(logFC.shape[1]):
             tab[f"logFC{i}"] = logFC[:, i]
-        tab.columns = ["logFC" for i in range(logFC.shape[1])]
+            tab[f"lfcSE{i}"] = lfcSE[:, i]
+        tab.columns = [
+            "log2FoldChange" if i % 2 == 0 else "lfcSE"
+            for i in range(2 * logFC.shape[1])
+        ]
+
     else:
-        tab["logFC"] = logFC
+        tab["log2FoldChange"] = logFC
+        tab["lfcSE"] = lfcSE
     tab["logCPM"] = glmfit.AveLogCPM
-    tab["LR"] = LR
-    tab["PValue"] = LRT_pvalue
-    res = DGELRT(glmfit)
-    res.table = tab
+    tab["stat"] = LR
+    tab["pvalue"] = LRT_pvalue
+    res = DGELRT(tab, glmfit)
     res.comparison = coef_name
     res.df_test = df_test
     return res

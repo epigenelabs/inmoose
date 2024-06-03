@@ -101,16 +101,14 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
           :class:`DGELRT` objects).
         - :code:`test`, string stating the name of the test
     """
-    if self.table is None:
-        raise ValueError("Need to run exactTest or glmLRT first")
     if isinstance(self, DGEExact):
         test = "exact"
     else:
         test = "glm"
-    MultipleContrasts = test == "glm" and self.table.shape[1] > 4
+    MultipleContrasts = test == "glm" and self.shape[1] > 4
 
     # Check n
-    n = np.min([n, self.table.shape[0]])
+    n = np.min([n, self.shape[0]])
     if n < 1:
         raise ValueError("No rows to output")
 
@@ -132,9 +130,9 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
             logging.warnings.warn(
                 "Two or more logFC columns in DGELRT object. First logFC column used to rank by logFC"
             )
-        alfc = np.abs(self.table["logFC"].iloc[:, 0])
+        alfc = np.abs(self["log2FoldChange"].iloc[:, 0])
     else:
-        alfc = np.abs(self.table["logFC"])
+        alfc = np.abs(self["log2FoldChange"])
 
     # Choose top genes
     if sort_by == "logFC":
@@ -142,25 +140,25 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
     elif sort_by == "PValue":
         o = np.argsort(
             np.array(
-                [(a, b) for a, b in zip(self.table["PValue"], -alfc)],
-                dtype=[("x", self.table["PValue"].dtype), ("y", alfc.dtype)],
+                [(a, b) for a, b in zip(self["pvalue"], -alfc)],
+                dtype=[("x", self["pvalue"].dtype), ("y", alfc.dtype)],
             ),
             order=("x", "y"),
         )
     elif sort_by == "none":
-        o = np.arange(self.table.shape[0])
+        o = np.arange(self.shape[0])
     else:
         raise ValueError(f"invalid value {sort_by} for 'sort_by'")
-    tab = self.table.iloc[o, :]
+    tab = self.iloc[o, :]
 
     # Add adjusted p-values if appropriate
-    adj_p_val = multipletests(self.table["PValue"], method=adjust_method)[1]
+    adj_p_val = multipletests(self["pvalue"], method=adjust_method)[1]
     if adjust_method != "none":
         if adjust_method in FWER_methods:
             adjustment = "FWER"
         if adjust_method in FDR_methods:
             adjustment = "FDR"
-        self.table.loc[self.table.index[o], adjustment] = adj_p_val[o]
+        self.loc[self.index[o], adjustment] = adj_p_val[o]
 
     # Add gene annotation if appropriate
     if self.genes is not None:

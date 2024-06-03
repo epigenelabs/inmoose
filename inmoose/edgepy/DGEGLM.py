@@ -53,6 +53,7 @@ class DGEGLM(object):
         self.iter = iter
         self.failed = failed
 
+        self.coeff_SE = None
         self.counts = None
         self.design = None
         self.offset = None
