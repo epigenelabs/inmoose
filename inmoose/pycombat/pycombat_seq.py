@@ -83,7 +83,7 @@ def pycombat_seq(
         ref_batch=ref_batch,
         na_cov_action=na_cov_action,
     )
-
+    dataframe_instance = vci.dataframe_instance
     counts = vci.counts
     list_samples = vci.list_samples
     list_genes = vci.list_genes
@@ -227,7 +227,7 @@ def pycombat_seq(
     adjust_counts_whole[keep, :] = adjust_counts
     adjust_counts_whole[rm, :] = countsOri[rm, :]
 
-    if isinstance(counts, pd.DataFrame):
+    if dataframe_instance == True:
         return pd.DataFrame(adjust_counts_whole, columns=list_samples, index=list_genes)
     else:
         return adjust_counts_whole

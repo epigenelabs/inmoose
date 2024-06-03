@@ -220,7 +220,9 @@ def param_fun(
     Returns:
         array list -- estimated adjusted additive and multiplicative batch effect
     """
-    if mean_only:  # if mean_only, no need for complex method: batch effect is immediately calculated
+    if (
+        mean_only
+    ):  # if mean_only, no need for complex method: batch effect is immediately calculated
         t2_n = np.multiply(t2[i], 1)
         t2_n_g_hat = np.multiply(t2_n, gamma_hat[i])
         gamma_star = postmean(
@@ -580,6 +582,7 @@ def pycombat_norm(
         counts, batch, covar_mod, ref_batch, na_cov_action=na_cov_action
     )
 
+    dataframe_instance = vci.dataframe_instance
     dat = vci.counts
     list_samples = vci.list_samples
     list_genes = vci.list_genes
@@ -615,7 +618,7 @@ def pycombat_norm(
         dat,
     )
 
-    if isinstance(counts, pd.DataFrame):
+    if dataframe_instance == True:
         return pd.DataFrame(bayes_data, columns=list_samples, index=list_genes)
     else:
         return bayes_data

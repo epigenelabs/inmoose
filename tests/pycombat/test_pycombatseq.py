@@ -188,7 +188,7 @@ class test_pycombatseq(unittest.TestCase):
                 index=["sample1", "sample2", "sample3", "sample5"],
             ),
         )
-        self.assertTrue(np.array_equal(res, res2))
+        pd.testing.assert_frame_equal(res, res2)
 
         # check confounded covariates
         with self.assertRaisesRegex(

@@ -2,7 +2,7 @@
 
 ## [0.5.1-dev]
 
-None
+- fix pycombat covariates action remove with count dataframe output 
 
 ## [0.5.0]
 
