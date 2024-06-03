@@ -8,6 +8,8 @@
 - add tmixture functions from R package limma
 - add linear model fit functions from R package limma
 - add functions handling duplicated probes from R package limma
+- lint code with `ruff`
+- add a "differential expression analysis" section to the doc
 
 ## [0.4.1]
 
