@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.5.1-dev]
+
+None
+
 ## [0.5.0]
 
 - add experimental support for MSVC compiler
