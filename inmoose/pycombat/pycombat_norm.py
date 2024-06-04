@@ -580,6 +580,7 @@ def pycombat_norm(
         counts, batch, covar_mod, ref_batch, na_cov_action=na_cov_action
     )
 
+    dataframe_instance = vci.dataframe_instance
     dat = vci.counts
     list_samples = vci.list_samples
     list_genes = vci.list_genes
@@ -615,7 +616,7 @@ def pycombat_norm(
         dat,
     )
 
-    if isinstance(counts, pd.DataFrame):
+    if dataframe_instance:
         return pd.DataFrame(bayes_data, columns=list_samples, index=list_genes)
     else:
         return bayes_data

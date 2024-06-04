@@ -85,12 +85,15 @@ class VirtualCohortInput:
             list_samples = counts.columns
             list_genes = counts.index
             counts = counts.values
+            dataframe_instance = True
         elif isinstance(counts, np.ndarray):
             list_samples = None
             list_genes = None
+            dataframe_instance = False
         else:
             raise ValueError("counts must be a pandas DataFrame or a numpy nd array")
 
+        self.dataframe_instance = dataframe_instance
         self.list_samples = list_samples
         self.list_genes = list_genes
         self.counts = counts
@@ -246,7 +249,11 @@ class VirtualCohortInput:
             )
 
         if self.nan_cov > 0:
-            counts, batch, covar = self.fix_na_cov(na_cov_action)
+            counts, batch, covar, list_samples, list_genes = self.fix_na_cov(
+                na_cov_action
+            )
+            if self.dataframe_instance:
+                counts = pd.DataFrame(counts, index=list_genes, columns=list_samples)
             if self.ref_batch_idx is not None:
                 ref_batch = self.batch[self.ref_batch_idx]
             else:
@@ -302,7 +309,17 @@ class VirtualCohortInput:
                 f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
             )
             keep = nan_covar_mod.sum(axis=1) == 0
-            return self.counts[:, keep], self.batch[keep], self.covar_mod[keep]
+            if self.dataframe_instance:
+                list_samples = self.list_samples[keep]
+            else:
+                list_samples = None
+            return (
+                self.counts[:, keep],
+                self.batch[keep],
+                self.covar_mod[keep],
+                list_samples,
+                self.list_genes,
+            )
         elif na_cov_action == "fill":
             logging.warnings.warn(
                 f"{nan_covar_mod.sum().sum()} missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates."
@@ -352,7 +369,13 @@ class VirtualCohortInput:
                     covar_mod[col] = covar_mod[col].astype(str)
                 for i, j in enumerate(np.where(nan_cov_col)[0]):
                     covar_mod.loc[j, col] = nan_batch_group[i]
-            return self.counts, self.batch, covar_mod
+            return (
+                self.counts,
+                self.batch,
+                covar_mod,
+                self.list_samples,
+                self.list_genes,
+            )
         else:
             raise ValueError(
                 f"unknown value {na_cov_action} for argument 'na_cov_action': must be one of 'raise', 'remove' or 'fill'"
