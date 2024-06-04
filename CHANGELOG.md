@@ -1,8 +1,8 @@
 # InMoose release changelog
 
-## [0.5.1-dev]
+## [0.5.1]
 
-- fix pycombat covariates action remove with count dataframe output 
+- fix pycombat covariates action remove with count dataframe output
 
 ## [0.5.0]
 
