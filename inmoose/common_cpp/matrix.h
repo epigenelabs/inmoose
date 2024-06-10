@@ -347,27 +347,6 @@ using NumericVector = std::vector<double>;
 using IntegerVector = std::vector<long>;
 using LogicalVector = std::vector<char>;
 
-/// This class is supposed to give access to the R-side CompressedMatrix class from C++.
-/// Because we currently do not replicate CompressedMatrix in Python, this class is close
-/// to being an empty shell.
-class compressed_matrix {
-public:
-    explicit compressed_matrix(PyArrayObject*);
-    const double* get_row(size_t) const;
-    NumericMatrix::ConstMatrixRow row(size_t index) const;
-    size_t get_ncol() const;
-    size_t get_nrow() const;
-
-    const double* begin() const { return mat.begin(); }
-    const double* end() const { return mat.end(); }
-
-    bool is_row_repeated() const { return false; }
-    bool is_col_repeated() const { return false; }
-private:
-    NumericMatrix mat;
-    // helper struct to get a view of a row of the matrix
-    mutable std::vector<double> output;
-};
 
 template<class T>
 struct NPY

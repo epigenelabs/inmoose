@@ -1,5 +1,5 @@
 // Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
-// Copyright (C) 2022-2023 Maximilien Colange
+// Copyright (C) 2022-2024 Maximilien Colange
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,14 +46,5 @@
 #include "edgepy_cpp.h"
 
 /* Py-accessible functions are defined in file __init__.pxd */
-
-/* Other utility functions and values */
-
-const double low_value=std::pow(10.0, -10.0), log_low_value=std::log(low_value);
-
-const double LNtwo=std::log(2), one_million=1000000, LNmillion=std::log(one_million);
-
-const double pos_inf = std::numeric_limits<double>::infinity();
-const double neg_inf = std::numeric_limits<double>::infinity() * -1;
 
 #endif
