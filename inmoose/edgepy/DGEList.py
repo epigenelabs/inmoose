@@ -24,7 +24,6 @@ import numpy as np
 import pandas as pd
 
 from ..utils import Factor
-from .edgepy_cpp import is_integer_array
 from .utils import _isAllZero
 
 
@@ -109,13 +108,12 @@ class DGEList(object):
         """
 
         # Check counts
-        counts = np.asarray(counts)
+        try:
+            counts = np.asarray(counts, dtype="int")
+        except:  # noqa: E722
+            raise ValueError("non-numeric values found in 'counts'")
         if counts.ndim != 2:
             raise ValueError("'counts' is not a matrix!")
-        try:
-            is_integer_array(counts)
-        except RuntimeError:
-            raise ValueError("non-numeric values found in 'counts'")
 
         (ntags, nlibs) = counts.shape
         # TODO fill in colnames
