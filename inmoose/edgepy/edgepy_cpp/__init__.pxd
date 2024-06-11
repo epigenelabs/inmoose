@@ -24,9 +24,6 @@ from numpy cimport ndarray
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data)
 cdef public double compute_unit_nb_deviance(double, double, double)
 
-cdef extern from "objects.h":
-    cpdef bool is_integer_array(ndarray arr) except +
-
 
 cdef extern from "maximize_interpolant.cpp":
     cpdef vector.vector[double] cxx_maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, ndarray[double] likelihoods) except +

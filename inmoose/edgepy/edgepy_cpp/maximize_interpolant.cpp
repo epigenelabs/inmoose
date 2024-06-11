@@ -18,6 +18,7 @@
 
 
 #include "utils.h"
+#include "matrix.h"
 #include "interpolator.h"
 
 std::vector<double> maximize_interpolant(std::vector<double> spts, PyArrayObject* likelihoods) {

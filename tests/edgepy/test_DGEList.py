@@ -35,6 +35,10 @@ class test_DGEList(unittest.TestCase):
         with self.assertRaisesRegex(
             ValueError, expected_regex="'counts' is not a matrix"
         ):
+            d = DGEList([1, 2])
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="non-numeric values found in 'counts'"
+        ):
             d = DGEList(None)
         with self.assertRaisesRegex(
             ValueError, expected_regex="non-numeric values found in 'counts'"

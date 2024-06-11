@@ -48,7 +48,6 @@ edgepy_cpp = Extension(
     [
         "inmoose/edgepy/edgepy_cpp/edgepy_cpp.pyx",
         "inmoose/edgepy/edgepy_cpp/interpolator.cpp",
-        "inmoose/edgepy/edgepy_cpp/objects.cpp",
     ],
     include_dirs=[numpy.get_include(), "inmoose/common_cpp/"],
     define_macros=macros,
@@ -79,7 +78,6 @@ setup(
             "edgepy_cpp.h",
             "interpolator.h",
             "maximize_interpolant.cpp",
-            "objects.h",
             "utils.h",
         ],
         "inmoose/common_cpp": [
