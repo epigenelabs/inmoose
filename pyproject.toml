@@ -39,5 +39,5 @@ doc = [
 ]
 
 [build-system]
-requires = ["setuptools", "numpy", "scipy", "Cython>=3.0.0", "wheel"]
+requires = ["setuptools", "numpy>=2.0.0", "scipy", "Cython>=3.0.0", "wheel"]
 
