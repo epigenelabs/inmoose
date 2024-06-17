@@ -1,5 +1,5 @@
 [lint]
-extend-select = ["I"]
+extend-select = ["I", "NPY201"]
 
 [lint.per-file-ignores]
 "__init__.py" = ["E402"]

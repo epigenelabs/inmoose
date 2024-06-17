@@ -15,15 +15,15 @@ class test_utils(unittest.TestCase):
         with self.assertRaisesRegex(
             ValueError, expected_regex="NaN counts are not allowed"
         ):
-            _isAllZero(np.array([1, 2, 3, np.NaN, 4, 5]))
+            _isAllZero(np.array([1, 2, 3, np.nan, 4, 5]))
         with self.assertRaisesRegex(
             ValueError, expected_regex="infinite counts are not allowed"
         ):
-            _isAllZero(np.array([1, 2, 3, np.PINF, 4, 5]))
+            _isAllZero(np.array([1, 2, 3, np.inf, 4, 5]))
         with self.assertRaisesRegex(
             ValueError, expected_regex="negative counts are not allowed"
         ):
-            _isAllZero(np.array([1, 2, 3, np.NINF, 4, 5]))
+            _isAllZero(np.array([1, 2, 3, -np.inf, 4, 5]))
         with self.assertRaisesRegex(
             ValueError, expected_regex="negative counts are not allowed"
         ):

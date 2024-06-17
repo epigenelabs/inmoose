@@ -181,7 +181,7 @@ def aveLogCPM(
     # Special case when all counts and library sizes are zero
     if _isAllZero(y):
         if (lib_size is None or max(lib_size) == 0) and (
-            offset is None or max(offset) == np.NINF
+            offset is None or max(offset) == -np.inf
         ):
             abundance = np.full((y.shape[0],), -np.log(y.shape[0]))
             return (abundance + np.log(1e6)) / np.log(2)
