@@ -75,5 +75,5 @@ jobs:
           name: inmoose_sdist
           path: dist
 
-      - uses: pypa/gh-action-pypi-publish@v1.8.14
+      - uses: pypa/gh-action-pypi-publish@v1.9.0
 
