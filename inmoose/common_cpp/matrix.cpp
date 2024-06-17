@@ -75,7 +75,7 @@ Matrix<T>::~Matrix()
 {
   if (owned)
   {
-    std::cerr << "[MATRIX] refcount = " << PyArray_REFCOUNT(obj) << std::endl;
+    std::cerr << "[MATRIX] refcount = " << Py_REFCNT(obj) << std::endl;
   }
 }
 
