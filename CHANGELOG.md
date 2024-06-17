@@ -2,7 +2,8 @@
 
 ## [0.5.2-dev]
 
-None
+- move most of C++ code to Python and Cython
+- compatibility with `numpy` 2.0.0
 
 ## [0.5.1]
 
