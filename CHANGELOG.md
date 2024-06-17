@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.5.2-dev]
+## [0.6.0]
 
 - move most of C++ code to Python and Cython
 - compatibility with `numpy` 2.0.0
