@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+import pandas as pd
 
 from inmoose.edgepy import DGEList, validDGEList
 
@@ -63,7 +64,7 @@ class test_DGEList(unittest.TestCase):
             d = DGEList([[0]], lib_size=[0])
 
         d = DGEList([[42]])
-        self.assertIsNotNone(d.counts)
+        self.assertTrue(isinstance(d.counts, pd.DataFrame))
         self.assertIsNotNone(d.samples)
         self.assertIsNone(d.common_dispersion)
         self.assertIsNone(d.trended_dispersion)
@@ -98,6 +99,7 @@ class test_DGEList(unittest.TestCase):
             validDGEList(d)
         d = DGEList([[42]])
         d = validDGEList(d)
+        self.assertTrue(isinstance(d.counts, pd.DataFrame))
         self.assertFalse((d.samples.group.values == None).any())  # noqa: E711
         self.assertFalse((d.samples.lib_size.values == None).any())  # noqa: E711
         self.assertFalse((d.samples.norm_factors.values == None).any())  # noqa: E711

@@ -160,7 +160,7 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
             adjustment = "FWER"
         if adjust_method in FDR_methods:
             adjustment = "FDR"
-        self.table.loc[o, adjustment] = adj_p_val[o]
+        self.table.loc[self.table.index[o], adjustment] = adj_p_val[o]
 
     # Add gene annotation if appropriate
     if self.genes is not None:

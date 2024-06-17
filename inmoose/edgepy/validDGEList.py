@@ -42,7 +42,6 @@ def validDGEList(y):
     """
     if y.counts is None:
         raise RuntimeError("No count matrix")
-    y.counts = np.asarray(y.counts)
     nlib = y.counts.shape[1]
     if (y.samples.group.values == None).any():  # noqa: E711
         y.samples.group = gl(1, nlib)
