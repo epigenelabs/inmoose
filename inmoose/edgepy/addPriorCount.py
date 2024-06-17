@@ -81,7 +81,7 @@ def addPriorCount(y, lib_size=None, offset=None, prior_count=1):
     """
 
     # Check y
-    if not np.issubdtype(y.dtype, np.number):
+    if not np.issubdtype(np.asarray(y).dtype, np.number):
         raise ValueError("count matrix must be numeric")
 
     # Check prior_count

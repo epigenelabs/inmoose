@@ -289,7 +289,7 @@ class Test(unittest.TestCase):
         self.assertTrue(np.allclose(pref, pval, atol=1e-6, rtol=0))
 
     def test_binomTest(self):
-        pval = binomTest(self.d.counts[:, 0], self.d.counts[:, 1])
+        pval = binomTest(self.d.counts.iloc[:, 0], self.d.counts.iloc[:, 1])
         pref = [
             1.000000e00,
             1.000000e00,

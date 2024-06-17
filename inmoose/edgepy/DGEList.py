@@ -34,9 +34,9 @@ class DGEList(object):
 
     Attributes
     ----------
-    counts : ndarray
+    counts : pd.DataFrame
         matrix of read counts, one row per gene and one column per sample
-    samples : DataFrame
+    samples : pd.DataFrame
         dataframe with a row for each sample and columns :code:`group`,
         :code:`lib_size` and :code:`norm_factors` containing the group labels,
         library sizes and normalization factors.
@@ -87,13 +87,13 @@ class DGEList(object):
 
         Arguments
         ---------
-        counts : array_like
+        counts : array_like or pd.DataFrame
             matrix of counts
         lib_size : array_like, optional
             vector of total counts (sequence depth) for each library
         norm_factors : array_like, optional
             vector of normalization factors that modify the library sizes
-        samples : DataFrame, optional
+        samples : pd.DataFrame, optional
             information for each sample
         group : array_like or Factor, optional
             vector or factor giving the experimental group/condition for each
@@ -101,23 +101,29 @@ class DGEList(object):
         group_col : str
             the name of the column containing the group information in :code:`samples`.
             only used if :code:`group` is not :code:`None`
-        genes : DataFrame, optional
+        genes : pd.DataFrame, optional
             annotation information for each gene
         remove_zeroes : bool
             whether to remove rows that have 0 total count
         """
 
         # Check counts
+        if not isinstance(counts, (np.ndarray, pd.DataFrame)):
+            counts = np.asarray(counts)
         try:
-            counts = np.asarray(counts, dtype="int")
+            counts = counts.astype(int)
         except:  # noqa: E722
             raise ValueError("non-numeric values found in 'counts'")
         if counts.ndim != 2:
             raise ValueError("'counts' is not a matrix!")
 
         (ntags, nlibs) = counts.shape
-        # TODO fill in colnames
-        # TODO fill in rownames
+        if not isinstance(counts, pd.DataFrame):
+            counts = pd.DataFrame(
+                counts,
+                index=[f"gene{i}" for i in range(ntags)],
+                columns=[f"sample{i}" for i in range(nlibs)],
+            )
         _isAllZero(
             counts
         )  # don't really care about all-zeroes, but do want to protect against NaN, infinite and negative values
@@ -188,7 +194,7 @@ class DGEList(object):
             sam.index = samples.index
             sam = pd.concat([sam, samples], axis=1)
         samples = sam
-        # TODO set row names in 'samples' according to column names in 'counts'
+        samples.index = counts.columns
 
         # make object
         self.counts = counts

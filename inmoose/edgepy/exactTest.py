@@ -172,7 +172,7 @@ def exactTest(
 
     # Reduce to two groups
     j = np.isin(group, pair)
-    y = self.counts[:, j]
+    y = self.counts.loc[:, j]
     lib_size = self.samples["lib_size"][j]
     norm_factors = self.samples["norm_factors"][j]
     group = group[j]
@@ -190,22 +190,26 @@ def exactTest(
     n1 = sum(j1)
     if n1 == 0:
         raise ValueError(f"No libraries for {pair[0]}")
-    y1 = y[:, j1]
+    y1 = y.loc[:, j1]
     abundance1 = mglmOneGroup(
-        y1 + prior_count[j1].to_numpy(), offset=offset_aug[j1], dispersion=dispersion
+        y1.to_numpy() + prior_count[j1].to_numpy(),
+        offset=offset_aug[j1],
+        dispersion=dispersion,
     )
     j2 = group == pair[1]
     n2 = sum(j2)
     if n2 == 0:
         raise ValueError(f"No libraries for {pair[1]}")
-    y2 = y[:, j2]
+    y2 = y.loc[:, j2]
     abundance2 = mglmOneGroup(
-        y2 + prior_count[j2].to_numpy(), offset=offset_aug[j2], dispersion=dispersion
+        y2.to_numpy() + prior_count[j2].to_numpy(),
+        offset=offset_aug[j2],
+        dispersion=dispersion,
     )
     logFC = (np.asarray(abundance2) - np.asarray(abundance1)) / np.log(2)
 
     # Equalize library sizes
-    abundance = mglmOneGroup(y, dispersion=dispersion, offset=offset)
+    abundance = mglmOneGroup(y.to_numpy(), dispersion=dispersion, offset=offset)
     e = np.exp(abundance)
     input_mean = np.broadcast_to(e, (n1, ntags))
     output_mean = input_mean * lib_size_average
