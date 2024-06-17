@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.6.1-dev]
+
+None
+
 ## [0.6.0]
 
 - move most of C++ code to Python and Cython
