@@ -991,15 +991,16 @@ def fitBeta(
             big_z_sqrt_w[:, :y_m] = z_sqrt_w.T
             # IRLS with Q matrix for X
             gamma_hat = np.swapaxes(q, -1, -2) @ big_z_sqrt_w[:, :, None]
-            beta_hat = np.linalg.solve(r, gamma_hat.squeeze(-1))
+            beta_hat = np.linalg.solve(r, gamma_hat).squeeze(-1)
         else:
             # use the standard design matrix and matrix inversion
             z = np.log(mu_hat_idx / nf[:, idx]) + (y[:, idx] - mu_hat_idx) / mu_hat_idx
             assert (x.T @ (x * w_vec.T[:, :, None]) + ridge).shape == (idx_n, x_p, x_p)
-            assert ((z * w_vec).T @ x).shape == (idx_n, x_p)
+            zwtx = (z * w_vec).T @ x
+            assert (zwtx).shape == (idx_n, x_p)
             beta_hat = np.linalg.solve(
-                x.T @ (x * w_vec.T[:, :, None]) + ridge, (z * w_vec).T @ x
-            )
+                x.T @ (x * w_vec.T[:, :, None]) + ridge, zwtx[:, :, None]
+            ).squeeze(-1)
 
         assert beta_hat.shape == (idx_n, x_p), f"{beta_hat.shape} vs {(idx_n, x_p)}"
         # easier to update beta_mat here instead than at the end of the loop

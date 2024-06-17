@@ -21,8 +21,8 @@ class test_mglm(unittest.TestCase):
         )
         ref1 = np.array(
             [
-                np.NINF,
-                np.NINF,
+                -np.inf,
+                -np.inf,
                 -2.986383,
                 -3.485387,
                 -2.896575,
@@ -53,7 +53,7 @@ class test_mglm(unittest.TestCase):
         )
         ref2 = np.array(
             [
-                np.NINF,
+                -np.inf,
                 -5.420406,
                 -3.273714,
                 -3.506488,

@@ -347,7 +347,9 @@ def calculate_stand_mean(grand_mean, n_array, design, n_batch, B_hat):
     Returns:
         stand_mean {matrix} -- standardised mean
     """
-    stand_mean = np.dot(np.transpose(np.mat(grand_mean)), np.mat([1] * n_array))
+    stand_mean = np.dot(
+        np.transpose(np.asmatrix(grand_mean)), np.asmatrix([1] * n_array)
+    )
     # corrects the mean with design matrix information
     if design is not None:
         tmp = np.ndarray.copy(design)
@@ -369,7 +371,7 @@ def standardise_data(dat, stand_mean, var_pooled, n_array):
         s_data {matrix} -- standardised data matrix
     """
     s_data = (dat - stand_mean) / np.dot(
-        np.transpose(np.mat(np.sqrt(var_pooled))), np.mat([1] * n_array)
+        np.transpose(np.asmatrix(np.sqrt(var_pooled))), np.asmatrix([1] * n_array)
     )
     return s_data
 
