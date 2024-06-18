@@ -67,13 +67,17 @@ def get_levenberg_start(y, offset, disp, weights, design, use_null):
         curweight = np.broadcast_to(curweight, y.shape)
         sum_exprs = np.sum(y * curweight / curN, axis=1)
         sum_weight = np.sum(curweight, axis=1)
-        current = np.log(sum_exprs / sum_weight)
+        with np.errstate(divide="ignore"):
+            current = np.log(sum_exprs / sum_weight)
 
-        for tag in range(y.shape[0]):
-            # performing the QR decomposition and taking the solution
-            res[tag] = solve_triangular(
-                R[:, :K], Q.T @ np.repeat(current[tag], y.shape[1]), check_finite=False
-            )
+        with np.errstate(invalid="ignore"):
+            for tag in range(y.shape[0]):
+                # performing the QR decomposition and taking the solution
+                res[tag] = solve_triangular(
+                    R[:, :K],
+                    Q.T @ np.repeat(current[tag], y.shape[1]),
+                    check_finite=False,
+                )
 
     else:
         # finding the delta

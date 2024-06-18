@@ -139,9 +139,10 @@ def fit_one_group(y, offsets, disp, weights, maxit, tol, beta, usePoisson=True):
 
     sum_lib = np.exp(offsets[special_case]).sum(axis=1)
     sum_counts = y[special_case].sum(axis=1)
-    out_beta[special_case] = np.where(
-        sum_counts == 0, -np.inf, np.log(sum_counts / sum_lib)
-    )
+    with np.errstate(divide="ignore"):
+        out_beta[special_case] = np.where(
+            sum_counts == 0, -np.inf, np.log(sum_counts / sum_lib)
+        )
     out_conv[special_case] = True
 
     # Otherwise going through NR iterations

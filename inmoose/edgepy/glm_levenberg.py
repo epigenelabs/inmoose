@@ -199,7 +199,8 @@ def fit_levenberg(y, offset, disp, weights, design, beta, tol, maxit):
             # step from where we were before). This is why we do not modify the
             # values in-place until we are sure we want to take the step.
             dev_new = nb_deviance(y, mu_new, weights, disp)
-            low_dev[(dev_new / ymax) < supremely_low_value] = True
+            with np.errstate(invalid="ignore"):
+                low_dev[(dev_new / ymax) < supremely_low_value] = True
             low_tags = lev_rem & ((dev_new <= dev) | low_dev)
             out_beta[low_tags, :] = beta_new[low_tags, :]
             mu[low_tags, :] = mu_new[low_tags, :]
@@ -213,7 +214,8 @@ def fit_levenberg(y, offset, disp, weights, design, beta, tol, maxit):
 
             # Excessive damping; steps get so small that it is pointless to
             # continue.
-            conv[lev_rem & ((lambda_ / maxinfo) > (1 / supremely_low_value))] = True
+            with np.errstate(divide="ignore"):
+                conv[lev_rem & ((lambda_ / maxinfo) > (1 / supremely_low_value))] = True
             lev_rem &= ~conv
 
         # Terminating if we failed, if divergence from the exact solution is
