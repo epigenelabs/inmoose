@@ -32,11 +32,11 @@ class Test(unittest.TestCase):
         # counts still the same
         self.assertTrue(np.all(dds1.counts() == dds.counts()))
         # first is NA
-        self.assertTrue(np.isnan(LFC1[0]))
+        self.assertTrue(np.isnan(LFC1.iloc[0]))
         # replaced, reduced LFC
-        self.assertTrue(np.abs(LFC1[1]) < np.abs(LFC0[1]))
+        self.assertTrue(np.abs(LFC1.iloc[1]) < np.abs(LFC0.iloc[1]))
         # replaced, LFC now zero
-        self.assertTrue(LFC1[2] == 0)
+        self.assertTrue(LFC1.iloc[2] == 0)
         idx = ~dds1.var["replace"]
         # the pvalue for those not replaced is equal
         self.assertTrue(
@@ -103,5 +103,5 @@ class Test(unittest.TestCase):
         dds.counts()[0, 3] = 0
         dds = DESeq(dds, fitType="mean")
         res = dds.results()
-        self.assertFalse(np.isnan(res.pvalue[0]))
+        self.assertFalse(np.isnan(res["pvalue"].iloc[0]))
         self.assertTrue(np.all(np.isnan(res.pvalue[1:2])))
