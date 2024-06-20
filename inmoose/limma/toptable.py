@@ -25,6 +25,7 @@ import pandas as pd
 import scipy
 from statsmodels.stats.multitest import multipletests
 
+from ..diffexp import DEResults
 from .marraylm import MArrayLM
 
 
@@ -156,23 +157,24 @@ def topTable(
 
     Returns
     -------
-    pd.DataFrame
-        a dataframe with a row for the :code:`number` top genes and the
-        following columns:
+    DEResults or pd.DataFrame
+        :class:`~DEResults` if :code:`coef` has a single value, otherwise
+        :class:`pd.DataFrame`. A dataframe with a row for each of the
+        :code:`number` top genes and the following columns:
 
         - genelist: one or more columns of probe annotation, if
           :code:`genelist` was included as input
-        - logFC: estimate of the log2-fold-change corresponding to the effect
-          or contrast
+        - log2FoldChange: estimate of the log2-fold-change corresponding to the
+          effect or contrast (:class:`DEResults` only)
         - CI_L: left limit of confidence interval for :code:`logFC`, if
           :code:`confint=True` or :code:`confint` is a numeric value
         - CI_R: right limit of confidence interval for :code:`logFC`, if
           :code:`confint=True` or :code:`confint` is a numeric value
         - AveExpr: average log2-expression for the probe over all arrays and
           channels, same as :code:`Amean` in the :class:`MArrayLM` object
-        - t: moderated *t*-statistic
-        - F: moderated *F*-statistic
-        - P_Value: raw *p*-value
+        - stat: moderated *t*-statistic (:class:`DEResults` only)
+        - F: moderated *F*-statistic (:class:`pd.DataFrame` only)
+        - pvalue: raw *p*-value
         - adj_P_Value: adjusted *p*-value or *q*-value
         - B: log-odds that the gene is differentially expressed
     """
@@ -322,7 +324,7 @@ def _topTableF(
         tab = pd.DataFrame(genelist[o, :], M[o, :])
     tab["AveExpr"] = Amean.iloc[o]
     tab["F"] = Fstat[o]
-    tab["P_Value"] = Fp[o]
+    tab["pvalue"] = Fp[o]
     tab["adj_P_Val"] = adj_P_Value[o]
     tab.index = rn[o]
     return tab
@@ -426,6 +428,7 @@ def _topTableT(
 
     # Extract statistics for table
     M = fit.coefficients.loc[:, coef]
+    lfcSE = fit.stdev_unscaled.loc[:, coef]
     tstat = eb.t.loc[:, coef]
     P_Value = eb.p_value.loc[:, coef]
     if include_B:
@@ -443,6 +446,7 @@ def _topTableT(
             return pd.DataFrame()
         genelist = genelist[sig, :]
         M = M[sig]
+        lfcSE = lfcSE[sig]
         A = A[sig]
         tstat = tstat[sig]
         P_Value = P_Value[sig]
@@ -474,10 +478,11 @@ def _topTableT(
 
     # Assemble output data frame
     if genelist is None:
-        tab = pd.DataFrame({"logFC": M.iloc[top]})
+        tab = pd.DataFrame({"log2FoldChange": M.iloc[top], "lfcSE": lfcSE.iloc[top]})
     else:
         tab = pd.DataFrame(genelist.loc[top, :])
-        tab["logFC"] = M[top]
+        tab["log2FoldChange"] = M[top]
+        tab["lfcSE"] = lfcSE[top]
 
     if confint is not False:
         if isinstance(confint, (int, float)):
@@ -494,8 +499,8 @@ def _topTableT(
 
     if A is not None:
         tab["AveExpr"] = A.iloc[top]
-    tab["t"] = tstat.iloc[top]
-    tab["P_Value"] = P_Value.iloc[top]
+    tab["stat"] = tstat.iloc[top]
+    tab["pvalue"] = P_Value.iloc[top]
     tab["adj_P_Val"] = adj_P_Value[top]
 
     if include_B:
@@ -505,15 +510,15 @@ def _topTableT(
     # Resort table
     if resort_by is not None:
         if resort_by == "logFC":
-            ord = np.flip(np.argsort(tab["logFC"]))
+            ord = np.flip(np.argsort(tab["log2FoldChange"]))
         elif resort_by == "AveExpr":
             ord = np.flip(np.argsort(tab["AveExpr"]))
         elif resort_by == "P":
-            ord = np.argsort(tab["P_Value"])
+            ord = np.argsort(tab["pvalue"])
         elif resort_by == "t":
-            ord = np.flip(np.argsort(tab["t"]))
+            ord = np.flip(np.argsort(tab["stat"]))
         elif resort_by == "B":
             ord = np.flip(np.argsort(tab["B"]))
         tab = tab[ord, :]
 
-    return tab
+    return DEResults(tab)

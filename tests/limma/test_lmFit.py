@@ -5,6 +5,7 @@ import pandas as pd
 from patsy import dmatrix
 from scipy.stats import norm
 
+from inmoose.diffexp import DEResults
 from inmoose.limma import (
     MArrayLM,
     contrasts_fit,
@@ -565,7 +566,7 @@ class Test(unittest.TestCase):
                     0.2824226,
                     0.1755450,
                 ],
-                "P_Value": [
+                "pvalue": [
                     5.883976e-12,
                     1.934773e-01,
                     2.618904e-01,
@@ -611,7 +612,7 @@ class Test(unittest.TestCase):
         )
         tt_ref = pd.DataFrame(
             {
-                "logFC": [
+                "log2FoldChange": [
                     -1.32847322,
                     0.41856886,
                     -0.26930840,
@@ -622,6 +623,18 @@ class Test(unittest.TestCase):
                     -0.07283173,
                     0.06450099,
                     -0.01254659,
+                ],
+                "lfcSE": [
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
+                    0.816496580927726,
                 ],
                 "CI_L": [
                     -1.80449340,
@@ -659,7 +672,7 @@ class Test(unittest.TestCase):
                     -0.07728329,
                     0.10603292,
                 ],
-                "t": [
+                "stat": [
                     -4.69927758,
                     1.48082246,
                     -0.95274945,
@@ -671,7 +684,7 @@ class Test(unittest.TestCase):
                     0.22819170,
                     -0.04438754,
                 ],
-                "P_Value": [
+                "pvalue": [
                     3.070827e-05,
                     1.464885e-01,
                     3.464392e-01,
@@ -721,6 +734,7 @@ class Test(unittest.TestCase):
                 "gene9",
             ],
         )
+        self.assertTrue(isinstance(tt, DEResults))
         pd.testing.assert_frame_equal(tt, tt_ref)
 
         fit_covariates = lmFit(self.y, self.design_covariates)
@@ -734,7 +748,7 @@ class Test(unittest.TestCase):
         )
         tt_ref = pd.DataFrame(
             {
-                "logFC": [
+                "log2FoldChange": [
                     1.50354659,
                     -0.51628690,
                     0.27921130,
@@ -745,6 +759,18 @@ class Test(unittest.TestCase):
                     -0.05636359,
                     0.05441120,
                     -0.02671935,
+                ],
+                "lfcSE": [
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
+                    0.8660254037844387,
                 ],
                 "CI_L": [
                     0.8648869,
@@ -782,7 +808,7 @@ class Test(unittest.TestCase):
                     0.10603292,
                     -0.10505440,
                 ],
-                "t": [
+                "stat": [
                     3.99964506,
                     -1.72626474,
                     0.88418560,
@@ -794,7 +820,7 @@ class Test(unittest.TestCase):
                     0.17874729,
                     -0.09049633,
                 ],
-                "P_Value": [
+                "pvalue": [
                     0.0003984447,
                     0.0949021452,
                     0.3838419907,
@@ -844,4 +870,5 @@ class Test(unittest.TestCase):
                 "gene4",
             ],
         )
+        self.assertTrue(isinstance(tt, DEResults))
         pd.testing.assert_frame_equal(tt, tt_ref, rtol=1e-3)
