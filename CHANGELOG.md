@@ -2,7 +2,8 @@
 
 ## [0.6.1-dev]
 
-None
+- harmonize differential expression analysis results across `deseq2`, `edgepy`
+  and `limma` modules
 
 ## [0.6.0]
 
