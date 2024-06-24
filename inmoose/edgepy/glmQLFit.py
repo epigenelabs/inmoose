@@ -318,9 +318,8 @@ def glmQLFTest(glmfit, coef=None, contrast=None, poisson_bound=True):
     if poisson_bound:
         i = _isBelowPoissonBound(glmfit)
         if i.any():
-            # pois_fit = glmfit[i, :]
             pois_fit = glmFit(
-                glmfit.counts[i, :],
+                glmfit.counts.loc[i, :],
                 design=glmfit.design,
                 offset=np.broadcast_to(glmfit.offset, glmfit.counts.shape)[i, :],
                 weights=glmfit.weights[i, :] if glmfit.weights is not None else None,

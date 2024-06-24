@@ -400,7 +400,8 @@ class test_glm(unittest.TestCase):
                     0.43338141,
                     0.69717923,
                 ],
-            }
+            },
+            index=[f"gene{i}" for i in range(22)],
         )
         pd.testing.assert_frame_equal(table_ref, s, check_frame_type=False, rtol=1e-4)
 
@@ -530,6 +531,7 @@ class test_glm(unittest.TestCase):
                     0.51881503,
                     0.78169064,
                 ],
-            }
+            },
+            index=[f"gene{i}" for i in range(22)],
         )
         pd.testing.assert_frame_equal(table_ref, s, check_frame_type=False, rtol=1e-4)
