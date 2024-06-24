@@ -76,14 +76,14 @@ def _residDF(zero, design):
     # Anything in between?
     somezero = (nzero > 0) & (nzero < nlib)
     if somezero.any():
-        zero2 = zero[somezero, :]
+        zero2 = zero.loc[somezero, :].values
         groupings = _comboGroups(zero2)
 
         # Identifying the true residual d.f. for each of these rows.
         DF2 = nlib - nzero[somezero]
         for i in groupings:
             zeroi = zero2[i[0], :]
-            DF2[i] -= np.linalg.matrix_rank(design[~zeroi, :])
+            DF2.iloc[i] -= np.linalg.matrix_rank(design[~zeroi, :])
         DF2 = np.maximum(DF2, 0)
         DF[somezero] = DF2
 

@@ -141,7 +141,7 @@ def glmFit(
 
     Arguments
     ---------
-    y : matrix
+    y : pd.DataFrame
         matrix of counts
     design : matrix, optional
         design matrix for the genewise linear models. Must be of full column
@@ -192,7 +192,6 @@ def glmFit(
         - :code:`deviance`, numeric vector of deviances, one for each gene
     """
     # Check y
-    y = np.asarray(y)
     (ntag, nlib) = y.shape
 
     # Check design
@@ -435,7 +434,6 @@ def glmLRT(glmfit, coef=None, contrast=None):
     LR = np.subtract(fit_null.deviance, glmfit.deviance)
     df_test = fit_null.df_residual - glmfit.df_residual
     LRT_pvalue = scipy.stats.chi2.sf(LR, df=df_test)
-    # TODO what about row names?
     tab = pd.DataFrame()
     if logFC.ndim > 1:
         for i in range(logFC.shape[1]):
@@ -452,6 +450,7 @@ def glmLRT(glmfit, coef=None, contrast=None):
     tab["logCPM"] = glmfit.AveLogCPM
     tab["stat"] = LR
     tab["pvalue"] = LRT_pvalue
+    tab.index = glmfit.counts.index
     res = DGELRT(tab, glmfit)
     res.comparison = coef_name
     res.df_test = df_test
