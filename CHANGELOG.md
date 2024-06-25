@@ -4,6 +4,7 @@
 
 - harmonize differential expression analysis results across `deseq2`, `edgepy`
   and `limma` modules
+- add a meta-analysis feature for differential expression
 
 ## [0.6.0]
 
