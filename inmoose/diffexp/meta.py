@@ -23,7 +23,7 @@ from statsmodels.stats.meta_analysis import combine_effects
 from .DEResults import DEResults
 
 
-def meta_de(de_results, alpha=0.05):
+def meta_de(de_results, alpha=0.05, min_common_genes=None):
     """
     Combine logFC and *p*-values of differential expression analyses
 
@@ -44,6 +44,11 @@ def meta_de(de_results, alpha=0.05):
         datasets, or any combination thereof
     alpha : float between 0 and 1
         significance level for the confidence intervals. Defaults to 0.05.
+    min_common_genes : int or None
+        minimal number of genes all the elements of :code:`de_results` need to
+        have in common. Below this threshold, an error will be raised. If
+        :code:`None`, then all elements of :code:`de_results` must have the
+        same set of genes.
 
     Returns
     -------
@@ -64,11 +69,21 @@ def meta_de(de_results, alpha=0.05):
         raise ValueError(
             "diffexp results fed to metanalysis must inherit from DEResults"
         )
-    idx = de_results[0].index
-    if not all(np.array_equal(d.index, idx) for d in de_results):
+
+    idx = list(set.intersection(*[set(d.index) for d in de_results]))
+    if min_common_genes is None:
+        max_n = np.max([d.shape[0] for d in de_results])
+        if len(idx) < max_n:
+            raise ValueError(
+                "diffexp results fed to metaanalysis must have the same set of genes"
+            )
+        idx = de_results[0].index
+    elif len(idx) < min_common_genes:
         raise ValueError(
-            "diffexp results fed to metaanalysis must have the same set of genes"
+            f"diffexp results fed to metaanalysis must have at least {min_common_genes} in common"
         )
+
+    de_results = [d.loc[idx, :] for d in de_results]
 
     # combining logFC
     logFC = {g: np.array([d.loc[g, "log2FoldChange"] for d in de_results]) for g in idx}
