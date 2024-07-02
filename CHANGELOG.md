@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.6.1-dev]
+## [0.7.0]
 
 - harmonize differential expression analysis results across `deseq2`, `edgepy`
   and `limma` modules
