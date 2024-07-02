@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.1-dev]
+
+None
+
 ## [0.7.0]
 
 - harmonize differential expression analysis results across `deseq2`, `edgepy`
