@@ -30,7 +30,7 @@ class DEResults(pd.DataFrame):
 
     @property
     def _constructor(self):
-        DEResults
+        return DEResults
 
     @property
     def _constructor_sliced(self):

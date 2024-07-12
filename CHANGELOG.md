@@ -2,7 +2,7 @@
 
 ## [0.7.1-dev]
 
-None
+- fix a bug when splicing a `DEResults`
 
 ## [0.7.0]
 
