@@ -41,9 +41,21 @@ jobs:
         run: tox
 
       # upload the coverage report to coveralls.io
-      - name: Coveralls GitHub Action
+      - name: Upload coverage reports to Coveralls
         uses: coverallsapp/github-action@v2.3.0
+        with:
+          parallel: true
         if: ${{ matrix.python-version == '3.12' }}
+
+  finish_coverage:
+    needs: [tests_and_coverage]
+    name: Notify Coveralls that the parallel build has finished
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close parallel build
+        uses: coverallsapp/github-action@v2.3.0
+        with:
+          parallel-finished: true
 
   build_sdist:
     needs: [ruff]

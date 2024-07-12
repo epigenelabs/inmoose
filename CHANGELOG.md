@@ -3,6 +3,7 @@
 ## [0.7.1-dev]
 
 - fix a bug when splicing a `DEResults`
+- fix coverage report upload in CI/CD pipeline
 
 ## [0.7.0]
 
