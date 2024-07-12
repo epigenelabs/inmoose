@@ -17,6 +17,7 @@ This module is a partial port of the R Bioconductor `DESeq2 package
 
 
 .. repl-quiet::
+   pd.options.display.max_columns = 10
    from matplotlib import rcParams
    # repl default config replaces '.' by '-' in the savefig.directory :/
    rcParams['savefig.directory'] = rcParams['savefig.directory'].replace("readthedocs-org", "readthedocs.org")
