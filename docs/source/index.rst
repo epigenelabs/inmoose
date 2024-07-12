@@ -5,8 +5,11 @@ Welcome to InMoose documentation!
 InMoose is the INtegrated Multi Omic Open Source Environment.
 
 InMoose is intended as a comprehensive state-of-the-art Python package for -omic
-data analysis. It comprises Python ports of popular and recognized R tools,
-namely ComBat [1]_ and ComBat-Seq [2]_.
+data analysis. Its current focus is on analysis of bulk transcriptomic data
+(microarray and RNA-Seq).
+It comprises Python ports of popular and recognized R tools, name ComBat
+[Johnson2007]_, ComBat-Seq [Zhang2020]_, DESeq2 [Love2014]_, edgeR [Chen2016]_,
+limma [Ritchie2015]_ and splatter [Zappia2017]_.
 
 .. toctree::
    :maxdepth: 1
@@ -59,17 +62,6 @@ Nordor. 2023. pyComBat, a Python tool for batch effects correction in
 high-throughput molecular data using empirical Bayes methods.  *BMC
 Bioinformatics* 7;24(1):459. :doi:`10.1186/s12859-023-05578-5`
 
-
-References
-==========
-
-.. [1] W. E. Johnson, C. Li, A. Rabinovic. 2007. Adjusting batch effects in
-   microarray expression data using empirical Bayes methods. *Biostatistics*, 8,
-   118–12.  :doi:`10.1093/biostatistics/kxj037`
-
-.. [2] Y. Zhang, G. Parmigiani, W. E. Johnson. 2020. ComBat-Seq: batch effect
-   adjustment for RNASeq count data. *NAR Genomics and Bioinformatics*, 2(3).
-   :doi:`10.1093/nargab/lqaa078`
 
 Indices and tables
 ==================

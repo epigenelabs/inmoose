@@ -4,6 +4,7 @@
 
 - fix a bug when splicing a `DEResults`
 - fix coverage report upload in CI/CD pipeline
+- improve documentation landing page and references
 
 ## [0.7.0]
 
