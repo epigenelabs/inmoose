@@ -23,6 +23,8 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+import warnings
+
 from scipy.special import polygamma
 from scipy.stats import trim_mean
 from statsmodels.tools.sm_exceptions import DomainWarning
@@ -920,7 +922,7 @@ def parametricDispersionFit(means, disps):
     means : ??
     disps : ??
     """
-    LOGGER.simplefilter("ignore", DomainWarning)
+    warnings.simplefilter("ignore", DomainWarning)
     coefs = pd.Series([0.1, 1.0])
     iter_ = 0
     while True:
