@@ -130,7 +130,7 @@ class VirtualCohortInput:
             # convert to dataframe
             if isinstance(covar_mod, (list, np.ndarray)):
                 covar_mod = pd.DataFrame(covar_mod)
-            elif type(covar_mod) != pd.DataFrame:
+            elif type(covar_mod) is not pd.DataFrame:
                 raise ValueError(
                     f"The covar_mod parameter type {type(covar_mod)} is not accepted, it must be list, numpy.array or pandas.dataframe."
                 )
