@@ -19,8 +19,10 @@
 # This file is based on the file 'R/movingAverageByCol.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
-import numpy as np
 from math import ceil, floor
+
+import numpy as np
+
 from ..utils import LOGGER
 
 

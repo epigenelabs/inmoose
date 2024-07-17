@@ -22,6 +22,7 @@
 
 import numpy as np
 from scipy.interpolate import splev
+
 from ..utils import LOGGER
 
 

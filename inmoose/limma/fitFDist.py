@@ -21,7 +21,7 @@
 import numpy as np
 from scipy.special import digamma, polygamma
 
-from ..utils import lm_fit, LOGGER, ns
+from ..utils import LOGGER, lm_fit, ns
 
 
 def fitFDist(x, df1, covariate=None):

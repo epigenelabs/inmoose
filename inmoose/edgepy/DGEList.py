@@ -21,8 +21,7 @@
 import numpy as np
 import pandas as pd
 
-from .edgepy_cpp import is_integer_array
-from ..utils import Factor, LOGGER
+from ..utils import LOGGER, Factor
 from .utils import _isAllZero
 
 

@@ -27,7 +27,7 @@ import pandas as pd
 import patsy
 from scipy.optimize import Bounds, minimize
 
-from ..utils import dnbinom_mu, dnorm, LOGGER
+from ..utils import LOGGER, dnbinom_mu, dnorm
 from .deseq2_cpp import fitBetaWrapper
 from .misc import renameModelMatrixColumns
 from .prior import estimateBetaPriorVar

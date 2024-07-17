@@ -20,17 +20,16 @@
 # (version 3.16).
 
 
+import warnings
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-import warnings
-
 from scipy.special import polygamma
 from scipy.stats import trim_mean
 from statsmodels.tools.sm_exceptions import DomainWarning
 
-from ..utils import LOGGER
-from ..utils import Factor
+from ..utils import LOGGER, Factor
 from .deseq2_cpp import fitDispGridWrapper, fitDispWrapper
 from .fitNbinomGLMs import fitNbinomGLMs
 from .misc import buildMatrixWithNACols, buildVectorWithNACols, checkFullRank

@@ -20,13 +20,16 @@
 # (version 3.16).
 
 
+import logging
+
 import numpy as np
 import pandas as pd
 from scipy.stats import trim_mean
 
-from ..utils import Factor, LOGGER, pnorm, pt
+from ..utils import LOGGER, Factor, pnorm, pt
 from .fitNbinomGLMs import fitGLMsWithPrior, fitNbinomGLMs
 from .misc import buildDataFrameWithNACols, buildMatrixWithNACols, nOrMoreInCell
+from .weights import getAndCheckWeights
 
 
 def nbinomWaldTest(
@@ -300,9 +303,12 @@ def nbinomWaldTest(
     modelMatrixNames = modelMatrix.design_info.column_names
     betaMatrix = fit["betaMatrix"]
     assert isinstance(betaMatrix, pd.DataFrame)
-    assert betaMatrix.shape == (
-        objNZ.n_vars,
-        len(modelMatrixNames),
+    assert (
+        betaMatrix.shape
+        == (
+            objNZ.n_vars,
+            len(modelMatrixNames),
+        )
     ), f"betaMatrix shape {betaMatrix.shape} is wrong, should be {(objNZ.n_vars, len(modelMatrixNames))}"
     betaMatrix.index = objNZ.var_names
     assert np.array_equal(betaMatrix.columns, modelMatrixNames)

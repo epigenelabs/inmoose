@@ -220,9 +220,7 @@ def param_fun(
     Returns:
         array list -- estimated adjusted additive and multiplicative batch effect
     """
-    if (
-        mean_only
-    ):  # if mean_only, no need for complex method: batch effect is immediately calculated
+    if mean_only:  # if mean_only, no need for complex method: batch effect is immediately calculated
         t2_n = np.multiply(t2[i], 1)
         t2_n_g_hat = np.multiply(t2_n, gamma_hat[i])
         gamma_star = postmean(

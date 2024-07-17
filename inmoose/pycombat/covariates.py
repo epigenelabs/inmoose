@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 from patsy import DesignMatrix, dmatrix
 
-from ..utils import asfactor, LOGGER
+from ..utils import LOGGER, asfactor
 
 
 class VirtualCohortInput:

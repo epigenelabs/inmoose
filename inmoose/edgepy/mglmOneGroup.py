@@ -22,7 +22,6 @@
 import numpy as np
 
 from ..utils import LOGGER
-
 from .glm_one_group import fit_one_group
 from .makeCompressedMatrix import (
     _compressDispersions,

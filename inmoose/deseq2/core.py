@@ -25,12 +25,12 @@ import numpy as np
 import pandas as pd
 import patsy
 
+from ..utils import LOGGER
 from .DESeqDataSet import DESeqDataSet, checkFullRank
 from .lrt import checkLRT, nbinomLRT
 from .misc import nOrMoreInCell
 from .outliers import refitWithoutOutliers
 from .wald import nbinomWaldTest
-from ..utils import LOGGER
 
 
 def DESeq(

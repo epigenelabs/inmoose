@@ -29,8 +29,7 @@ from anndata import AnnData
 from scipy.stats import median_abs_deviation as mad
 from scipy.stats import norm
 
-from ..utils import Factor, rnbinom
-from ..utils import LOGGER
+from ..utils import LOGGER, Factor, rnbinom
 from .misc import buildVectorWithNACols, checkFullRank, cleanCategoricalColumnName
 
 
