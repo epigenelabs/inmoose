@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 import numpy as np
@@ -112,7 +113,10 @@ class Test(unittest.TestCase):
         with self.assertLogs("inmoose", level="WARNING") as logChecker:
             dds = DESeq(dds)
         self.assertRegex(
-            logChecker.output[0],
+            # account for https://github.com/python/cpython/issues/86109
+            logChecker.output[0]
+            if sys.version_info >= (3, 10)
+            else logChecker.output[3],
             "for 1 genes, the weights as supplied won't allow parameter estimation",
         )
         self.assertTrue(dds.var["allZero"].iloc[0])
