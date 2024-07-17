@@ -15,8 +15,9 @@ class test_predFC(unittest.TestCase):
 
     def test_predFC(self):
         design = np.array([[1, 0], [1, 0], [0, 1], [0, 2]])
-        with self.assertWarnsRegex(Warning, expected_regex="dispersion set to zero"):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             res = self.d.predFC(design=design)
+        self.assertRegex(logChecker.output[0], "dispersion set to zero")
         ref = np.array(
             [
                 [-12.969746, -11.384905],

@@ -101,10 +101,11 @@ class test_dispersion(unittest.TestCase):
     def test_movingAverageByCol(self):
         y = self.d.counts
         self.assertTrue(np.array_equal(movingAverageByCol(y, width=1), y))
-        with self.assertWarnsRegex(
-            Warning, expected_regex="reducing moving average width to x.shape\[0\]"
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             res = movingAverageByCol(y, width=23)
+        self.assertRegex(
+            logChecker.output[0], "reducing moving average width to x.shape\[0\]"
+        )
         ref = np.array(
             [
                 [13.25000, 17.41667, 17.41667, 17.75000],

@@ -58,10 +58,9 @@ class test_DGEList(unittest.TestCase):
             ValueError, expected_regex="library size set to zero but counts are nonzero"
         ):
             d = DGEList([[42]], lib_size=[0])
-        with self.assertWarnsRegex(
-            UserWarning, expected_regex="library size of zero detected"
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             d = DGEList([[0]], lib_size=[0])
+        self.assertRegex(logChecker.output[0], "library size of zero detected")
 
         d = DGEList([[42]])
         self.assertTrue(isinstance(d.counts, pd.DataFrame))

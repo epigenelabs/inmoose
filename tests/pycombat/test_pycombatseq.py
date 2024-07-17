@@ -132,35 +132,34 @@ class test_pycombatseq(unittest.TestCase):
             pycombat_seq(self.y, self.batch, covar_mod=["a", np.nan, "a", np.nan, "a"])
 
         ref = pycombat_seq(self.y, self.batch, covar_mod=["a", "b", "a", "c", "a"])
-        with self.assertWarnsRegex(
-            UserWarning,
-            r"1 missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates.",
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             res = pycombat_seq(
                 self.y,
                 self.batch,
                 covar_mod=[1, 2, 1, np.nan, 1],
                 na_cov_action="fill",
             )
+        self.assertRegex(
+            logChecker.output[0],
+            r"1 missing covariates in covar_mod. Creating a distinct covariate per batch for the missing values. You may want to double check your covariates.",
+        )
         self.assertTrue(np.array_equal(res, ref))
 
-        with self.assertWarnsRegex(
-            UserWarning,
-            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             res = pycombat_seq(
                 self.y,
                 self.batch,
                 covar_mod=[1, 2, 1, np.nan, 1],
                 na_cov_action="remove",
             )
+        self.assertRegex(
+            logChecker.output[0],
+            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
+        )
 
         # with count as dataframe
         # check remove option warning message
-        with self.assertWarnsRegex(
-            UserWarning,
-            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             res = pycombat_seq(
                 pd.DataFrame(
                     self.y,
@@ -174,6 +173,10 @@ class test_pycombatseq(unittest.TestCase):
                 ),
                 na_cov_action="remove",
             )
+        self.assertRegex(
+            logChecker.output[0],
+            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
+        )
 
         # check remove option results
         res2 = pycombat_seq(
@@ -216,16 +219,17 @@ class test_pycombatseq(unittest.TestCase):
                 ),
             )
 
-        with self.assertWarnsRegex(
-            UserWarning,
-            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             res = pycombat_seq(
                 self.y,
                 self.batch,
                 covar_mod=pd.DataFrame(["a", "b", "a", np.nan, "a"], columns=["test"]),
                 na_cov_action="remove",
             )
+        self.assertRegex(
+            logChecker.output[0],
+            r"1 samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates.",
+        )
 
         ref_y = np.delete(self.y, (3), axis=1)
         ref_batch = np.array([1, 1, 2, 2])
