@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.2-dev]
+
+None
+
 ## [0.7.1]
 
 - fix a bug when splicing a `DEResults`
