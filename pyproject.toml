@@ -4,6 +4,7 @@ version = "0.7.1-dev"
 description = "InMoose: the Integrated Multi Omic Open Source Environment"
 readme = "README.md"
 authors = [
+  {name = "Guillaume Appé", email = "guillaume@epigenelabs.com"},
   {name = "Maximilien Colange", email = "maximilien@epigenelabs.com"},
   {name = "Léa Meunier", email = "lea@epigenelabs.com"},
   {name = "Solène Weill", email = "solene@epigenelabs.com"},

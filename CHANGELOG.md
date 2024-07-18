@@ -5,6 +5,7 @@
 - fix a bug when splicing a `DEResults`
 - fix coverage report upload in CI/CD pipeline
 - improve documentation landing page and references
+- use a package-specific logger
 
 ## [0.7.0]
 
