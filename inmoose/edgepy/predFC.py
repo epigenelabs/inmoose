@@ -19,10 +19,9 @@
 # This file is based on the file 'R/predFC.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
-import logging
-
 import numpy as np
 
+from ..utils import LOGGER
 from .addPriorCount import addPriorCount
 
 
@@ -46,7 +45,7 @@ def predFC_DGEList(
         dispersion = self.getDispersion()
     if dispersion is None:
         dispersion = 0
-        logging.warnings.warn("dispersion set to zero")
+        LOGGER.warning("dispersion set to zero")
 
     return predFC(
         y=self.counts,

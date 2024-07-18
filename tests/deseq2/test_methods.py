@@ -13,11 +13,12 @@ class Test(unittest.TestCase):
         coldata = pd.DataFrame({"x": Factor(["A", "A", "B", "B"])})
         counts = np.arange(1, 17).reshape((4, 4))
         dds = DESeqDataSet(counts, coldata, "~x")
-        with self.assertWarnsRegex(
-            UserWarning,
-            expected_regex="there is no layer named 'replacedCounts', using original.",
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             dds.counts(replaced=True)
+        self.assertRegex(
+            logChecker.output[0],
+            "There is no layer named 'replacedCounts', using original.",
+        )
         with self.assertRaisesRegex(
             ValueError,
             expected_regex="first calculate size factors, add normalizationFactors, or set normalized=False",

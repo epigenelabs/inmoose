@@ -19,13 +19,13 @@
 # This file is based on the file 'R/core.R' of the Bioconductor DESeq2 package
 # (version 3.16).
 
-
 import logging
 
 import numpy as np
 import pandas as pd
 import patsy
 
+from ..utils import LOGGER
 from .DESeqDataSet import DESeqDataSet, checkFullRank
 from .lrt import checkLRT, nbinomLRT
 from .misc import nOrMoreInCell
@@ -209,9 +209,9 @@ def DESeq(
     if not isinstance(quiet, bool):
         raise ValueError(f"invalid value for parameter quiet: {quiet}")
     if not quiet:
-        logging.basicConfig(level=logging.INFO)
+        LOGGER.setLevel(logging.INFO)
     else:
-        logging.basicConfig(level=logging.WARNING)
+        LOGGER.setLevel(logging.WARNING)
 
     if not isinstance(parallel, bool):
         raise ValueError(f"invalid value for parameter parallel: {parallel}")
@@ -220,7 +220,7 @@ def DESeq(
     if fitType == "glmGamPoi":
         minReplicatesForReplace = np.inf
         if parallel:
-            logging.warnings.warn(
+            LOGGER.warning(
                 "parallelization of DESeq() is not implemented for fitType='glmGamPoi'"
             )
 
@@ -269,7 +269,7 @@ def DESeq(
     if test == "Wald" and reduced is not None:
         raise ValueError("'reduced' ignored when test='Wald'")
     if dispersionEstimator == "glmGamPoi" and test == "Wald":
-        logging.warnings.warn(
+        LOGGER.warning(
             "glmGamPoi dispersion estimator should be used in combination with a LRT and not a Wald test"
         )
 
@@ -279,9 +279,7 @@ def DESeq(
 
         # warn if the design is just an intercept
         if [len(t.factors) for t in obj.design.design_info.terms] == [0]:
-            logging.warnings.warn(
-                "the design is ~1 (just an intercept). Is this intended?"
-            )
+            LOGGER.warning("the design is ~1 (just an intercept). Is this intended?")
 
         if full.design_info.describe() != obj.design.design_info.describe():
             raise ValueError("'full' specified as formula should match obj.design")
@@ -290,7 +288,7 @@ def DESeq(
 
     else:
         # model not as formula, so DESeq() is using supplied model matrix
-        logging.info("using supplied model matrix")
+        LOGGER.info("using supplied model matrix")
         if betaPrior:
             raise ValueError(
                 "'betaPrior'=True is not supported for user-provided model matrices"
@@ -302,21 +300,21 @@ def DESeq(
     obj.betaPrior = betaPrior
 
     if obj.normalizationFactors is not None:
-        logging.info("using pre-existing normalization factors")
+        LOGGER.info("using pre-existing normalization factors")
     elif obj.sizeFactors is not None:
-        logging.info("using pre-existing size factors")
+        LOGGER.info("using pre-existing size factors")
     else:
-        logging.info("estimating size factors")
+        LOGGER.info("estimating size factors")
         obj = obj.estimateSizeFactors(type_=sfType, quiet=quiet)
 
     if not parallel:
-        logging.info("estimating dispersions")
+        LOGGER.info("estimating dispersions")
 
         obj = obj.estimateDispersions(
             fitType=fitType, quiet=quiet, modelMatrix=modelMatrix, minmu=minmu
         )
 
-        logging.info("fitting model and testing")
+        LOGGER.info("fitting model and testing")
 
         if test == "Wald":
             obj = nbinomWaldTest(

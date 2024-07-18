@@ -19,10 +19,11 @@
 # This file is based on the file 'R/movingAverageByCol.R' of the Bioconductor edgeR package (version 3.38.4).
 
 
-import logging
 from math import ceil, floor
 
 import numpy as np
+
+from ..utils import LOGGER
 
 
 def movingAverageByCol(x, width=5, full_length=True):
@@ -52,7 +53,7 @@ def movingAverageByCol(x, width=5, full_length=True):
     (n, m) = x.shape
     if width > n:
         width = n
-        logging.warnings.warn("reducing moving average width to x.shape[0]")
+        LOGGER.warning("reducing moving average width to x.shape[0]")
 
     if full_length:
         half1 = ceil(width / 2)

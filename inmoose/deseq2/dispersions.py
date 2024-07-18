@@ -20,7 +20,7 @@
 # (version 3.16).
 
 
-import logging
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -29,7 +29,7 @@ from scipy.special import polygamma
 from scipy.stats import trim_mean
 from statsmodels.tools.sm_exceptions import DomainWarning
 
-from ..utils import Factor
+from ..utils import LOGGER, Factor
 from .deseq2_cpp import fitDispGridWrapper, fitDispWrapper
 from .fitNbinomGLMs import fitNbinomGLMs
 from .misc import buildMatrixWithNACols, buildVectorWithNACols, checkFullRank
@@ -162,7 +162,7 @@ def estimateDispersions_dds(
         )
 
     if "dispersion" in obj.var:
-        logging.info("found already estimated dispersions, replacing these")
+        LOGGER.info("found already estimated dispersions, replacing these")
         del obj.var["dispersion"]
 
     if fitType == "glmGamPoi":
@@ -175,7 +175,7 @@ def estimateDispersions_dds(
 
     checkForExperimentalReplicates(obj, modelMatrix)
 
-    logging.info("gene-wise dispersion estimates")
+    LOGGER.info("gene-wise dispersion estimates")
     obj = estimateDispersionsGeneEst(
         obj,
         maxit=maxit,
@@ -186,9 +186,9 @@ def estimateDispersions_dds(
         minmu=minmu,
         type_=dispersionEstimator,
     )
-    logging.info("mean-dispersion relationship")
+    LOGGER.info("mean-dispersion relationship")
     obj = estimateDispersionsFit(obj, fitType=fitType, quiet=quiet)
-    logging.info("final dispersion estimates")
+    LOGGER.info("final dispersion estimates")
     obj = estimateDispersionsMAP(
         obj,
         maxit=maxit,
@@ -284,7 +284,7 @@ def estimateDispersionsGeneEst(
             minmu = 0.5
 
     if "dispGeneEst" in obj.var:
-        logging.info("found already estimated gene-wise dispersions, removing these")
+        LOGGER.info("found already estimated gene-wise dispersions, removing these")
         del obj.var["dispGeneEst"]
         if "dispGeneIter" in obj.var:
             del obj.var["dispGeneIter"]
@@ -507,8 +507,8 @@ def estimateDispersionsFit(obj, fitType="parametric", minDisp=1e-8, quiet=False)
                 objNZ.var["baseMean"][useForFit], objNZ.var["dispGeneEst"][useForFit]
             )
         except RuntimeError as e:
-            logging.info(f"parametric fit failed with {e}")
-            logging.info(
+            LOGGER.info(f"parametric fit failed with {e}")
+            LOGGER.info(
                 "note: fitType='parametric', but the dispersion trend was not well captured by the function: y = a/x + b, and a local regression fit was automatically substituted. Specify fitType='local' or 'mean' to avoid this message next time."
             )
             fitType = "local"
@@ -621,7 +621,7 @@ def estimateDispersionsMAP(
     if "allZero" not in obj.var:
         obj = obj.getBaseMeansAndVariances()
     if "dispersion" in obj.var:
-        logging.info("found already estimated dispersions, removing these")
+        LOGGER.info("found already estimated dispersions, removing these")
         del obj.var["dispersion"]
         del obj.var["dispOutlier"]
         del obj.var["dispMAP"]
@@ -635,7 +635,7 @@ def estimateDispersionsMAP(
     if dispPriorVar is None:
         # if no gene-wise estimates above minimum
         if np.nansum(obj.var["dispGeneEst"] >= 100 * minDisp) == 0:
-            logging.warnings.warn(
+            LOGGER.warning(
                 f"all genes have dispersion estimates < {100*minDisp}, returning disp = {10*minDisp}"
             )
             obj.var["dispersion"] = buildVectorWithNACols(
@@ -921,7 +921,7 @@ def parametricDispersionFit(means, disps):
     means : ??
     disps : ??
     """
-    logging.warnings.simplefilter("ignore", DomainWarning)
+    warnings.simplefilter("ignore", DomainWarning)
     coefs = pd.Series([0.1, 1.0])
     iter_ = 0
     while True:

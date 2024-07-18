@@ -20,12 +20,11 @@
 # (version 3.16).
 
 
-import logging
-
 import numpy as np
 import scipy.stats
 from scipy.stats import trim_mean
 
+from ..utils import LOGGER
 from .dispersions import estimateDispersionsGeneEst, estimateDispersionsMAP
 from .lrt import nbinomLRT
 from .misc import nOrMoreInCell
@@ -55,7 +54,7 @@ def refitWithoutOutliers(
     # only refit if some of the replacements do not result in all zero counts
     # otherwise, these cases are handled by results()
     if nrefit > 0 and nrefit > np.sum(newAllZero):
-        logging.info(
+        LOGGER.info(
             f"""
         -- replacing outliers and refitting for {nrefit} genes
         -- DESeq argument 'minReplicatesForReplace' = {minReplicatesForReplace}
@@ -75,7 +74,7 @@ def refitWithoutOutliers(
             del objSub.var.description[c]
 
         # estimate gene-wise dispersion
-        logging.info("estimating dispersions")
+        LOGGER.info("estimating dispersions")
         objSub = estimateDispersionsGeneEst(
             objSub, quiet=quiet, modelMatrix=modelMatrix
         )
@@ -92,7 +91,7 @@ def refitWithoutOutliers(
         )
 
         # fit GLM
-        logging.info("fitting model and testing")
+        LOGGER.info("fitting model and testing")
         if test == "Wald":
             betaPriorVar = obj.betaPriorVar
             objSub = nbinomWaldTest(

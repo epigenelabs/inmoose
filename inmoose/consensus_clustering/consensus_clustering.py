@@ -20,13 +20,14 @@
 # github.com/ZigaSajovic/Consensus_Clustering (as of July 30, 2021).
 
 import bisect
-import logging
 from itertools import combinations
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sn
+
+from ..utils import LOGGER
 
 
 class consensusClustering:
@@ -124,7 +125,7 @@ class consensusClustering:
 
         for k in range(self.min_k, self.max_k + 1):  # for each number of clusters
             if verbose:
-                logging.info(f"Computing consensus matrix for {k} clusters")
+                LOGGER.info(f"Computing consensus matrix for {k} clusters")
             indicator_matrix = np.zeros((data.shape[0],) * 2)
             connectivity_matrix = np.zeros((data.shape[0],) * 2)
 

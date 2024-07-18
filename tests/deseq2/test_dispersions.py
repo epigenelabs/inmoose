@@ -51,11 +51,12 @@ class Test(unittest.TestCase):
         dds = dds.estimateSizeFactors()
         dds.var["dispGeneEst"] = np.repeat(1e-7, 100)
         dds.setDispFunction(lambda x: 1e-6)
-        with self.assertWarnsRegex(
-            UserWarning,
-            expected_regex="all genes have dispersion estimates < 1e-06, returning disp = 1e-07",
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             estimateDispersionsMAP(dds)
+        self.assertRegex(
+            logChecker.output[0],
+            "all genes have dispersion estimates < 1e-06, returning disp = 1e-07",
+        )
 
         dds = makeExampleDESeqDataSet(n=100, m=4)
         dds = dds.estimateSizeFactors()

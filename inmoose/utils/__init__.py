@@ -4,6 +4,7 @@ from .factor import gl as gl
 from .linalg import cov2cor as cov2cor
 from .lm import lm_fit as lm_fit
 from .lm import lm_wfit as lm_wfit
+from .logging import LOGGER as LOGGER
 from .splines import ns as ns
 from .splines import spline_design as spline_design
 from .stats import dnbinom_mu as dnbinom_mu

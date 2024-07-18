@@ -20,10 +20,10 @@
 
 # As per StackOverflow terms of service (see https://stackoverflow.com/help/licensing), original code is licensed under CC BY SA 4.0, which is compatible with GPL3 (see https://creativecommons.org/2015/10/08/cc-by-sa-4-0-now-one-way-compatible-with-gplv3/)
 
-import logging
-
 import numpy as np
 from scipy.interpolate import splev
+
+from ..utils import LOGGER
 
 
 def spline_design(knots, x, order, derivs=0):
@@ -145,7 +145,7 @@ class ns:
             nIknots = df - 1 - include_intercept
             if nIknots < 0:
                 nIknots = 0
-                logging.warnings.warn("df was too small, used {1+include_intercept}")
+                LOGGER.warning("df was too small, used {1+include_intercept}")
 
             if nIknots > 0:
                 knots = np.linspace(0, 1, num=nIknots + 2)[1:-1]

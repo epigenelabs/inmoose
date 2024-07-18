@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 import numpy as np
@@ -109,11 +110,15 @@ class Test(unittest.TestCase):
         w = np.ones(dds.shape)
         w[0:6, 0] = 0
         dds.layers["weights"] = w
-        with self.assertWarnsRegex(
-            UserWarning,
-            expected_regex="for 1 genes, the weights as supplied won't allow parameter estimation",
-        ):
+        with self.assertLogs("inmoose", level="WARNING") as logChecker:
             dds = DESeq(dds)
+        self.assertRegex(
+            # account for https://github.com/python/cpython/issues/86109
+            logChecker.output[0]
+            if sys.version_info >= (3, 10)
+            else logChecker.output[3],
+            "for 1 genes, the weights as supplied won't allow parameter estimation",
+        )
         self.assertTrue(dds.var["allZero"].iloc[0])
         self.assertTrue(dds.var["weightsFail"].iloc[0])
         dds.results()

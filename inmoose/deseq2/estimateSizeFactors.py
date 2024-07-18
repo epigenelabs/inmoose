@@ -20,9 +20,9 @@
 # (version 3.16).
 
 
-import logging
-
 import numpy as np
+
+from ..utils import LOGGER
 
 
 def estimateSizeFactors_dds(
@@ -142,7 +142,7 @@ def estimateSizeFactors_dds(
                 geoMeans=geoMeans,
                 controlGenes=controlGenes,
             )
-            logging.info(
+            LOGGER.info(
                 "using 'avgTxLength' from dds.obsm, correcting for library size"
             )
 
@@ -158,7 +158,7 @@ def estimateSizeFactors_dds(
                 geoMeans=geoMeans,
                 controlGenes=controlGenes,
             )
-            logging.info(
+            LOGGER.info(
                 "using 'normMatrix', adding normalization factors which correct for library size"
             )
 
