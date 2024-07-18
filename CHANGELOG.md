@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.7.1-dev]
+## [0.7.1]
 
 - fix a bug when splicing a `DEResults`
 - fix coverage report upload in CI/CD pipeline
