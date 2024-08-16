@@ -1,9 +1,10 @@
 import unittest
 
 import numpy as np
+import pandas as pd
 from scipy.stats import f
 
-from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet, replaceOutliers
+from inmoose.deseq2 import DESeq, DESeqDataSet, makeExampleDESeqDataSet, replaceOutliers
 
 
 class Test(unittest.TestCase):
@@ -105,3 +106,24 @@ class Test(unittest.TestCase):
         res = dds.results()
         self.assertFalse(np.isnan(res["pvalue"].iloc[0]))
         self.assertTrue(np.all(np.isnan(res.pvalue[1:2])))
+
+    def test_CR391(self):
+        """
+        test that the array indexing error reported in CR-391 is fixed
+        NB: this test only checks that no exception is raised during computation
+        """
+        dds = DESeqDataSet(
+            np.array(
+                [
+                    [527, 524, 10, 1541, 341, 396, 73, 31, 382, 122],
+                    [585, 498, 7, 1329, 285, 352, 58, 24, 332, 154],
+                    [33, 439, 9, 2114, 199, 115, 47, 0, 425, 19],
+                    [34, 652, 20, 3040, 308, 153, 62, 2, 543, 34],
+                    [42, 752, 14, 3796, 349, 215, 67, 1, 658, 30],
+                    [38, 565, 15, 2743, 266, 118, 58, 5, 512, 28],
+                ]
+            ),
+            clinicalData=pd.DataFrame({"group": [0, 0, 1, 1, 1, 1]}),
+            design="~ group",
+        )
+        DESeq(dds)
