@@ -472,7 +472,7 @@ def robustMethodOfMomentsDisp(obj, modelMatrix):
         levelsThreeOrMore = cells.categories[cells.value_counts() >= 3]
         idx = cells.isin(levelsThreeOrMore)
         cntsSub = cnts[idx, :]
-        cellsSub = Factor(cells[idx])
+        cellsSub = Factor(cells[idx]).droplevels()
         v = trimmedCellVariance(cntsSub, cellsSub)
     else:
         v = trimmedVariance(cnts)
