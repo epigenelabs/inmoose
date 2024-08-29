@@ -99,10 +99,17 @@ def meta_de(de_results, alpha=0.05, min_common_genes=None):
 
     # combining p-values
     pvals = {g: [d.loc[g, "pvalue"] for d in de_results] for g in idx}
-    meta_pvals = np.array([combine_pvalues(pvals[g]).pvalue for g in idx])
+    meta_pvals = np.array(
+        [combine_pvalues(pvals[g], nan_policy="omit").pvalue for g in idx]
+    )
 
     # multiple testing
-    meta_adj_pvals = false_discovery_control(meta_pvals)
+    nan_meta_pvals = np.isnan(meta_pvals)
+    meta_adj_pvals = np.zeros(meta_pvals.shape)
+    meta_adj_pvals[nan_meta_pvals] = np.nan
+    meta_adj_pvals[~nan_meta_pvals] = false_discovery_control(
+        meta_pvals[~nan_meta_pvals]
+    )
     res["adjusted combined pval"] = meta_adj_pvals
 
     return res

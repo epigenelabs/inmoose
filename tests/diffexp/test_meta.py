@@ -5,7 +5,7 @@ import pandas as pd
 import patsy
 
 from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet
-from inmoose.diffexp import meta_de
+from inmoose.diffexp import DEResults, meta_de
 from inmoose.edgepy import (
     DGEList,
     exactTest,
@@ -863,3 +863,77 @@ class Test(unittest.TestCase):
             index=[f"gene{i}" for i in range(200)],
         )
         pd.testing.assert_frame_equal(res, ref, rtol=1e-4)
+
+    def test_meta_de_nan(self):
+        """check robustness of meta_de to NaN values"""
+        idx = ["gene1", "gene2", "gene3"]
+        res1 = DEResults(
+            {
+                "log2FoldChange": [1.0, np.nan, 3.0],
+                "lfcSE": [0.5, np.nan, 0.5],
+                "pvalue": [0.1, np.nan, 0.2],
+            },
+            index=idx,
+        )
+        res2 = DEResults(
+            {
+                "log2FoldChange": [2.0, 3.0, 4.0],
+                "lfcSE": [0.5, 0.5, 0.5],
+                "pvalue": [0.1, 0.15, 0.2],
+            },
+            index=idx,
+        )
+        res3 = DEResults(
+            {
+                "log2FoldChange": [3.0, np.nan, 5.0],
+                "lfcSE": [0.5, np.nan, 0.5],
+                "pvalue": [0.2, np.nan, 0.1],
+            },
+            index=idx,
+        )
+        meta1 = meta_de([res1, res2, res3])
+        meta2 = meta_de([res1, res3])
+        ref1 = pd.DataFrame(
+            {
+                "combined logFC (CI_L)": [
+                    0.8684142716330685,
+                    np.nan,
+                    2.868414271633068,
+                ],
+                "combined logFC (CI_R)": [
+                    3.1315857283669315,
+                    np.nan,
+                    5.131585728366931,
+                ],
+                "combined logFC": [2, np.nan, 4],
+                "adjusted combined pval": [
+                    0.13058835750961412,
+                    0.15,
+                    0.13058835750961412,
+                ],
+            },
+            index=idx,
+        )
+        ref2 = pd.DataFrame(
+            {
+                "combined logFC (CI_L)": [
+                    0.0400360524639638,
+                    np.nan,
+                    2.0400360524639636,
+                ],
+                "combined logFC (CI_R)": [
+                    3.9599639475360364,
+                    np.nan,
+                    5.959963947536036,
+                ],
+                "combined logFC": [2, np.nan, 4],
+                "adjusted combined pval": [
+                    0.09824046010856295,
+                    np.nan,
+                    0.09824046010856295,
+                ],
+            },
+            index=idx,
+        )
+        pd.testing.assert_frame_equal(meta1, ref1)
+        pd.testing.assert_frame_equal(meta2, ref2)
