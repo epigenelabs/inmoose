@@ -19,7 +19,7 @@ dependencies = [
   "anndata",
   "fastcluster",
   "mpmath>=1.1.0",
-  "numpy>=1.18.5",
+  "numpy<2.1.0",
   "pandas",
   "patsy",
   "scipy",
