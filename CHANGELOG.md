@@ -1,8 +1,12 @@
 # InMoose release changelog
 
-## [0.7.2-dev]
+## [0.7.2]
 
-None
+- opt out of `numpy` 2.1.0 until `statsmodels` supports it
+- fix an array indexing bug in function `meta_de`
+- function `meta_de` is now robust to NaN *p*-values
+- allow arbitrary types for `batch` and `group` arguments in function
+  `sim_rnaseq`
 
 ## [0.7.1]
 
