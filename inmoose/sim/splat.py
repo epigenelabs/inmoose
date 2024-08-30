@@ -25,6 +25,8 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import bernoulli, chi2, gamma, lognorm, poisson
 
+from ..utils import Factor
+
 
 def get_lognorm_factors(size, sel_prob, neg_prob, loc, scale, random_state):
     """
@@ -161,16 +163,16 @@ def sim_rnaseq(
 
     if batch is None:
         batch = np.zeros(nb_samples, dtype=np.int64)
-    batch = np.asarray(batch)
+    batch = Factor(batch)
     assert len(batch) == nb_samples
 
     if group is None:
         group = np.zeros(nb_samples, dtype=np.int64)
-    group = np.asarray(group)
+    group = Factor(group)
     assert len(group) == nb_samples
 
-    nb_batches = len(np.unique(batch))
-    nb_groups = len(np.unique(group))
+    nb_batches = batch.nlevels()
+    nb_groups = group.nlevels()
 
     # draw gene means
     original_means = gamma.rvs(
@@ -217,7 +219,7 @@ def sim_rnaseq(
         )
         for i in range(nb_groups)
     ]
-    de_lf = np.choose(group, [x[:, None] for x in de_lf])
+    de_lf = np.choose(group.codes, [x[:, None] for x in de_lf])
 
     # cell type specific cell means
     de_trended_cell_means = de_lf * trended_cell_means
@@ -229,7 +231,7 @@ def sim_rnaseq(
         )
         for i in range(nb_batches)
     ]
-    be_fact = np.choose(batch, [x[:, None] for x in be_fact])
+    be_fact = np.choose(batch.codes, [x[:, None] for x in be_fact])
     batch_cell_means = be_fact * de_trended_cell_means
 
     # counts
