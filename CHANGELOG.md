@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.3-dev]
+
+None
+
 ## [0.7.2]
 
 - opt out of `numpy` 2.1.0 until `statsmodels` supports it
