@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2022 Michael I. Love, Constantin Ahlmann-Eltze
-# Copyright (C) 2023 Maximilien Colange
+# Copyright (C) 2023-2024 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -578,6 +578,7 @@ def fitDisp(
     assert y.shape[1] == mu_hat.shape[1]
     assert y.shape[1] == log_alpha.shape[0]
     assert y.shape[1] == log_alpha_prior_mean.shape[0]
+    assert y.shape == weights.shape
 
     y_n = y.shape[1]
     epsilon = 1.0e-4

@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2022 Michael I. Love, Constantin Ahlmann-Eltze
-# Copyright (C) 2023 Maximilien Colange
+# Copyright (C) 2023-2024 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -335,8 +335,8 @@ def estimateDispersionsGeneEst(
     # bound the rough estimated alpha between minDisp and maxDisp for numeric stability
     maxDisp = np.maximum(10, obj.n_obs)
     alpha_init = np.clip(alpha_hat, minDisp, maxDisp)
-    alpha_hat_new = alpha_init
-    alpha_hat = alpha_init
+    alpha_hat_new = alpha_init.copy()
+    alpha_hat = alpha_init.copy()
 
     if niter <= 0:
         raise ValueError("niter should be strictly positive")
@@ -390,7 +390,7 @@ def estimateDispersionsGeneEst(
                 tol=dispTol,
                 maxit=maxit,
                 usePrior=False,
-                weights=weights,
+                weights=weights[:, fitidx],
                 useWeights=useWeights,
                 weightThreshold=weightThreshold,
                 useCR=useCR,
@@ -418,7 +418,7 @@ def estimateDispersionsGeneEst(
         noIncrease = last_lp < initial_lp + np.abs(initial_lp) / 1e6
         dispGeneEst[noIncrease] = alpha_init[noIncrease]
     # did not reach the maximum and iterated more than once
-    dispGeneEstConv = dispIter < maxit & (dispIter > 1)
+    dispGeneEstConv = (dispIter < maxit) & (dispIter > 1)
 
     # if lacking convergence from fitDisp() (C++)...
     refitDisp = ~dispGeneEstConv & (dispGeneEst > minDisp * 10)
