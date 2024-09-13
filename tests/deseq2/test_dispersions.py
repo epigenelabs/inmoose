@@ -196,5 +196,5 @@ class Test(unittest.TestCase):
         dds = estimateDispersionsGeneEst(dds, niter=5)
         dds = dds[:, ~dds.var["allZero"]]
         self.assertTrue(
-            np.allclose(dds.var["trueDisp"], dds.var["dispGeneEst"], atol=0.7)
+            np.allclose(dds.var["trueDisp"], dds.var["dispGeneEst"], rtol=0.7)
         )
