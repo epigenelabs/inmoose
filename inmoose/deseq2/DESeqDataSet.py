@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2022 Michael I. Love, Constantin Ahlmann-Eltze
-# Copyright (C) 2023 Maximilien Colange
+# Copyright (C) 2023-2024 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -357,7 +357,8 @@ class DESeqDataSet(AnnData):
             if np.nansum(aboveMinDisp) > 0:
                 dispResiduals = np.log(dispGeneEst) - np.log(dispFit)
                 varLogDispEsts = (
-                    mad(dispResiduals[aboveMinDisp], nan_policy="omit") ** 2
+                    mad(dispResiduals[aboveMinDisp], nan_policy="omit", scale="normal")
+                    ** 2
                 )
                 value.varLogDispEsts = varLogDispEsts
             else:
