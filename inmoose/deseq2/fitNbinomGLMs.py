@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2022 Michael I. Love, Constantin Ahlmann-Eltze
-# Copyright (C) 2023 Maximilien Colange
+# Copyright (C) 2023-2024 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -535,10 +535,28 @@ def fitNbinomGLMsOptim(
             if np.isfinite(negLogPost):
                 return negLogPost
             else:
-                return 10**300
+                return 1e300
+
+        def jac(p):
+            with np.errstate(over="ignore"):
+                mu_col = nf * 2 ** (x @ p)
+            if useWeights:
+                res = -(weights[:, [col]] * x).T @ k + (
+                    (1 / alpha + k) * mu_col / (1 / alpha + mu_col)
+                ) @ (weights[:, [col]] * x)
+            else:
+                res = -x.T @ k + ((1 / alpha + k) * mu_col / (1 / alpha + mu_col)) @ x
+            res /= np.log(2)
+            res += lambda_ @ p
+            return res
 
         o = minimize(
-            objectiveFn, betaCol, method="L-BFGS-B", bounds=Bounds(lb=-large, ub=large)
+            objectiveFn,
+            betaCol,
+            method="TNC",
+            bounds=Bounds(lb=-large, ub=large),
+            jac=jac,
+            tol=1e-6,
         )
         ridge = np.diag(lambdaNatLogScale)
         # if we converged, change betaConv to True
