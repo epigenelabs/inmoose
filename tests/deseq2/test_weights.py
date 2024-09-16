@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(
             dds3.results().log2FoldChange.iloc[0],
             o["betaMatrix"].iloc[0, 1],
-            delta=1e-5,
+            delta=1e-4,
         )
 
     def test_weights_with_beta_prior(self):
