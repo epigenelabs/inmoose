@@ -11,16 +11,27 @@ class test_utils(unittest.TestCase):
         from inmoose.edgepy.utils import _isAllZero
 
         self.assertEqual(_isAllZero(np.array([])), False)
+        self.assertEqual(_isAllZero(pd.DataFrame(np.array([]))), False)
         self.assertEqual(_isAllZero(np.array([0, 0, 0])), True)
+        self.assertEqual(_isAllZero(pd.DataFrame(np.array([0, 0, 0]))), True)
         self.assertEqual(_isAllZero(np.array([2, 1, 0])), False)
+        self.assertEqual(_isAllZero(pd.DataFrame(np.array([2, 1, 0]))), False)
         with self.assertRaisesRegex(
             ValueError, expected_regex="NaN counts are not allowed"
         ):
             _isAllZero(np.array([1, 2, 3, np.nan, 4, 5]))
         with self.assertRaisesRegex(
+            ValueError, expected_regex="NaN counts are not allowed"
+        ):
+            _isAllZero(pd.DataFrame(np.array([1, 2, 3, np.nan, 4, 5])))
+        with self.assertRaisesRegex(
             ValueError, expected_regex="infinite counts are not allowed"
         ):
             _isAllZero(np.array([1, 2, 3, np.inf, 4, 5]))
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="infinite counts are not allowed"
+        ):
+            _isAllZero(pd.DataFrame(np.array([1, 2, 3, np.inf, 4, 5])))
         with self.assertRaisesRegex(
             ValueError, expected_regex="negative counts are not allowed"
         ):
@@ -28,7 +39,15 @@ class test_utils(unittest.TestCase):
         with self.assertRaisesRegex(
             ValueError, expected_regex="negative counts are not allowed"
         ):
+            _isAllZero(pd.DataFrame(np.array([1, 2, 3, -np.inf, 4, 5])))
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="negative counts are not allowed"
+        ):
             _isAllZero(np.array([1, 2, 3, -42, 4, 5]))
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="negative counts are not allowed"
+        ):
+            _isAllZero(pd.DataFrame(np.array([1, 2, 3, -42, 4, 5])))
 
 
 class test_DGEList(unittest.TestCase):

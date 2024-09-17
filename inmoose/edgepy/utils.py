@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
-# Copyright (C) 2022-2023 Maximilien Colange
+# Copyright (C) 2022-2024 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 
 import numpy as np
+import pandas as pd
 
 
 def _isAllZero(y):
@@ -39,6 +40,8 @@ def _isAllZero(y):
     bool
         whether :code:`y` only contains zeroes
     """
+    if isinstance(y, pd.DataFrame):
+        y = y.values
     if len(y) == 0:
         return False
     check_range = (np.amin(y), np.nanmax(y))
