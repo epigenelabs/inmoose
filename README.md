@@ -42,6 +42,46 @@ rnaseq_corrected = pycombat_seq(rnaseq_data, rnaseq_batches)
   batch for each sample. The list of batches should contain as many elements as
   the number of samples in the expression matrix.
 
+
+# Cohort QC
+InMoose provides classes CohortQC and QCReport to help to perform quality control (QC) on cohort datasets after batch effect correction. 
+
+CohortQC: This class handles the analysis and provides methods for performing quality control on cohort datasets.
+
+Description
+The CohortQC class performs a range of quality control analyses, including:
+- Principal Component Analysis (PCA) to assess data variation.
+- Comparison of sample distributions across different datasets or batches.
+- Quantification of the effect of batch correction.
+- Silhouette Score calculation to assess how well batches are separated.
+- Entropy calculation to evaluate the mixing of samples from different batches.
+
+Usage Example
+```python
+from inmoose.cohort_qc import CohortQC
+
+cohort_qc = CohortQC(
+    clinical_df=clinical_data, 
+    batch_column="batch", 
+    data_expression_df=gene_expression_after_correction, 
+    data_expression_df_before=gene_expression_before_correction, 
+    covariates=["biopsy_site", "sample_type"]
+)
+```
+
+QCReport: This class extends CohortQC and generates an HTML report summarizing the QC results.
+
+The QCReport class extends CohortQC and generates a comprehensive HTML report based on the quality control analysis. It includes visualizations and summaries of PCA, batch correction, Silhouette Scores, entropy, and more.
+
+Usage Example
+```python
+from inmoose.qc_report import QCReport
+
+# Generate and save the QC report
+qc_report = QCReport(cohort_qc)
+qc_report.save_html_report_local(output_path='reports')
+```
+
 # Differential Expression Analysis
 
 InMoose provides features to analyse diffentially expressed genes in bulk
