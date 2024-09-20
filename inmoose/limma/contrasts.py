@@ -63,7 +63,7 @@ def makeContrasts(contrasts, levels):
         return res
 
     def rename(n):
-        return re.sub("([a-zA-Z0-9]+)\[((T.)?[a-zA-Z0-9]+)\]", "\\1_\\2", n)
+        return re.sub("([a-zA-Z0-9_]+)\[((T.)?[a-zA-Z0-9_]+)\]", "\\1_\\2", n)
 
     gl = {
         rename(L): indicator(i, levels.nlevels())
