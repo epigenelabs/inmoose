@@ -28,3 +28,14 @@ class Test(unittest.TestCase):
                 [[1.0], [-1.0], [0.0], [0.0]],
             )
         )
+
+        # test support for underscores in contrasts
+        self.assertTrue(
+            np.array_equal(
+                makeContrasts(
+                    contrasts=["T_T[B_1]-T[A_0]", "T[C_2]-T_T[B_1]", "T[C_2]-T[A_0]"],
+                    levels=["T[A_0]", "T_T[B_1]", "T[C_2]"],
+                ),
+                [[-1, 0, -1], [0, 1, 1], [1, -1, 0]],
+            )
+        )
