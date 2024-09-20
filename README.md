@@ -58,7 +58,7 @@ The CohortQC class performs a range of quality control analyses, including:
 
 Usage Example
 ```python
-from inmoose.cohort_qc import CohortQC
+from inmoose.cohort_qc.cohort_qc import CohortQC
 
 cohort_qc = CohortQC(
     clinical_df=clinical_data, 
@@ -75,7 +75,7 @@ The QCReport class extends CohortQC and generates a comprehensive HTML report ba
 
 Usage Example
 ```python
-from inmoose.qc_report import QCReport
+from inmoose.cohort_qc.qc_report import QCReport
 
 # Generate and save the QC report
 qc_report = QCReport(cohort_qc)

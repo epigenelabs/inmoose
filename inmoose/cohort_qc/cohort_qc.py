@@ -66,6 +66,8 @@ class CohortQC:
         data_expression_df_before: pd.DataFrame = None,
         covariates: list = None,
         clinical_columns_of_interest: list = None,
+        n_components: int = 10,
+        n_neighbors: int = 5,
     ) -> None:
         """
         Initialize the CohortQC object with clinical and expression data.
@@ -112,6 +114,8 @@ class CohortQC:
             ]
         else:
             self.data_expression_df_before = None
+        self.n_components = n_components
+        self.n_neighbors = n_neighbors
         self.process()
 
     def identify_mixed_datasets(self) -> list:
@@ -832,10 +836,12 @@ class CohortQC:
             self.pca_after,
             self.pcs_before,
             self.pcs_after,
-        ) = self.pca_analysis()
+        ) = self.pca_analysis(n_components=self.n_components)
         self.mad_before, self.mad_after, self.effect_metric = (
             self.quantify_correction_effect()
         )
         self.silhouette_before, self.silhouette_after = self.silhouette_score()
-        self.entropy_before, self.entropy_after = self.entropy_batch_mixing()
+        self.entropy_before, self.entropy_after = self.entropy_batch_mixing(
+            n_neighbors=self.n_neighbors
+        )
         self.summary = self.summarize_and_compare_mixed_datasets()
