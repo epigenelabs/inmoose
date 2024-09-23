@@ -16,6 +16,7 @@
 # -----------------------------------------------------------------------------
 
 import logging
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -119,8 +120,12 @@ class CohortMetric:
             clinical_columns_of_interest = clinical_df.columns.tolist()
         self.clinical_df = clinical_df.loc[common_samples, clinical_columns_of_interest]
         # Check if covariates are in clinical_df
-        missing_covariates = [covariate for covariate in covariates if covariate not in clinical_df.columns]
-        if len(missing_covariates)>0:
+        missing_covariates = [
+            covariate
+            for covariate in covariates
+            if covariate not in clinical_df.columns
+        ]
+        if len(missing_covariates) > 0:
             raise ValueError(
                 f"Covariates {', '.join(missing_covariates)} are not present in the clinical dataframe."
             )
@@ -129,8 +134,10 @@ class CohortMetric:
         self.covariates = [
             cov for cov in covariates if clinical_df[cov].unique().size > 1
         ]
-        if len(self.covariates)<len(covariates):
-            logging.warning(f"Since covariates {', '.join(np.setdiff1d(covariates, self.covariates))} have only one unique value, they are removed.")
+        if len(self.covariates) < len(covariates):
+            logging.warning(
+                f"Since covariates {', '.join(np.setdiff1d(covariates, self.covariates))} have only one unique value, they are removed."
+            )
         self.mixed_datasets = self.identify_mixed_datasets()
 
         self.data_expression_df = data_expression_df.loc[:, common_samples]

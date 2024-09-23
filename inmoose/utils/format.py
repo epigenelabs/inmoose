@@ -26,7 +26,7 @@ def round_scientific_notation(num: float) -> str:
 
     Returns
     -------
-    str 
+    str
         rounded number in scientific notation
     """
     return "{:0.2e}".format(num)
@@ -45,7 +45,7 @@ def truncate_name(name, max_length=10):
 
     Returns
     -------
-    str 
+    str
         The truncated string, or the original string if it is already shorter than or equal to the maximum length.
     """
     return name if len(name) <= max_length else name[: (max_length - 3)] + "..."
