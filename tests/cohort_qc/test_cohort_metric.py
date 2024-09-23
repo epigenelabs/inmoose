@@ -148,7 +148,7 @@ class TestCohortMetric(unittest.TestCase):
 
     def test_pca_analysis(self):
         """Test pca_analysis method."""
-        result = self.qc.pca_analysis(n_components=2)
+        result = self.qc.pca_analysis()
         self.assertEqual(len(result), 6)  # Ensure the result is a tuple of length 6
         self.assertIsInstance(result[0], pd.DataFrame)
         self.assertIsInstance(result[1], pd.DataFrame)

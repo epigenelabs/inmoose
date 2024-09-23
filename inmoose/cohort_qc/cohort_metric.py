@@ -721,9 +721,7 @@ class CohortMetric:
 
         if self.data_expression_df_before is not None:
             # Compute entropy of batch mixing before batch correction
-            entropy_before = self.compute_entropy(
-                self.data_expression_df_before
-            )
+            entropy_before = self.compute_entropy(self.data_expression_df_before)
         else:
             entropy_before = None
 
