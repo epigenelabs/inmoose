@@ -183,12 +183,12 @@ class TestCohortMetric(unittest.TestCase):
     def test_compute_entropy(self, mock_kneighbors):
         """Test compute_entropy method."""
         mock_kneighbors.return_value = (None, np.array([[0, 1], [1, 0]]))
-        entropy = self.qc.compute_entropy(self.qc.data_expression_df, n_neighbors=2)
+        entropy = self.qc.compute_entropy(self.qc.data_expression_df)
         self.assertIsInstance(entropy, float)
 
     def test_entropy_batch_mixing(self):
         """Test entropy_batch_mixing method."""
-        entropy_before, entropy_after = self.qc.entropy_batch_mixing(n_neighbors=2)
+        entropy_before, entropy_after = self.qc.entropy_batch_mixing()
         self.assertIsInstance(entropy_before, float)
         self.assertIsInstance(entropy_after, float)
 

@@ -69,9 +69,9 @@ class CohortMetric:
         Compares overall sample distribution before and after correction.
     silhouette_score()
         Computes the Silhouette Score for batch mixing before and after correction.
-    compute_entropy(data_expression_df, n_neighbors)
+    compute_entropy(data_expression_df)
         Computes entropy of batch mixing.
-    entropy_batch_mixing(n_neighbors=5)
+    entropy_batch_mixing()
         Computes entropy of batch mixing before and after correction.
     summarize_and_compare_mixed_datasets()
         Summarizes and compares mixed datasets.
@@ -383,14 +383,9 @@ class CohortMetric:
         correlation_matrix = self.create_correlation_matrix_with_pc(pc_data)
         return correlation_matrix
 
-    def pca_analysis(self, n_components: int = 10) -> tuple:
+    def pca_analysis(self) -> tuple:
         """
         Perform PCA and compute associations between principal components and clinical annotations.
-
-        Parameters
-        ----------
-        n_components: int
-            Number of principal components to retain.
 
         Returns
         -------
@@ -398,12 +393,12 @@ class CohortMetric:
             Tuple containing the association matrices, PCA models, and principal components before and after correction.
         """
         # Perform PCA for data after batch effect correction
-        pca_after = PCA(n_components=n_components)
+        pca_after = PCA(n_components=self.n_components)
         pcs_after = pca_after.fit_transform(self.data_expression_df.T)
 
         # If data_expression_df_before is not None, compute PCA for it
         if self.data_expression_df_before is not None:
-            pca_before = PCA(n_components=n_components)
+            pca_before = PCA(n_components=self.n_components)
             pcs_before = pca_before.fit_transform(self.data_expression_df_before.T)
             association_matrix_before = self._compute_pc_associations(pcs_before)
         else:
@@ -679,9 +674,7 @@ class CohortMetric:
 
         return score_before, score_after
 
-    def compute_entropy(
-        self, data_expression_df: pd.DataFrame, n_neighbors: int
-    ) -> float:
+    def compute_entropy(self, data_expression_df: pd.DataFrame) -> float:
         """
         Compute the entropy of batch mixing to evaluate the effectiveness of batch correction.
 
@@ -698,15 +691,15 @@ class CohortMetric:
             Mean entropy value indicating the level of batch mixing.
         """
 
-        nbrs = NearestNeighbors(n_neighbors=n_neighbors, metric="euclidean").fit(
+        nbrs = NearestNeighbors(n_neighbors=self.n_neighbors, metric="euclidean").fit(
             data_expression_df.T
         )
         _, indices = nbrs.kneighbors(data_expression_df.T)
         batch_labels = self.clinical_df[self.batch_column].values
 
         entropies = []
-        for idx in range(indices.shape[0]):
-            neighbors_labels = batch_labels[indices[idx]]
+        for indice in indices:
+            neighbors_labels = batch_labels[indice]
             label_counts = np.unique(neighbors_labels, return_counts=True)[1]
             probabilities = label_counts / len(neighbors_labels)
             entropy = -np.sum(probabilities * np.log2(probabilities))
@@ -714,14 +707,9 @@ class CohortMetric:
 
         return np.mean(entropies)
 
-    def entropy_batch_mixing(self, n_neighbors: int = 5) -> tuple:
+    def entropy_batch_mixing(self) -> tuple:
         """
         Compute the entropy of batch mixing before and after batch correction.
-
-        Parameters
-        ----------
-        n_neighbors : int, optional
-            Number of nearest neighbors to consider in the entropy calculation, by default 5.
 
         Returns
         -------
@@ -729,12 +717,12 @@ class CohortMetric:
             Entropy values before and after correction.
         """
         # Compute entropy of batch mixing after batch correction
-        entropy_after = self.compute_entropy(self.data_expression_df, n_neighbors)
+        entropy_after = self.compute_entropy(self.data_expression_df, self.n_neighbors)
 
         if self.data_expression_df_before is not None:
             # Compute entropy of batch mixing before batch correction
             entropy_before = self.compute_entropy(
-                self.data_expression_df_before, n_neighbors
+                self.data_expression_df_before, self.n_neighbors
             )
         else:
             entropy_before = None
@@ -860,12 +848,10 @@ class CohortMetric:
             self.pca_after,
             self.pcs_before,
             self.pcs_after,
-        ) = self.pca_analysis(n_components=self.n_components)
+        ) = self.pca_analysis()
         self.mad_before, self.mad_after, self.effect_metric = (
             self.quantify_correction_effect()
         )
         self.silhouette_before, self.silhouette_after = self.silhouette_score()
-        self.entropy_before, self.entropy_after = self.entropy_batch_mixing(
-            n_neighbors=self.n_neighbors
-        )
+        self.entropy_before, self.entropy_after = self.entropy_batch_mixing()
         self.summary = self.summarize_and_compare_mixed_datasets()
