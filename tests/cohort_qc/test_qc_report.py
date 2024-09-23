@@ -5,7 +5,7 @@ from unittest.mock import patch
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from inmoose.cohort_qc import CohortQC, QCReport
+from inmoose.cohort_qc import CohortMetric, QCReport
 
 
 class TestQCReport(unittest.TestCase):
@@ -40,7 +40,7 @@ class TestQCReport(unittest.TestCase):
 
         self.covariates = ["Covariate1", "Covariate2"]
 
-        qc = CohortQC(
+        qc = CohortMetric(
             clinical_df=self.clinical_df,
             batch_column="batch",
             data_expression_df=self.data_expression_df,
@@ -50,7 +50,7 @@ class TestQCReport(unittest.TestCase):
             n_neighbors=2,
         )
 
-        # Initialize the QCReport object with the mock CohortQC
+        # Initialize the QCReport object with the mock CohortMetric
         self.qc_report = QCReport(qc)
 
     @patch("inmoose.cohort_qc.qc_report.plt.Figure.savefig")

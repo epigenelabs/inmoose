@@ -4,17 +4,17 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from yattag import Doc, indent
 
-from .cohort_qc import CohortQC
+from .cohort_metric import CohortMetric
 
 
 class QCReport:
     """
-    A class for generating an HTML report from a CohortQC object.
+    A class for generating an HTML report from a CohortMetric object.
 
     Attributes
     ----------
-    cohort_qc : CohortQC
-        A CohortQC object.
+    cohort_qc : CohortMetric
+        A CohortMetric object.
 
     Methods
     -------
@@ -36,12 +36,12 @@ class QCReport:
         Saves the full HTML report to a local file.
     """
 
-    def __init__(self, cohort_qc: CohortQC) -> None:
+    def __init__(self, cohort_qc: CohortMetric) -> None:
         """
         Parameters
         ----------
-        cohort_qc : CohortQC
-            A CohortQC object.
+        cohort_qc : CohortMetric
+            A CohortMetric object.
         """
         self.cohort_qc = cohort_qc
         self.html_report = self.generate_html_report()
@@ -698,7 +698,7 @@ class QCReport:
         if self.cohort_qc.data_expression_df_before is None:
             with tag("h4"):
                 text(
-                    "Without data before correction, some metrics are not available, use data_expression_df_before parameter of the cohortQC class to get all metrics."
+                    "Without data before correction, some metrics are not available, use data_expression_df_before parameter of the CohortMetric class to get all metrics."
                 )
 
         doc.asis(cohort_summary_report_text)

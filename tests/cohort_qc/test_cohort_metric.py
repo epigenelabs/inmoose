@@ -7,10 +7,10 @@ import numpy.testing as npt
 import pandas as pd
 from sklearn.decomposition import PCA
 
-from inmoose.cohort_qc import CohortQC
+from inmoose.cohort_qc import CohortMetric
 
 
-class TestCohortQC(unittest.TestCase):
+class TestCohortMetric(unittest.TestCase):
     def setUp(self):
         """Set up mock data for testing."""
         self.clinical_df = pd.DataFrame(
@@ -42,7 +42,7 @@ class TestCohortQC(unittest.TestCase):
 
         self.covariates = ["Covariate1", "Covariate2"]
 
-        self.qc = CohortQC(
+        self.qc = CohortMetric(
             clinical_df=self.clinical_df,
             batch_column="batch",
             data_expression_df=self.data_expression_df,
@@ -52,11 +52,11 @@ class TestCohortQC(unittest.TestCase):
             n_neighbors=2,
         )
 
-    def test_CohortQC_missing_covariates(self):
+    def test_CohortMetric_missing_covariates(self):
         missing_covariates = ["covariate1", "nonexistent_covariate"]
 
         with self.assertRaises(ValueError) as context:
-            CohortQC(
+            CohortMetric(
                 clinical_df=self.clinical_df,
                 batch_column="batch",
                 data_expression_df=self.data_expression_df,
@@ -69,9 +69,9 @@ class TestCohortQC(unittest.TestCase):
             "One or more covariates are not present in the clinical dataframe.",
         )
 
-    def test_CohortQC_without_before_data(self):
-        """Test CohortQC class."""
-        qc_without_before_data = CohortQC(
+    def test_CohortMetric_without_before_data(self):
+        """Test CohortMetric class."""
+        qc_without_before_data = CohortMetric(
             clinical_df=self.clinical_df,
             batch_column="batch",
             data_expression_df=self.data_expression_df,

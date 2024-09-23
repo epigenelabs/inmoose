@@ -44,12 +44,12 @@ rnaseq_corrected = pycombat_seq(rnaseq_data, rnaseq_batches)
 
 
 # Cohort QC
-InMoose provides classes CohortQC and QCReport to help to perform quality control (QC) on cohort datasets after batch effect correction. 
+InMoose provides classes CohortMetric and QCReport to help to perform quality control (QC) on cohort datasets after batch effect correction. 
 
-CohortQC: This class handles the analysis and provides methods for performing quality control on cohort datasets.
+CohortMetric: This class handles the analysis and provides methods for performing quality control on cohort datasets.
 
 Description
-The CohortQC class performs a range of quality control analyses, including:
+The CohortMetric class performs a range of quality control analyses, including:
 - Principal Component Analysis (PCA) to assess data variation.
 - Comparison of sample distributions across different datasets or batches.
 - Quantification of the effect of batch correction.
@@ -58,9 +58,9 @@ The CohortQC class performs a range of quality control analyses, including:
 
 Usage Example
 ```python
-from inmoose.cohort_qc.cohort_qc import CohortQC
+from inmoose.cohort_qc.cohort_metric import CohortMetric
 
-cohort_qc = CohortQC(
+cohort_quality_control = CohortMetric(
     clinical_df=clinical_data, 
     batch_column="batch", 
     data_expression_df=gene_expression_after_correction, 
@@ -69,16 +69,16 @@ cohort_qc = CohortQC(
 )
 ```
 
-QCReport: This class extends CohortQC and generates an HTML report summarizing the QC results.
+QCReport: This class that take parameter CohortMetric and generates an HTML report summarizing the QC results.
 
-The QCReport class extends CohortQC and generates a comprehensive HTML report based on the quality control analysis. It includes visualizations and summaries of PCA, batch correction, Silhouette Scores, entropy, and more.
+The QCReport class extends CohortMetric and generates a comprehensive HTML report based on the quality control analysis. It includes visualizations and summaries of PCA, batch correction, Silhouette Scores, entropy, and more.
 
 Usage Example
 ```python
 from inmoose.cohort_qc.qc_report import QCReport
 
 # Generate and save the QC report
-qc_report = QCReport(cohort_qc)
+qc_report = QCReport(cohort_quality_control)
 qc_report.save_html_report_local(output_path='reports')
 ```
 

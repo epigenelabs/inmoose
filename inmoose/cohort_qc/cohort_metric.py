@@ -12,7 +12,7 @@ from statsmodels.formula.api import ols
 from .utils import round_scientific_notation, truncate_name
 
 
-class CohortQC:
+class CohortMetric:
     """
     A class for performing quality control (QC) on cohort datasets, including PCA analysis,
     batch effect correction assessment.
@@ -70,7 +70,7 @@ class CohortQC:
         n_neighbors: int = 5,
     ) -> None:
         """
-        Initialize the CohortQC object with clinical and expression data.
+        Initialize the CohortMetric object with clinical and expression data.
 
         Parameters
         ----------
