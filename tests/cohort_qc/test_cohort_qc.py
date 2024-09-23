@@ -56,7 +56,7 @@ class TestCohortQC(unittest.TestCase):
         missing_covariates = ["covariate1", "nonexistent_covariate"]
 
         with self.assertRaises(ValueError) as context:
-            qc_missing_covariates = CohortQC(
+            CohortQC(
                 clinical_df=self.clinical_df,
                 batch_column="batch",
                 data_expression_df=self.data_expression_df,
