@@ -66,7 +66,7 @@ class TestCohortMetric(unittest.TestCase):
             )
         self.assertEqual(
             str(context.exception),
-            "One or more covariates are not present in the clinical dataframe.",
+            "Covariates covariate1, nonexistent_covariate are not present in the clinical dataframe.",
         )
 
     def test_CohortMetric_without_before_data(self):
