@@ -5,8 +5,7 @@ from unittest.mock import patch
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from inmoose.cohort_qc.cohort_qc import CohortQC
-from inmoose.cohort_qc.qc_report import QCReport
+from inmoose.cohort_qc import CohortQC, QCReport
 
 
 class TestQCReport(unittest.TestCase):
