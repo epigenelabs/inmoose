@@ -69,7 +69,7 @@ cohort_quality_control = CohortMetric(
 )
 ```
 
-QCReport: This class that take parameter CohortMetric and generates an HTML report summarizing the QC results.
+QCReport: This class takes a CohortMetric argument, and generates an HTML report summarizing the QC results.
 
 The QCReport class extends CohortMetric and generates a comprehensive HTML report based on the quality control analysis. It includes visualizations and summaries of PCA, batch correction, Silhouette Scores, entropy, and more.
 
