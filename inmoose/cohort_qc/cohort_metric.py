@@ -698,8 +698,8 @@ class CohortMetric:
         batch_labels = self.clinical_df[self.batch_column].values
 
         entropies = []
-        for indice in indices:
-            neighbors_labels = batch_labels[indice]
+        for index in indices:
+            neighbors_labels = batch_labels[index]
             label_counts = np.unique(neighbors_labels, return_counts=True)[1]
             probabilities = label_counts / len(neighbors_labels)
             entropy = -np.sum(probabilities * np.log2(probabilities))
