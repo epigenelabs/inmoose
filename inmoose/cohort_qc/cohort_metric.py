@@ -717,12 +717,12 @@ class CohortMetric:
             Entropy values before and after correction.
         """
         # Compute entropy of batch mixing after batch correction
-        entropy_after = self.compute_entropy(self.data_expression_df, self.n_neighbors)
+        entropy_after = self.compute_entropy(self.data_expression_df)
 
         if self.data_expression_df_before is not None:
             # Compute entropy of batch mixing before batch correction
             entropy_before = self.compute_entropy(
-                self.data_expression_df_before, self.n_neighbors
+                self.data_expression_df_before
             )
         else:
             entropy_before = None
