@@ -458,24 +458,6 @@ class CohortMetric:
 
         return summary
 
-    def median_absolute_deviation(self, data: pd.DataFrame) -> np.ndarray:
-        """
-        Compute the median absolute deviation (MAD) for each gene in the data.
-
-        Parameters
-        ----------
-        data : pd.DataFrame
-            Gene expression data frame.
-
-        Returns
-        -------
-        np.ndarray
-            Array of median absolute deviations for each gene.
-        """
-        return np.median(
-            np.abs(data.values - np.median(data.values, axis=1, keepdims=True)), axis=1
-        )
-
     def quantify_correction_effect(self) -> tuple:
         """
         Compute a metric quantifying the effect of batch correction on the variability of gene expression data.
@@ -486,11 +468,15 @@ class CohortMetric:
             A tuple containing the mean median absolute deviation before and after correction, and the correction effect metric.
         """
         # Compute MAD for after correction
-        mad_after = self.median_absolute_deviation(self.data_expression_df)
+        mad_after = stats.median_abs_deviation(
+            self.data_expression_df.to_numpy(), axis=1
+        )
 
         if self.data_expression_df_before is not None:
             # Compute MAD for before correction if data is available
-            mad_before = self.median_absolute_deviation(self.data_expression_df_before)
+            mad_before = stats.median_abs_deviation(
+                self.data_expression_df_before.to_numpy(), axis=1
+            )
             effect_metric = np.mean(mad_after) / np.mean(mad_before)
             return mad_before.mean(), mad_after.mean(), effect_metric
         else:
