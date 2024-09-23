@@ -44,19 +44,19 @@ rnaseq_corrected = pycombat_seq(rnaseq_data, rnaseq_batches)
 
 
 # Cohort QC
-InMoose provides classes CohortMetric and QCReport to help to perform quality control (QC) on cohort datasets after batch effect correction. 
+InMoose provides classes `CohortMetric` and `QCReport` to help to perform quality control (QC) on cohort datasets after batch effect correction. 
 
-CohortMetric: This class handles the analysis and provides methods for performing quality control on cohort datasets.
+`CohortMetric`: This class handles the analysis and provides methods for performing quality control on cohort datasets.
 
-Description
-The CohortMetric class performs a range of quality control analyses, including:
+**Description**
+The `CohortMetric` class performs a range of quality control analyses, including:
 - Principal Component Analysis (PCA) to assess data variation.
 - Comparison of sample distributions across different datasets or batches.
 - Quantification of the effect of batch correction.
 - Silhouette Score calculation to assess how well batches are separated.
 - Entropy calculation to evaluate the mixing of samples from different batches.
 
-Usage Example
+**Usage Example**
 ```python
 from inmoose.cohort_qc.cohort_metric import CohortMetric
 
@@ -69,11 +69,12 @@ cohort_quality_control = CohortMetric(
 )
 ```
 
-QCReport: This class takes a CohortMetric argument, and generates an HTML report summarizing the QC results.
+`QCReport`: This class takes a CohortMetric argument, and generates an HTML report summarizing the QC results.
 
-The QCReport class extends CohortMetric and generates a comprehensive HTML report based on the quality control analysis. It includes visualizations and summaries of PCA, batch correction, Silhouette Scores, entropy, and more.
+**Description**
+The `QCReport` class extends `CohortMetric` and generates a comprehensive HTML report based on the quality control analysis. It includes visualizations and summaries of PCA, batch correction, Silhouette Scores, entropy, and more.
 
-Usage Example
+**Usage Example**
 ```python
 from inmoose.cohort_qc.qc_report import QCReport
 

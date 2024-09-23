@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (C) 2022-2023 M. Colange
+# Copyright (C) 2024 L. Meunier
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -44,10 +45,12 @@ class CohortMetric:
         Gene expression data frame before batch effect correction.
     covariates : list
         List of covariate names used for analysis.
-    clinical_columns_of_interest : list
-        List of clinical columns of interest to include in the analysis.
     mixed_datasets : list
         List of datasets identified as mixed datasets based on covariate combinations.
+    n_components : int
+        Number of principal components to retain.
+    n_neighbors : int
+        Number of nearest neighbors to consider in the entropy calculation.
 
     Methods
     -------
@@ -101,6 +104,10 @@ class CohortMetric:
             List of covariate names used for analysis, by default None.
         clinical_columns_of_interest : list, optional
             List of clinical columns of interest to include in the analysis, by default None.
+        n_components : int, optional
+            Number of principal components to retain, by default 10.
+        n_neighbors : int, optional
+            Number of nearest neighbors to consider in the entropy calculation, by default 5.
 
         Raises
         ------
@@ -112,15 +119,18 @@ class CohortMetric:
             clinical_columns_of_interest = clinical_df.columns.tolist()
         self.clinical_df = clinical_df.loc[common_samples, clinical_columns_of_interest]
         # Check if covariates are in clinical_df
-        if not all(covariate in clinical_df.columns for covariate in covariates):
+        missing_covariates = [covariate for covariate in covariates if covariate not in clinical_df.columns]
+        if len(missing_covariates)>0:
             raise ValueError(
-                "One or more covariates are not present in the clinical dataframe."
+                f"Covariates {', '.join(missing_covariates)} are not present in the clinical dataframe."
             )
         self.batch_column = batch_column
         # remove covariates with only one unique value
         self.covariates = [
             cov for cov in covariates if clinical_df[cov].unique().size > 1
         ]
+        if len(self.covariates)<len(covariates):
+            logging.warning(f"Since covariates {', '.join(np.setdiff1d(covariates, self.covariates))} have only one unique value, they are removed.")
         self.mixed_datasets = self.identify_mixed_datasets()
 
         self.data_expression_df = data_expression_df.loc[:, common_samples]
@@ -198,8 +208,8 @@ class CohortMetric:
 
         # Set plot title and labels
         ax.set_title(title)
-        ax.set_xlabel("PC1")
-        ax.set_ylabel("PC2")
+        ax.set_xlabel(f"PC{PC_list[0]}")
+        ax.set_ylabel(f"PC{PC_list[1]}")
 
         # Position the legend outside the plot
         ax.legend(title=labels.name, bbox_to_anchor=(1.05, 1), loc="upper left")
@@ -248,11 +258,15 @@ class CohortMetric:
         - If elements are both numeric, we use Pearson correlation.
         - If one element is categorical and the other numeric, we use a t-test or ANOVA depending on the number of categories.
 
-        Args:
-            clinical_data (pd.DataFrame): Clinical data containing PCs and other data elements.
+        Parameters
+        ----------
+        clinical_data: pd.DataFrame
+            Clinical data containing PCs and other data elements.
 
-        Returns:
-            pd.DataFrame: A correlation matrix between PC columns and other clinical data elements.
+        Returns
+        -------
+        pd.DataFrame
+            A correlation matrix between PC columns and other clinical data elements.
         """
 
         # Filter PC columns (assuming continuous) and other data elements
@@ -747,9 +761,9 @@ class CohortMetric:
         summary = {}
 
         # Identify mixed and non-mixed datasets
-        non_mixed_datasets = self.clinical_df[
-            ~self.clinical_df[self.batch_column].isin(self.mixed_datasets)
-        ][self.batch_column].unique()
+        non_mixed_datasets = np.setdiff1d(
+            self.clinical_df[self.batch_column].unique(), self.mixed_datasets
+        )
 
         summary["total_mixed_datasets"] = len(self.mixed_datasets)
         summary["total_non_mixed_datasets"] = len(non_mixed_datasets)

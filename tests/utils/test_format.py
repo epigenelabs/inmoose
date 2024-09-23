@@ -11,3 +11,7 @@ def test_truncate_name(self):
     """Test case where the name is longer than max_length."""
     result = truncate_name("ThisNameIsTooLong", 11)
     self.assertEqual(result, "ThisName...")
+    
+    result = truncate_name("ThisNameIsShort", 15)
+    self.assertEqual(result, "ThisNameIsShort")
+    
