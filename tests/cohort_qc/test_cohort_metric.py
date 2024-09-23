@@ -7,7 +7,7 @@ import numpy.testing as npt
 import pandas as pd
 from sklearn.decomposition import PCA
 
-from inmoose.cohort_qc import CohortMetric
+from inmoose.cohort_qc.cohort_metric import CohortMetric
 
 
 class TestCohortMetric(unittest.TestCase):

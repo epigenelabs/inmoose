@@ -1,4 +1,4 @@
-from inmoose.cohort_qc.utils import round_scientific_notation, truncate_name
+from inmoose.utils import round_scientific_notation, truncate_name
 
 
 def test_round_scientific_notation(self):
