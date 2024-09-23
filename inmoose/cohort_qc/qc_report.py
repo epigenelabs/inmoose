@@ -359,18 +359,22 @@ class QCReport:
 
         with tag("h4"):
             text("Interpretation:")
+        with tag("p"):
+            text(
+                "This ratio help to quantifies how much variability remains after correction."
+            )
         with tag("ul"):
             with tag("li"):
                 text(
-                    "A correction effect metric close to 1 (e.g., 0.95 to 1.05) indicates that the batch correction did not significantly change the variability of gene expression. This is generally desirable as it suggests that the correction preserved the biological variability while removing batch effects."
+                    "If the ratio is close to 1, the correction may not have reduced batch effects much."
                 )
             with tag("li"):
                 text(
-                    "A metric around 0.5 might indicate that the batch correction was strong. While this reduction in variability could be due to effective correction, it also raises concerns about potentially removing biological variability."
+                    "A ratio significantly less than 1 indicates that the correction has reduced the batch effect (lower variability). A metric around 0.5 might indicate that the batch correction was strong. While this reduction in variability could be due to effective correction, it also raises concerns about potentially removing biological variability."
                 )
             with tag("li"):
                 text(
-                    "A metric much higher than 1 (e.g., 1.5 or higher) could indicate that the correction process introduced additional variability. This could be due to overcorrection, which might have removed important biological signals along with the batch effects."
+                    "A metric much higher than 1 could indicate that the correction process introduced additional variability. This could be due to overcorrection, which might have removed important biological signals along with the batch effects."
                 )
             with tag("li"):
                 text(
