@@ -509,7 +509,7 @@ class CohortMetric:
             lambda x: "Mixed" if x in self.mixed_datasets else "Non-Mixed"
         )
         data_after_melted["Dataset"] = data_after_melted["Dataset"].apply(
-            truncate_name, 11
+            truncate_name, args=(11,)
         )
 
         # Plot the boxplot
@@ -535,7 +535,7 @@ class CohortMetric:
                 lambda x: "Mixed" if x in self.mixed_datasets else "Non-Mixed"
             )
             data_before_melted["Dataset"] = data_before_melted["Dataset"].apply(
-                truncate_name, 11
+                truncate_name, args=(11,)
             )
             # Plot before correction
             sns.violinplot(
