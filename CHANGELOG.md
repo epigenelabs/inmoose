@@ -2,7 +2,9 @@
 
 ## [0.7.3-dev]
 
-- create `cohort_qc` package with `CohortMetric` and `QCReport` class to evaluate dataset quality after batch effect correction
+- create `cohort_qc` module with `CohortMetric` and `QCReport` classes to
+  evaluate dataset quality after batch effect correction
+- improve `cohort_qc` module when the number of covariates is 0 or 1
 
 ## [0.7.2]
 

@@ -119,6 +119,9 @@ class CohortMetric:
         if clinical_columns_of_interest is None:
             clinical_columns_of_interest = clinical_df.columns.tolist()
         self.clinical_df = clinical_df.loc[common_samples, clinical_columns_of_interest]
+
+        if covariates is None:
+            covariates = []
         # Check if covariates are in clinical_df
         missing_covariates = [
             covariate
@@ -434,13 +437,18 @@ class CohortMetric:
         covariates_used = ", ".join(self.covariates)
 
         # Calculate the number of samples by covariate combinations
-        covariate_combinations = (
-            self.clinical_df.groupby(self.covariates)
-            .size()
-            .reset_index(name="Number of Samples")
-        )
+        if len(self.covariates) > 0:
+            covariate_combinations = (
+                self.clinical_df.groupby(self.covariates)
+                .size()
+                .reset_index(name="Number of Samples")
+            )
+        else:
+            covariate_combinations = pd.DataFrame(
+                {"Number of Samples": [len(self.clinical_df)]}
+            )
 
-        # Convert the covariate combinations and their counts to a readable format
+            # Convert the covariate combinations and their counts to a readable format
         covariate_combination_summary = covariate_combinations.to_dict(orient="records")
 
         summary = {
@@ -495,9 +503,7 @@ class CohortMetric:
             The generated plot object.
         """
         # Filter the clinical data to select samples corresponding to the current covariate combination
-        filter_condition = (
-            self.clinical_df[self.covariates].eq(list(combination)).all(axis=1)
-        )
+        filter_condition = self.clinical_df[self.covariates].eq(combination).all(axis=1)
         selected_samples = self.clinical_df[filter_condition].index
 
         data_after = self.data_expression_df[selected_samples]
@@ -763,12 +769,16 @@ class CohortMetric:
             self.covariates if isinstance(self.covariates, list) else [self.covariates]
         )
 
-        summary["mixed_samples_by_covariate"] = (
-            mixed_samples.groupby(covariate_tuple).size().to_dict()
-        )
-        summary["non_mixed_samples_by_covariate"] = (
-            non_mixed_samples.groupby(covariate_tuple).size().to_dict()
-        )
+        if len(covariate_tuple) > 0:
+            summary["mixed_samples_by_covariate"] = (
+                mixed_samples.groupby(covariate_tuple).size().to_dict()
+            )
+            summary["non_mixed_samples_by_covariate"] = (
+                non_mixed_samples.groupby(covariate_tuple).size().to_dict()
+            )
+        else:
+            summary["mixed_samples_by_covariate"] = {(): len(mixed_samples)}
+            summary["non_mixed_samples_by_covariate"] = {(): len(non_mixed_samples)}
 
         # Compare clinical annotations between mixed and non-mixed datasets
         comparison_results = {}
@@ -814,12 +824,16 @@ class CohortMetric:
         summary["mixed_dataset_details"] = mixed_dataset_details
 
         # Compute the overall proportion of mixed samples by covariate combination across all datasets
-        total_samples_by_combination = (
-            self.clinical_df.groupby(covariate_tuple).size().to_dict()
-        )
-        mixed_samples_by_combination = (
-            mixed_samples.groupby(covariate_tuple).size().to_dict()
-        )
+        if len(covariate_tuple) > 0:
+            total_samples_by_combination = (
+                self.clinical_df.groupby(covariate_tuple).size().to_dict()
+            )
+            mixed_samples_by_combination = (
+                mixed_samples.groupby(covariate_tuple).size().to_dict()
+            )
+        else:
+            total_samples_by_combination = {(): len(self.clinical_df)}
+            mixed_samples_by_combination = {(): len(mixed_samples)}
 
         overall_proportion_by_combination = {
             comb: mixed_samples_by_combination.get(comb, 0)

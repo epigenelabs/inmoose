@@ -52,6 +52,37 @@ class TestCohortMetric(unittest.TestCase):
             n_neighbors=2,
         )
 
+    def test_covariate_corner_cases(self):
+        """
+        make sure the code runs without error when passing zero or one covariate
+        """
+        CohortMetric(
+            clinical_df=self.clinical_df,
+            batch_column="batch",
+            data_expression_df=self.data_expression_df,
+            data_expression_df_before=self.data_expression_df_before,
+            n_components=2,
+            n_neighbors=2,
+        )
+        CohortMetric(
+            clinical_df=self.clinical_df,
+            batch_column="batch",
+            data_expression_df=self.data_expression_df,
+            data_expression_df_before=self.data_expression_df_before,
+            covariates=[],
+            n_components=2,
+            n_neighbors=2,
+        )
+        CohortMetric(
+            clinical_df=self.clinical_df,
+            batch_column="batch",
+            data_expression_df=self.data_expression_df,
+            data_expression_df_before=self.data_expression_df_before,
+            covariates=["Covariate1"],
+            n_components=2,
+            n_neighbors=2,
+        )
+
     def test_CohortMetric_missing_covariates(self):
         missing_covariates = ["covariate1", "nonexistent_covariate"]
 
@@ -149,7 +180,8 @@ class TestCohortMetric(unittest.TestCase):
     def test_pca_analysis(self):
         """Test pca_analysis method."""
         result = self.qc.pca_analysis()
-        self.assertEqual(len(result), 6)  # Ensure the result is a tuple of length 6
+        # Ensure the result is a tuple of length 6
+        self.assertEqual(len(result), 6)
         self.assertIsInstance(result[0], pd.DataFrame)
         self.assertIsInstance(result[1], pd.DataFrame)
         self.assertIsInstance(result[2], PCA)
