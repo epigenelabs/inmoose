@@ -26,6 +26,8 @@ dependencies = [
   "seaborn",
   "scikit-learn",
   "statsmodels",
+  "matplotlib",
+  "yattag"
 ]
 
 [project.urls]

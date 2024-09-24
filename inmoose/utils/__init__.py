@@ -1,6 +1,8 @@
 from .factor import Factor as Factor
 from .factor import asfactor as asfactor
 from .factor import gl as gl
+from .format import round_scientific_notation as round_scientific_notation
+from .format import truncate_name as truncate_name
 from .linalg import cov2cor as cov2cor
 from .lm import lm_fit as lm_fit
 from .lm import lm_wfit as lm_wfit

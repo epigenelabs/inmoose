@@ -2,7 +2,7 @@
 
 ## [0.7.3-dev]
 
-None
+- create `cohort_qc` package with `CohortMetric` and `QCReport` class to evaluate dataset quality after batch effect correction
 
 ## [0.7.2]
 

@@ -71,6 +71,7 @@ setup(
         "inmoose/utils",
         "inmoose/deseq2",
         "inmoose/diffexp",
+        "inmoose/cohort_qc",
     ],
     package_data={
         "inmoose/edgepy/edgepy_cpp": [
