@@ -383,9 +383,15 @@ class QCReport:
 
         with tag("h3"):
             text("Sample Distribution by Covariate Combination")
-        covariate_combinations = (
-            self.cohort_qc.clinical_df.groupby(self.cohort_qc.covariates).size().index
-        )
+
+        if len(self.cohort_qc.covariates) > 0:
+            covariate_combinations = (
+                self.cohort_qc.clinical_df.groupby(self.cohort_qc.covariates)
+                .size()
+                .index
+            )
+        else:
+            covariate_combinations = [()]
 
         with tag("p"):
             text(

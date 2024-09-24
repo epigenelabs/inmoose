@@ -54,6 +54,43 @@ class TestQCReport(unittest.TestCase):
         # Initialize the QCReport object with the mock CohortMetric
         self.qc_report = QCReport(qc)
 
+    def test_covariate_corner_cases(self):
+        """
+        make sure the code runs without error when passing zero or one covariate
+        """
+        QCReport(
+            CohortMetric(
+                clinical_df=self.clinical_df,
+                batch_column="batch",
+                data_expression_df=self.data_expression_df,
+                data_expression_df_before=self.data_expression_df_before,
+                n_components=2,
+                n_neighbors=2,
+            )
+        )
+        QCReport(
+            CohortMetric(
+                clinical_df=self.clinical_df,
+                batch_column="batch",
+                data_expression_df=self.data_expression_df,
+                data_expression_df_before=self.data_expression_df_before,
+                covariates=[],
+                n_components=2,
+                n_neighbors=2,
+            )
+        )
+        QCReport(
+            CohortMetric(
+                clinical_df=self.clinical_df,
+                batch_column="batch",
+                data_expression_df=self.data_expression_df,
+                data_expression_df_before=self.data_expression_df_before,
+                covariates=["Covariate1"],
+                n_components=2,
+                n_neighbors=2,
+            )
+        )
+
     @patch("inmoose.cohort_qc.qc_report.plt.Figure.savefig")
     def test_plot_html(self, mock_savefig):
         # Simulate saving the plot to a buffer
