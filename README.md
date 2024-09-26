@@ -1,4 +1,10 @@
+<img src="docs/source/inmoose.png" width="600">
+
+[![pypi version](https://img.shields.io/pypi/v/inmoose)](https://pypi.org/project/inmoose)
+[![pypiDownloads](https://static.pepy.tech/badge/inmoose)](https://pepy.tech/project/inmoose)
+[![coverage](https://img.shields.io/coverallsCoverage/github/epigenelabs/inmoose.svg)](https://coveralls.io/github/epigenelabs/inmoose)
 [![Documentation Status](https://readthedocs.org/projects/inmoose/badge/?version=latest)](https://inmoose.readthedocs.io/en/latest/?badge=latest)
+[![license](https://img.shields.io/pypi/l/inmoose)](LICENSE)
 
 # InMoose
 
@@ -44,7 +50,7 @@ rnaseq_corrected = pycombat_seq(rnaseq_data, rnaseq_batches)
 
 
 # Cohort QC
-InMoose provides classes `CohortMetric` and `QCReport` to help to perform quality control (QC) on cohort datasets after batch effect correction. 
+InMoose provides classes `CohortMetric` and `QCReport` to help to perform quality control (QC) on cohort datasets after batch effect correction.
 
 `CohortMetric`: This class handles the analysis and provides methods for performing quality control on cohort datasets.
 
@@ -61,10 +67,10 @@ The `CohortMetric` class performs a range of quality control analyses, including
 from inmoose.cohort_qc.cohort_metric import CohortMetric
 
 cohort_quality_control = CohortMetric(
-    clinical_df=clinical_data, 
-    batch_column="batch", 
-    data_expression_df=gene_expression_after_correction, 
-    data_expression_df_before=gene_expression_before_correction, 
+    clinical_df=clinical_data,
+    batch_column="batch",
+    data_expression_df=gene_expression_after_correction,
+    data_expression_df_before=gene_expression_before_correction,
     covariates=["biopsy_site", "sample_type"]
 )
 ```
