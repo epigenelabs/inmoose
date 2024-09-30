@@ -104,7 +104,7 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
         test = "exact"
     else:
         test = "glm"
-    MultipleContrasts = test == "glm" and self.shape[1] > 4
+    MultipleContrasts = test == "glm" and self.shape[1] > 5
 
     # Check n
     n = np.min([n, self.shape[0]])

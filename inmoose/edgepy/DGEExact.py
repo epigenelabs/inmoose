@@ -34,7 +34,7 @@ class DGEExact(DEResults):
         return f
 
     @property
-    def _constructor_slided(self):
+    def _constructor_sliced(self):
         return pd.Series
 
     def __init__(self, table, comparison, genes, *args, **kwargs):

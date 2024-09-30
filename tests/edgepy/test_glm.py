@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from inmoose.edgepy import DGEList, glmFit, glmLRT, glmQLFTest
+from inmoose.edgepy import DGEList, glmFit, glmLRT, glmQLFTest, topTags
 from inmoose.utils import rnbinom
 
 
@@ -535,3 +535,25 @@ class test_glm(unittest.TestCase):
             index=[f"gene{i}" for i in range(22)],
         )
         pd.testing.assert_frame_equal(table_ref, s, check_frame_type=False, rtol=1e-4)
+
+    def test_topTags(self):
+        self.d.estimateGLMCommonDisp()
+        s = glmLRT(self.d.glmFit())
+        t = topTags(s)
+        self.assertTrue(
+            np.array_equal(
+                t.table.index,
+                [
+                    "gene1",
+                    "gene5",
+                    "gene13",
+                    "gene9",
+                    "gene15",
+                    "gene4",
+                    "gene6",
+                    "gene12",
+                    "gene10",
+                    "gene20",
+                ],
+            )
+        )

@@ -23,6 +23,8 @@ from ..diffexp import DEResults
 
 class DGELRT(DEResults):
     _metadata = ["fit", "comparison", "df_test", "df_total"]
+    _internal_names = DEResults._internal_names + ["genes"]
+    _internal_names_set = set(_internal_names)
 
     @property
     def _constructor(self):
@@ -38,5 +40,7 @@ class DGELRT(DEResults):
     def __init__(self, df, glmfit, *args, **kwargs):
         super().__init__(df, *args, **kwargs)
         self.fit = glmfit
-        # self.coefficients_full = None
-        # self.coefficients_null = None
+
+    @property
+    def genes(self):
+        return self.fit.genes
