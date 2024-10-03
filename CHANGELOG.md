@@ -5,6 +5,7 @@
 - create `cohort_qc` module with `CohortMetric` and `QCReport` classes to
   evaluate dataset quality after batch effect correction
 - improve `cohort_qc` module when the number of covariates is 0 or 1
+- improve documentation for `diffexp` module
 
 ## [0.7.2]
 
