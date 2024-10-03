@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
+from anndata import AnnData
 
 from inmoose.pycombat import pycombat_seq
 from inmoose.utils import rnbinom
@@ -247,3 +248,16 @@ class test_pycombatseq(unittest.TestCase):
                 covar_mod=[1, 2.9, 1, 1, np.nan],
                 na_cov_action="fill",
             )
+
+    def test_pycombat_anndata(self):
+        ad = AnnData(
+            self.y.T,
+            obs=pd.DataFrame({"batch": self.batch}),
+        )
+        res = pycombat_seq(ad, batch="batch")
+        ref = pycombat_seq(self.y, self.batch)
+        self.assertTrue(np.allclose(res.X.T, ref))
+        with self.assertRaisesRegex(
+            ValueError, 'the batch column "foo" must appear in'
+        ):
+            pycombat_seq(ad, batch="foo")

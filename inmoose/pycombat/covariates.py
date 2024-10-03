@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (C) 2019-2023 A. Behdenna, A. Nordor, J. Haziza, A. Gema, M. Colange, L. Meunier
+# Copyright (C) 2019-2024 A. Behdenna, A. Nordor, J. Haziza, A. Gema, M. Colange, L. Meunier
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 import numpy as np
 import pandas as pd
+from anndata import AnnData
 from patsy import DesignMatrix, dmatrix
 
 from ..utils import LOGGER, asfactor
@@ -66,10 +67,12 @@ class VirtualCohortInput:
         """
         Arguments
         ---------
-        counts : matrix
+        counts : ndarray or pd.DataFrame or AnnData
             raw count matrix from genomic studies (dimensions gene x sample)
-        batch : array or list or :class:`~inmoose.utils.factor.Factor`
+        batch : array or list or :class:`~inmoose.utils.factor.Factor` or str
             batch identifiers
+            if :code:`counts` is an AnnData, then :code:`batch` can be the name
+            of the obs column containing the batch information
         covar_mod : list or matrix, optional
             model matrix (dataframe, list or numpy array) for one or multiple
             covariates to include in linear model (signal from these variables
@@ -83,15 +86,28 @@ class VirtualCohortInput:
             list_samples = counts.columns
             list_genes = counts.index
             counts = counts.values
-            dataframe_instance = True
+            input_type = "dataframe"
         elif isinstance(counts, np.ndarray):
             list_samples = None
             list_genes = None
-            dataframe_instance = False
+            input_type = "ndarray"
+        elif isinstance(counts, AnnData):
+            list_samples = counts.obs_names
+            list_genes = counts.var_names
+            self.input_ad = counts
+            counts = counts.X.T
+            input_type = "anndata"
+            if isinstance(batch, str):
+                try:
+                    batch = self.input_ad.obs[batch]
+                except KeyError:
+                    raise ValueError(
+                        f"the batch column \"{batch}\" must appear in 'counts.obs'"
+                    )
         else:
             raise ValueError("counts must be a pandas DataFrame or a numpy nd array")
 
-        self.dataframe_instance = dataframe_instance
+        self.input_type = input_type
         self.list_samples = list_samples
         self.list_genes = list_genes
         self.counts = counts
@@ -250,8 +266,12 @@ class VirtualCohortInput:
             counts, batch, covar, list_samples, list_genes = self.fix_na_cov(
                 na_cov_action
             )
-            if self.dataframe_instance:
+            if self.input_type == "dataframe":
                 counts = pd.DataFrame(counts, index=list_genes, columns=list_samples)
+            elif self.input_type == "anndata":
+                tmp = self.input_ad.copy()
+                tmp.X = counts
+                counts = tmp
             if self.ref_batch_idx is not None:
                 ref_batch = self.batch[self.ref_batch_idx]
             else:
@@ -307,7 +327,7 @@ class VirtualCohortInput:
                 f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
             )
             keep = nan_covar_mod.sum(axis=1) == 0
-            if self.dataframe_instance:
+            if self.input_type in ["dataframe", "anndata"]:
                 list_samples = self.list_samples[keep]
             else:
                 list_samples = None
