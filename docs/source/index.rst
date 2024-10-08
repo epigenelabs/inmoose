@@ -24,6 +24,7 @@ limma [Ritchie2015]_ and splatter [Zappia2017]_.
    :caption: API
 
    deseq
+   clustering
    edgepy
    limma
    sim
