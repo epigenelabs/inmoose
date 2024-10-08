@@ -36,6 +36,7 @@ Documentation = "https://inmoose.readthedocs.io/en/latest/"
 
 [project.optional-dependencies]
 doc = [
+  "scanpy",
   "sphinx",
   "sphinx_rtd_theme",
   "sphinxcontrib-repl",
