@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
+from anndata import AnnData
 
 from inmoose.pycombat import pycombat_norm
 from inmoose.pycombat.covariates import make_design_matrix
@@ -169,3 +170,15 @@ class test_pycombat(unittest.TestCase):
             r"Batches 4 contain a single sample, which is not supported for batch effect correction. Please review your inputs.",
         ):
             pycombat_norm(self.matrix, np.asarray([1, 1, 1, 2, 2, 3, 3, 3, 4]))
+
+    def test_pycombat_anndata(self):
+        ad = AnnData(
+            self.matrix.T,
+            obs=pd.DataFrame({"batch": self.batch}, index=self.matrix.columns),
+        )
+        res = pycombat_norm(ad, batch="batch")
+        self.assertTrue(np.allclose(res.X.T, self.matrix_adjusted))
+        with self.assertRaisesRegex(
+            ValueError, 'the batch column "foo" must appear in'
+        ):
+            pycombat_norm(ad, batch="foo")

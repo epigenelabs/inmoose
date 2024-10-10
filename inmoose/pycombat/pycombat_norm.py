@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (C) 2019-2023 A. Behdenna, A. Nordor, J. Haziza, A. Gema and M. Colange
+# Copyright (C) 2019-2024 A. Behdenna, A. Nordor, J. Haziza, A. Gema and M. Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -542,10 +542,10 @@ def pycombat_norm(
 
     Arguments
     ---------
-    counts : matrix
-        expression matrix (dataframe or numpy array). It contains the information about the gene expression (rows) for each sample (columns).
-    batch : list
-        batch indices. Must have as many elements as the number of columns in the expression matrix.
+    counts : np.ndarray or pd.DataFrame or ad.AnnData
+        expression matrix. It contains the information about the gene expression (rows) for each sample (columns).
+    batch : list or str
+        batch indices. Must have as many elements as the number of columns in the expression matrix. If :code:`counts` is an AnnData or a DataFrame, :code:`batch` can be the name of the column containing the batch data.
     covar_mod : list or matrix, optional
         model matrix (dataframe, list or numpy array) for one or multiple covariates to include in linear model (signal
         from these variables are kept in data after adjustment). Covariates have to be categorial,
@@ -582,7 +582,6 @@ def pycombat_norm(
         counts, batch, covar_mod, ref_batch, na_cov_action=na_cov_action
     )
 
-    dataframe_instance = vci.dataframe_instance
     dat = vci.counts
     list_samples = vci.list_samples
     list_genes = vci.list_genes
@@ -618,7 +617,11 @@ def pycombat_norm(
         dat,
     )
 
-    if dataframe_instance:
+    if vci.input_type == "anndata":
+        res = vci.input_ad.copy()
+        res.X = bayes_data.T
+        return res
+    elif vci.input_type == "dataframe":
         return pd.DataFrame(bayes_data, columns=list_samples, index=list_genes)
     else:
         return bayes_data
