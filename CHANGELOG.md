@@ -6,6 +6,7 @@
   evaluate dataset quality after batch effect correction
 - improve `cohort_qc` module when the number of covariates is 0 or 1
 - improve documentation for `diffexp` module
+- batch effect correction functions now accept `AnnData` as input
 
 ## [0.7.2]
 
