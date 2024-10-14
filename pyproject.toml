@@ -22,7 +22,7 @@ dependencies = [
   "numpy<2.1.0",
   "pandas",
   "patsy",
-  "scipy",
+  "scipy>=1.11.0",
   "seaborn",
   "scikit-learn",
   "statsmodels",
