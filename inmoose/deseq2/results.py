@@ -34,13 +34,17 @@ from .deseq2_cpp import fitBeta
 from .misc import buildDataFrameWithNACols, getFactorName
 
 
-def p_adjust(*args, **kwargs):
+def p_adjust(pvals, **kwargs):
     """
     Test results and p-value correction for multiple tests
 
     This is a wrapper around :func:`statsmodels.stats.multitest.multipletests`
     """
-    return multipletests(*args, **kwargs)[1]
+    res = np.zeros(pvals.shape)
+    pvals_na = pvals.isna()
+    res[pvals_na] = np.nan
+    res[~pvals_na] = multipletests(pvals[~pvals_na], **kwargs)[1]
+    return res
 
 
 class DESeqResults(DEResults):
