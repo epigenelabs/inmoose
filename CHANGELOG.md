@@ -7,6 +7,7 @@
 - improve `cohort_qc` module when the number of covariates is 0 or 1
 - improve documentation for `diffexp` module
 - batch effect correction functions now accept `AnnData` as input
+- fix p-value adjustment in `deseq2` module
 
 ## [0.7.2]
 
