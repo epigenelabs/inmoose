@@ -85,14 +85,22 @@ class test_consensusClustering(unittest.TestCase):
         self.CC.compute_consensus_clustering(
             self.mocked_data.to_numpy(), random_state=0
         )
-        cons_clust_df = self.CC.build_clusters_consensus_df()
+        cons_clust_df, single_sample_cluster = self.CC.build_clusters_consensus_df()
         self.CC.plot_clusters_consensus(cons_clust_df, self.consensus_plot)
         assert os.path.exists(self.consensus_plot)
+        assert len(single_sample_cluster) == 0
+
+    def test_clusters_consensus_single_sample(self):
+        self.CC.compute_consensus_clustering(
+            self.mocked_data.iloc[:8].to_numpy(), random_state=0
+        )
+        _, single_sample_cluster = self.CC.build_clusters_consensus_df()
+        assert len(single_sample_cluster) == 1
 
     def test_line_plots_cluster_consensus(self):
         self.CC.compute_consensus_clustering(
             self.mocked_data.to_numpy(), random_state=0
         )
-        cons_clust_df = self.CC.build_clusters_consensus_df()
+        cons_clust_df, _ = self.CC.build_clusters_consensus_df()
         self.CC.line_plots_cluster_consensus(cons_clust_df, self.consensus_line_plot)
         assert os.path.exists(self.consensus_line_plot)
