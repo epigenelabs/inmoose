@@ -511,6 +511,9 @@ def estimateDispersionsFit(obj, fitType="parametric", minDisp=1e-8, quiet=False)
             LOGGER.info(
                 "note: fitType='parametric', but the dispersion trend was not well captured by the function: y = a/x + b, and a local regression fit was automatically substituted. Specify fitType='local' or 'mean' to avoid this message next time."
             )
+            LOGGER.info(
+                "NB: original DESeq2 goes for a local regression fit, which is currently not implemented in inmoose. Specify fitType='mean' to avoid this."
+            )
             fitType = "local"
 
     if fitType == "local":
