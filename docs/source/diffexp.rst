@@ -123,6 +123,6 @@ Code documentation
 .. autosummary::
    :toctree: generated/
 
-   DEResults
+   ~DEResults.DEResults
 
    meta_de
