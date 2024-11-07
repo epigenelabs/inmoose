@@ -1,13 +1,17 @@
 # InMoose release changelog
 
-## [0.7.3-dev]
+## [0.7.3]
 
+- fix dispersion estimation and MAD computation in `deseq2` module
+- improve GLM fit in `deseq2` module
 - create `cohort_qc` module with `CohortMetric` and `QCReport` classes to
   evaluate dataset quality after batch effect correction
 - improve `cohort_qc` module when the number of covariates is 0 or 1
 - improve documentation for `diffexp` module
+- improve documentation for `consensus_clustering` module
 - batch effect correction functions now accept `AnnData` as input
 - fix p-value adjustment in `deseq2` module
+- add logos and badges in the README
 
 ## [0.7.2]
 
