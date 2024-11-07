@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.4-dev]
+
+None
+
 ## [0.7.3]
 
 - fix dispersion estimation and MAD computation in `deseq2` module
