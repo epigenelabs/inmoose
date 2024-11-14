@@ -11,6 +11,8 @@
 InMoose is the **In**tegrated **M**ulti **O**mic **O**pen **S**ource **E**nvironment.
 It is a collection of tools for the analysis of omic data.
 
+InMoose is developed and maintained by <img src="docs/source/epigenelogo.png" width="20"> [Epigene Labs](https://www.epigenelabs.com/).
+
 # Installation
 
 You can install InMoose directly with:
@@ -23,15 +25,24 @@ pip install inmoose
 
 Documentation is hosted on [readthedocs.org](https://inmoose.readthedocs.io/en/latest/).
 
+# Citing
+
+Depending on the features you use, you may cite one of the following papers:
+- Behdenna A, Colange M, Haziza J, Gema A, Appé G, Azencot CA and Nordor A. (2023) pyComBat, a Python tool for batch effects correction in high-throughput molecular data using empirical Bayes methods. BMC Bioinformatics 7;24(1):459. https://doi.org/10.1186/s12859-023-05578-5.
+- Colange M, Appé G, Meunier L, Weill S, Nordor A, Behdenna A. (2024)
+  Differential Expression Analysis with InMoose, the Integrated Multi-Omic Open-Source Environment in Python. BioRxiv. https://doi.org/XXX
+
 # Batch Effect Correction
 
 InMoose provides features to correct technical biases, also called batch
 effects, in transcriptomic data:
-- for microarray data, InMoose supersedes pyCombat [1], a Python3
-  implementation of ComBat [2], one of the most widely used tool for batch effect
-  correction on microarray data.
-- for RNASeq data, InMoose features a port to Python3 of ComBat-Seq [3], one of the
-  most widely used tool for batch effect correction on RNASeq data.
+- for microarray data, InMoose supersedes
+  [pyCombat](https://github.com/epigenelabs/pycombat/), a Python3 implementation
+  of [ComBat](https://doi.org/10.1093/biostatistics/kxj037), one of the most
+  widely used tool for batch effect correction on microarray data.
+- for RNASeq data, InMoose features a port to Python3 of
+  [ComBat-Seq](https://doi.org/10.1093/nargab/lqaa078), one of the most widely
+  used tool for batch effect correction on RNASeq data.
 
 To use these functions, simply import them and call them with default
 parameters:
@@ -93,11 +104,13 @@ qc_report.save_html_report_local(output_path='reports')
 
 InMoose provides features to analyse diffentially expressed genes in bulk
 transcriptomic data:
-- for microarray data, InMoose features a port of limma [4], the *de
-  facto* standard tool for differential expression analysis on microarray data.
-- for RNASeq data, InMoose features a ports to Python3 of edgeR [5] and DESeq2
-  [6], two of the most widely used tools for differential expression analysis on
-  RNASeq data.
+- for microarray data, InMoose features a port of
+  [limma](https://doi.org/10.1093/nar/gkv007), the *de facto* standard tool
+  for differential expression analysis on microarray data.
+- for RNASeq data, InMoose features a ports to Python3 of
+  [edgeR](https://doi.org/10.12688/f1000research.8987.2) and
+  [DESeq2](https://doi.org/10.1186/s13059-014-0550-8), two of the most widely
+  used tools for differential expression analysis on RNASeq data.
 
 See the dedicated sections of the
 [documentation](https://inmoose.readthedocs.io/en/latest/).
@@ -119,13 +132,4 @@ CC.compute_consensus_clustering(numpy_ndarray)
 # How to contribute
 
 Please refer to [CONTRIBUTING.md](https://github.com/epigenelabs/inmoose/blob/master/CONTRIBUTING.md) to learn more about the contribution guidelines.
-
-# References
-
-[1] Behdenna A, Colange M, Haziza J, Gema A, Appé G, Azencot CA and Nordor A. (2023) pyComBat, a Python tool for batch effects correction in high-throughput molecular data using empirical Bayes methods. BMC Bioinformatics 7;24(1):459. https://doi.org/10.1186/s12859-023-05578-5.
-
-[2] Johnson W E, et al. (2007) Adjusting batch effects in microarray expression data using empirical Bayes methods. Biostatistics, 8, 118–12. https://doi.org/10.1093/biostatistics/kxj037
-
-[3] Zhang Y, et al. (2020) ComBat-Seq: batch effect adjustment for RNASeq count
-data. NAR Genomics and Bioinformatics, 2(3). https://doi.org/10.1093/nargab/lqaa078
 
