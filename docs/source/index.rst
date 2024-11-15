@@ -56,12 +56,16 @@ Citing
 
 The :doc:`pycombat <pycombat>` module was previously `distributed independently <https://github.com/epigenelabs/pycombat>`_.
 
-To cite InMoose, please use the following reference:
+To cite InMoose, please use one of the following references:
 
 A. Behdenna, M. Colange, J. Haziza, A. Gema, G. Appé, C.-A. Azencott and A.
 Nordor. 2023. pyComBat, a Python tool for batch effects correction in
 high-throughput molecular data using empirical Bayes methods.  *BMC
 Bioinformatics* 7;24(1):459. :doi:`10.1186/s12859-023-05578-5`
+
+M. Colange, G. Appé, L. Meunier, S. Weill, A. Nordor, A.  Behdenna. 2024.
+Differential Expression Analysis with InMoose, the Integrated Multi-Omic
+Open-Source Environment in Python. *Bioarxiv*. :doi:`10.1101/2024.11.14.623578`
 
 
 Indices and tables
