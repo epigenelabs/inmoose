@@ -15,6 +15,9 @@ hesitate to open an issue if your favorite feature is missing.
 In addition, InMoose provides a meta-analysis feature to combine the results
 from different differential expression analysis tools.
 
+Please refer to [Colange2024]_ for a detailed comparison of InMoose
+implementation with the original R implementations.
+
 Differential Expression Meta-Analysis
 =====================================
 
@@ -116,6 +119,14 @@ results of the differential expression analysis are stored as
 :doc:`deseq` return sub-classes of :class:`DEResults`, thus allowing users to
 perform cross-technology meta-analysis (*e.g.* by combining results from
 :doc:`limma` with results from :doc:`deseq`).
+
+References
+==========
+
+.. [Colange2024] M. Colange, G. Appé, L. Meunier, S. Weill, A. Nordor, A.
+   Behdenna. 2024. Differential Expression Analysis with InMoose, the Integrated
+   Multi-Omic Open-Source Environment in Python. *Bioarxiv*.
+   :doi:`10.1101/2024.11.14.623578`
 
 Code documentation
 ==================
