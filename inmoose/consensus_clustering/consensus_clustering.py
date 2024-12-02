@@ -349,6 +349,12 @@ class consensusClustering:
             ids = np.where(prediction == clust)[0]
             clust_size = len(ids)
             ids_ = np.array(list(combinations(np.sort(ids), 2))).T
+            if ids_.size == 0:
+                clusters_consensus[clust] = np.nan
+                LOGGER.error(
+                    f"Single sample cluster for cluster {str(clust)} of k={k}. Setting cluster consensus to NaN."
+                )
+                continue
             clusters_consensus[clust] = self.consensus_matrices[
                 k - self.min_k, ids_[0], ids_[1]
             ].sum() / (clust_size * (clust_size - 1) / 2)
@@ -469,21 +475,15 @@ class consensusClustering:
         Compute cluster consensus for each k from min_k to max_k and return a dataframe to use in the plot_clusters_consensus
         """
         consensus_clusters = []
-        index_name = []
-        single_sample_cluster = []
         for k in range(self.min_k, self.max_k + 1):
             prediction = self.predict(k)
-            try:
-                consensus_clust = self.compute_clusters_consensus(prediction, k)
-                consensus_clusters.append(consensus_clust)
-                index_name.append(f"k={k}")
-            except IndexError:
-                LOGGER.error(
-                    f"Error while computing cluster consensus for k={k}. Skipping this value."
-                )
-                single_sample_cluster.append(k)
+            consensus_clust = self.compute_clusters_consensus(prediction, k)
+            consensus_clusters.append(consensus_clust)
 
-        return pd.DataFrame(consensus_clusters, index=index_name), single_sample_cluster
+        return pd.DataFrame(
+            consensus_clusters,
+            index=[f"k={i}" for i in range(self.min_k, self.max_k + 1)],
+        )
 
     def plot_clusters_consensus(self, cons_clust_df, fig_path):
         """
