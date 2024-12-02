@@ -238,17 +238,19 @@ class TestCohortMetric(unittest.TestCase):
     def test_process(self):
         """Test process method."""
         # Mock the return values of each method that is called within `process`
-        with mock.patch.object(
-            self.qc, "pca_analysis"
-        ) as mock_pca_analysis, mock.patch.object(
-            self.qc, "quantify_correction_effect"
-        ) as mock_quantify_correction_effect, mock.patch.object(
-            self.qc, "silhouette_score"
-        ) as mock_silhouette_score, mock.patch.object(
-            self.qc, "entropy_batch_mixing"
-        ) as mock_entropy_batch_mixing, mock.patch.object(
-            self.qc, "summarize_and_compare_mixed_datasets"
-        ) as mock_summarize_and_compare_mixed_datasets:
+        with (
+            mock.patch.object(self.qc, "pca_analysis") as mock_pca_analysis,
+            mock.patch.object(
+                self.qc, "quantify_correction_effect"
+            ) as mock_quantify_correction_effect,
+            mock.patch.object(self.qc, "silhouette_score") as mock_silhouette_score,
+            mock.patch.object(
+                self.qc, "entropy_batch_mixing"
+            ) as mock_entropy_batch_mixing,
+            mock.patch.object(
+                self.qc, "summarize_and_compare_mixed_datasets"
+            ) as mock_summarize_and_compare_mixed_datasets,
+        ):
             # Define mock return values for each method
             mock_pca_analysis.return_value = (
                 pd.DataFrame(),  # association_matrix_before
