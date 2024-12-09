@@ -351,7 +351,7 @@ class consensusClustering:
             ids_ = np.array(list(combinations(np.sort(ids), 2))).T
             if ids_.size == 0:
                 clusters_consensus[clust] = np.nan
-                LOGGER.error(
+                LOGGER.warning(
                     f"Single sample cluster for cluster {str(clust)} of k={k}. Setting cluster consensus to NaN."
                 )
                 continue
