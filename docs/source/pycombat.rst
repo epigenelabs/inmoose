@@ -7,6 +7,9 @@ from technical bias [Lander1999]_.
 InMoose offers a collection of tools for the correction of such technical bias,
 also called batch effects.
 
+Please refer to [Behdenna2023]_ for a detailed comparison of InMoose
+implementation with the original R implementations.
+
 .. toctree::
    :maxdepth: 1
    :caption: Batch effect correction per type of data:
@@ -17,6 +20,11 @@ also called batch effects.
 
 References
 ==========
+
+.. [Behdenna2023] A. Behdenna, M. Colange, J. Haziza, A. Gema, G. Appé, C.-A.
+   Azencott and A.  Nordor. 2023. pyComBat, a Python tool for batch effects
+   correction in high-throughput molecular data using empirical Bayes methods.
+   *BMC Bioinformatics* 7;24(1):459. :doi:`10.1186/s12859-023-05578-5`
 
 .. [Johnson2007] W. E. Johnson, C. Li, A. Rabinovic. 2007. Adjusting batch
    effects in microarray expression data using empirical Bayes methods.

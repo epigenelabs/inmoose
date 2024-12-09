@@ -205,35 +205,36 @@ Summary and :func:`show` method exists for objects of class
 The results from :func:`decideTests` can also be included when the results of a
 linear model fit are written to a file using :func:`write_fit`.
 
-#Gene Set Tests
-#--------------
-#
-#Competitive gene set testing for an individual gene set is provided by
-#:func:`wilcoxGST` or :func:`geneSetTest`, which permute genes. The gene set can
-#be displayed using :func:`barcodeplot`.
-#
-#Self-contained gene set testing for an individual set is provided by
-#:func:`roast`, which uses rotation technology, analogous to permuting arrays.
-#
-#Gene set enrichment analysis for a large database of gene sets is provided by
-#:func:`romer`. :func:`topRomer` is used to rank results from :func:`romer`.
-#
-#The functions :func:`alias2Symbol`, :func:`alias2SymbolTable` and
-#:func:`alias2SymbolUsingNCBI` are provided to help match gene sets with
-#microarray probes by way of official gene symbols.
-#
-#Global Tests
-#------------
-#
-#The function :func:`genas` can test for associations between two contrasts in a
-#linear model.
-#
-#Given a set of *p*-values, the function :func:`propTrueNull` can be used to
-#estimate the proportion of true null hypothesis.
-#
-#When evaluating test procedures with simulated or known results, the utility
-#function :func:`auROC` can be used to compute the area under the Receiver
-#Operating Curve for the test results for a given probe.
+..
+  Gene Set Tests
+  --------------
+
+  Competitive gene set testing for an individual gene set is provided by
+  :func:`wilcoxGST` or :func:`geneSetTest`, which permute genes. The gene set can
+  be displayed using :func:`barcodeplot`.
+
+  Self-contained gene set testing for an individual set is provided by
+  :func:`roast`, which uses rotation technology, analogous to permuting arrays.
+
+  Gene set enrichment analysis for a large database of gene sets is provided by
+  :func:`romer`. :func:`topRomer` is used to rank results from :func:`romer`.
+
+  The functions :func:`alias2Symbol`, :func:`alias2SymbolTable` and
+  :func:`alias2SymbolUsingNCBI` are provided to help match gene sets with
+  microarray probes by way of official gene symbols.
+
+  Global Tests
+  ------------
+
+  The function :func:`genas` can test for associations between two contrasts in a
+  linear model.
+
+  Given a set of *p*-values, the function :func:`propTrueNull` can be used to
+  estimate the proportion of true null hypothesis.
+
+  When evaluating test procedures with simulated or known results, the utility
+  function :func:`auROC` can be used to compute the area under the Receiver
+  Operating Curve for the test results for a given probe.
 
 
 References
