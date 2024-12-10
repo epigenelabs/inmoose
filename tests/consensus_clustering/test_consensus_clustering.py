@@ -1,4 +1,5 @@
 import importlib.resources
+import logging
 import os
 import unittest
 
@@ -94,7 +95,7 @@ class test_consensusClustering(unittest.TestCase):
         self.CC.compute_consensus_clustering(
             self.mocked_data.iloc[:8].to_numpy(), random_state=0
         )
-        with self.assertLogs(level="WARNING") as log:
+        with self.assertLogs("inmoose", level=logging.WARNING) as log:
             cons_clust_df = self.CC.build_clusters_consensus_df()
             self.assertIn(
                 "Single sample cluster for cluster 1 of k=4. Setting cluster consensus to NaN.",
