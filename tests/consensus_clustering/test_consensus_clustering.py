@@ -1,4 +1,5 @@
 import importlib.resources
+import logging
 import os
 import unittest
 
@@ -88,6 +89,28 @@ class test_consensusClustering(unittest.TestCase):
         cons_clust_df = self.CC.build_clusters_consensus_df()
         self.CC.plot_clusters_consensus(cons_clust_df, self.consensus_plot)
         assert os.path.exists(self.consensus_plot)
+
+    def test_clusters_consensus_single_sample(self):
+        np.random.seed(0)
+        self.CC.compute_consensus_clustering(
+            self.mocked_data.iloc[:8].to_numpy(), random_state=0
+        )
+        with self.assertLogs("inmoose", level=logging.WARNING) as log:
+            cons_clust_df = self.CC.build_clusters_consensus_df()
+            self.assertIn(
+                "Single sample cluster for cluster 1 of k=4. Setting cluster consensus to NaN.",
+                log.output[0],
+            )
+            self.assertIn(
+                "Single sample cluster for cluster 2 of k=4. Setting cluster consensus to NaN.",
+                log.output[1],
+            )
+            self.assertIn(
+                "Single sample cluster for cluster 3 of k=4. Setting cluster consensus to NaN.",
+                log.output[2],
+            )
+
+        assert cons_clust_df.iloc[2].isna().sum() == 3
 
     def test_line_plots_cluster_consensus(self):
         self.CC.compute_consensus_clustering(
