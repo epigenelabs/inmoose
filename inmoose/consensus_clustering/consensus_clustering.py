@@ -349,6 +349,12 @@ class consensusClustering:
             ids = np.where(prediction == clust)[0]
             clust_size = len(ids)
             ids_ = np.array(list(combinations(np.sort(ids), 2))).T
+            if ids_.size == 0:
+                clusters_consensus[clust] = np.nan
+                LOGGER.warning(
+                    f"Single sample cluster for cluster {str(clust)} of k={k}. Setting cluster consensus to NaN."
+                )
+                continue
             clusters_consensus[clust] = self.consensus_matrices[
                 k - self.min_k, ids_[0], ids_[1]
             ].sum() / (clust_size * (clust_size - 1) / 2)
@@ -474,9 +480,10 @@ class consensusClustering:
             consensus_clust = self.compute_clusters_consensus(prediction, k)
             consensus_clusters.append(consensus_clust)
 
-        index_name = [f"k={i}" for i in range(self.min_k, self.max_k + 1)]
-
-        return pd.DataFrame(consensus_clusters, index=index_name)
+        return pd.DataFrame(
+            consensus_clusters,
+            index=[f"k={i}" for i in range(self.min_k, self.max_k + 1)],
+        )
 
     def plot_clusters_consensus(self, cons_clust_df, fig_path):
         """

@@ -2,7 +2,7 @@
 
 ## [0.7.4-dev]
 
-None
+- fix single sample clustering error, changing cluster consensus to nan
 
 ## [0.7.3]
 
