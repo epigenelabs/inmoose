@@ -255,16 +255,17 @@ Note on factor levels
 ---------------------
 
 By default, Python will choose a *reference level* for factors based on
-alphabetical order. Then, if you never tell the DESeq2 functions which level you
-want to compare against (*e.g.* which level represents the control group), the
-comparisons will be based on the alphabetical order of the levels. There are two
+alphabetical order, it chooses the first value as the reference. Then, if you 
+never tell the DESeq2 functions which level you want to compare against 
+(*e.g.* which level represents the control group), the comparisons will 
+be based on the alphabetical order of the levels. There are two
 solutions: you can either explicitly tell :meth:`.DESeqDataSet.results` which
 comparison to make using the :code:`contrast` argument (this will be shown
-later), or you can explicitly set the factors levels. In order to see the change
-of reference levels reflected in the results names, you need to either run
-:func:`DESeq` or :func:`nbinomWaldTest` / :func:`nbinomLRT` after the
-re-leveling operation.  Setting the factor levels can be done with the
-:code:`reorder_categories` function:
+later), or you can explicitly set the factors levels by specifying the desired 
+reference value first. In order to see the change of reference levels reflected 
+in the results names, you need to either run :func:`DESeq` or 
+:func:`nbinomWaldTest` / :func:`nbinomLRT` after the re-leveling operation.  
+Setting the factor levels can be done with the:code:`reorder_categories` function:
 
 .. repl::
 

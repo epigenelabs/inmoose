@@ -3,6 +3,7 @@
 ## [0.7.4-dev]
 
 - fix single sample clustering error, changing cluster consensus to nan
+- improve pyDESeq2 documentation 
 
 ## [0.7.3]
 
