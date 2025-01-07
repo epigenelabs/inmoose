@@ -82,6 +82,17 @@ class TestCohortMetric(unittest.TestCase):
             n_components=2,
             n_neighbors=2,
         )
+        clinical_df_na = self.clinical_df.copy()
+        clinical_df_na["Covariate3"] = ["A", "B", "C", "D"]
+        clinical_df_na.loc[["Sample1", "Sample3"], "Covariate1"] = np.nan
+        CohortMetric(
+            clinical_df=clinical_df_na,
+            batch_column="batch",
+            data_expression_df=self.data_expression_df,
+            data_expression_df_before=self.data_expression_df_before,
+            n_components=2,
+            n_neighbors=2,
+        )
 
     def test_CohortMetric_missing_covariates(self):
         missing_covariates = ["covariate1", "nonexistent_covariate"]
