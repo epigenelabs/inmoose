@@ -639,7 +639,7 @@ def estimateDispersionsMAP(
         # if no gene-wise estimates above minimum
         if np.nansum(obj.var["dispGeneEst"] >= 100 * minDisp) == 0:
             LOGGER.warning(
-                f"all genes have dispersion estimates < {100*minDisp}, returning disp = {10*minDisp}"
+                f"all genes have dispersion estimates < {100 * minDisp}, returning disp = {10 * minDisp}"
             )
             obj.var["dispersion"] = buildVectorWithNACols(
                 10 * minDisp, obj.var["allZero"]

@@ -380,7 +380,7 @@ class CohortMetric:
         # Add all PCs to the clinical data at once
         pc_data = self.clinical_df.copy()
         for i in range(pcs.shape[1]):
-            pc_data[f"PC{i+1}"] = pcs[:, i]
+            pc_data[f"PC{i + 1}"] = pcs[:, i]
 
         # Generate the correlation matrix once with all PCs
         correlation_matrix = self.create_correlation_matrix_with_pc(pc_data)

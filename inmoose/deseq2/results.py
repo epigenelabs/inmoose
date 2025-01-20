@@ -142,12 +142,14 @@ class DESeqResults(DEResults):
 
         res += f"out of {notallzero} with nonzero total read count\n"
         res += f"{test_col_name} < {alpha}\n"
-        res += f"LFC > {pT}: {up}, {up/notallzero*100:.2f}%\n"
-        res += f"LFC < {mT}: {down}, {down/notallzero*100:.2f}%\n"
+        res += f"LFC > {pT}: {up}, {up / notallzero * 100:.2f}%\n"
+        res += f"LFC < {mT}: {down}, {down / notallzero * 100:.2f}%\n"
         if not sval:
-            res += f"outliers [1]       : {outlier}, {outlier/notallzero*100:.2f}%\n"
+            res += (
+                f"outliers [1]       : {outlier}, {outlier / notallzero * 100:.2f}%\n"
+            )
         if not sval and not ihw:
-            res += f"low counts [2]     : {filt}, {filt/notallzero*100:.2f}%\n"
+            res += f"low counts [2]     : {filt}, {filt / notallzero * 100:.2f}%\n"
         if not sval and not ihw:
             res += f"(mean count < {ft})\n"
         if not sval:
