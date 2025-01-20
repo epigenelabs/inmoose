@@ -301,9 +301,9 @@ def fitNbinomGLMs(
         colsForOptim = np.nonzero(colsForOptim)[0]
 
     if len(colsForOptim) > 0:
-        assert (
-            betaMatrix.shape == beta_mat.shape
-        ), f"{betaMatrix.shape} vs {beta_mat.shape}"
+        assert betaMatrix.shape == beta_mat.shape, (
+            f"{betaMatrix.shape} vs {beta_mat.shape}"
+        )
         # we use optim if did not reach convergence with the IRLS code
         resOptim = fitNbinomGLMsOptim(
             obj,

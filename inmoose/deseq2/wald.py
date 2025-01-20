@@ -303,20 +303,19 @@ def nbinomWaldTest(
     modelMatrixNames = modelMatrix.design_info.column_names
     betaMatrix = fit["betaMatrix"]
     assert isinstance(betaMatrix, pd.DataFrame)
-    assert (
-        betaMatrix.shape
-        == (
-            objNZ.n_vars,
-            len(modelMatrixNames),
-        )
-    ), f"betaMatrix shape {betaMatrix.shape} is wrong, should be {(objNZ.n_vars, len(modelMatrixNames))}"
+    assert betaMatrix.shape == (
+        objNZ.n_vars,
+        len(modelMatrixNames),
+    ), (
+        f"betaMatrix shape {betaMatrix.shape} is wrong, should be {(objNZ.n_vars, len(modelMatrixNames))}"
+    )
     betaMatrix.index = objNZ.var_names
     assert np.array_equal(betaMatrix.columns, modelMatrixNames)
     betaSE = fit["betaSE"]
     assert isinstance(betaSE, pd.DataFrame)
-    assert (
-        betaSE.shape == betaMatrix.shape
-    ), f"betaSE and betaMatrix shapes disagree: {betaSE.shape} and {betaMatrix.shape}"
+    assert betaSE.shape == betaMatrix.shape, (
+        f"betaSE and betaMatrix shapes disagree: {betaSE.shape} and {betaMatrix.shape}"
+    )
     betaSE.index = objNZ.var_names
     betaSE.columns = [f"SE_{n}" for n in modelMatrixNames]
     WaldStatistic = betaMatrix / betaSE.values

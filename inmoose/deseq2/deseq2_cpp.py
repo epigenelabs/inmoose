@@ -154,18 +154,18 @@ def log_posterior(
             axis=-2,
         )
 
-    assert (
-        ll_part.shape[:-1] == log_alpha.shape[:-1]
-    ), f"{ll_part.shape} vs {log_alpha.shape}"
+    assert ll_part.shape[:-1] == log_alpha.shape[:-1], (
+        f"{ll_part.shape} vs {log_alpha.shape}"
+    )
     assert ll_part.shape[-1] == M
 
     if usePrior:
         prior_part = (
             -0.5 * (log_alpha - log_alpha_prior_mean) ** 2 / log_alpha_prior_sigmasq
         )
-        assert (
-            prior_part.shape[:-1] == log_alpha.shape[:-1]
-        ), f"{prior_part.shape} vs {log_alpha.shape}"
+        assert prior_part.shape[:-1] == log_alpha.shape[:-1], (
+            f"{prior_part.shape} vs {log_alpha.shape}"
+        )
     else:
         prior_part = 0.0
 

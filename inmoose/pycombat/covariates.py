@@ -324,7 +324,7 @@ class VirtualCohortInput:
             )
         elif na_cov_action == "remove":
             LOGGER.warning(
-                f"{(nan_covar_mod.sum(axis=1)>0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
+                f"{(nan_covar_mod.sum(axis=1) > 0).sum()} samples with missing covariates in covar_mod. They are removed from the data. You may want to double check your covariates."
             )
             keep = nan_covar_mod.sum(axis=1) == 0
             if self.input_type in ["dataframe", "anndata"]:

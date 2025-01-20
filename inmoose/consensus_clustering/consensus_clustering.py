@@ -315,9 +315,9 @@ class consensusClustering:
             Array of the item consensus (nb_items * k)
         """
         assert self.consensus_matrices is not None, "First compute consensus clustering"
-        assert (
-            self.min_k <= k <= self.max_k
-        ), "Number of clusters must be between min_k and max_k"
+        assert self.min_k <= k <= self.max_k, (
+            "Number of clusters must be between min_k and max_k"
+        )
         predictions = self.predict(k)
         clusters_consensus = self.compute_clusters_consensus(predictions, k)
         items_consensus = self.compute_items_consensus(predictions, k)
@@ -341,9 +341,9 @@ class consensusClustering:
         clusters_consensus
             Array of cluster consensus
         """
-        assert (
-            self.min_k <= k <= self.max_k
-        ), "Number of clusters must be between min_k and max_k"
+        assert self.min_k <= k <= self.max_k, (
+            "Number of clusters must be between min_k and max_k"
+        )
         clusters_consensus = np.zeros(k)
         for clust in range(k):
             ids = np.where(prediction == clust)[0]
@@ -378,9 +378,9 @@ class consensusClustering:
         items_consensus
             Array of the item consensus (nb_items * k)
         """
-        assert (
-            self.min_k <= k <= self.max_k
-        ), "Number of clusters must be between min_k and max_k"
+        assert self.min_k <= k <= self.max_k, (
+            "Number of clusters must be between min_k and max_k"
+        )
         items_consensus = np.zeros(
             (self.consensus_matrices[k - self.min_k].shape[0], k)
         )
@@ -416,9 +416,9 @@ class consensusClustering:
         predicted cluster for k clusters
         """
         assert self.consensus_matrices is not None, "First compute consensus clustering"
-        assert (
-            self.min_k <= k <= self.max_k
-        ), "Number of clusters must be between min_k and max_k"
+        assert self.min_k <= k <= self.max_k, (
+            "Number of clusters must be between min_k and max_k"
+        )
         return self.cluster_(n_clusters=k).fit_predict(
             1 - self.consensus_matrices[k - self.min_k]
         )
@@ -455,9 +455,9 @@ class consensusClustering:
 
         """
         assert self.consensus_matrices is not None, "First compute consensus clustering"
-        assert (
-            self.min_k <= k <= self.max_k
-        ), "Number of clusters must be between min_k and max_k"
+        assert self.min_k <= k <= self.max_k, (
+            "Number of clusters must be between min_k and max_k"
+        )
         cluster_map = sn.clustermap(
             pd.DataFrame(self.consensus_matrices[k - self.min_k]),
             method="ward",
