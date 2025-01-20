@@ -134,7 +134,7 @@ def topTable(
         :func:`statsmodels.stats.multitest.multipletests` for the complete list
         of options. A :code:`None` value will result in the default adjustment
         method, which is :code:`"fdr_bh"`.
-    sort_by : { "logFC", "AveExpr", "t", "P", "p", "B", "none" }
+    sort_by : { "logFC", "log2FoldChange", "AveExpr", "t", "P", "p", "B", "none" }
         string specifying which statistic to rank the genes by
     resort_by : { "logFC", "AveExpr", "t", "P", "p", "B", "none" }
         string specifying statistic to sort the selected genes by in the output
@@ -369,9 +369,21 @@ def _topTableT(
         rn = np.arange(fit.coefficients.shape[0])
 
     # Check sort_by
-    if sort_by not in ["logFC", "M", "A", "Amean", "AveExpr", "P", "p", "T", "t", "B"]:
+    if sort_by not in [
+        "logFC",
+        "log2FoldChange",
+        "M",
+        "A",
+        "Amean",
+        "AveExpr",
+        "P",
+        "p",
+        "T",
+        "t",
+        "B",
+    ]:
         raise ValueError(f"invalid value {sort_by} for sort_by")
-    if sort_by == "M":
+    if sort_by == "M" or sort_by == "log2FoldChange":
         sort_by = "logFC"
     if sort_by == "A" or sort_by == "Amean":
         sort_by = "AveExpr"
@@ -384,6 +396,7 @@ def _topTableT(
     if resort_by is not None:
         if resort_by not in [
             "logFC",
+            "log2FoldChange",
             "M",
             "A",
             "Amean",
@@ -395,7 +408,7 @@ def _topTableT(
             "B",
         ]:
             raise ValueError(f"invalid value {sort_by} for sort_by")
-        if resort_by == "M":
+        if resort_by == "M" or resort_by == "log2FoldChange":
             resort_by = "logFC"
         if resort_by == "A" or resort_by == "Amean":
             resort_by = "AveExpr"
