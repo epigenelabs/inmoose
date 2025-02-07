@@ -113,7 +113,7 @@ def sim_rnaseq(
     group : array-like, optional
         vector/factor for biological condition of interest. Must have as many
         elements as `nb_samples`.
-    dropout : bool, optional
+    single_cell : bool, optional
         if True, simulate scRNASeq data by adding drop-outs. Defaults to `False`.
 
     alpha : float, optional
