@@ -215,7 +215,7 @@ def sim_rnaseq(
     # DE fold-changes between cell types
     de_lf = [
         get_lognorm_factors(
-            nb_genes, 1, 0.3 + 0.2 * i, 0.1 + i * 0.5, 1, random_state=random_state
+            nb_genes, 0.1, 0.5, 0.3 + 0.2 * i, 0.1 + i * 0.5, random_state=random_state
         )
         for i in range(nb_groups)
     ]
