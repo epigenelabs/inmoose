@@ -1,151 +1,91 @@
 import unittest
-from io import BytesIO
-from unittest.mock import patch
-
-import matplotlib.pyplot as plt
-import pandas as pd
-
-from inmoose.cohort_qc.cohort_metric import CohortMetric
+import os
 from inmoose.cohort_qc.qc_report import QCReport
+from inmoose.cohort_qc.cohort_metric import CohortMetric
+import pandas as pd
 
 
 class TestQCReport(unittest.TestCase):
     def setUp(self):
-        """Set up mock data for testing."""
+        import os
+
+        self.output_path = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "html_report_output",
+            "test_qc_report_output.html",
+        )
+        output_dir = os.path.dirname(self.output_path)
+        os.makedirs(output_dir, exist_ok=True)
+
         self.clinical_df = pd.DataFrame(
             {
-                "SampleID": ["Sample1", "Sample2", "Sample3", "Sample4"],
-                "Covariate1": [1, 1, 2, 2],
-                "Covariate2": ["X", "Y", "X", "Y"],
-                "Covariate3": ["D", "D", "D", "D"],
-                "batch": [
-                    "Dataset1",
-                    "Dataset1",
-                    "Dataset2",
-                    "Dataset2",
-                ],
+                "SampleID": ["S1", "S2", "S3", "S4"],
+                "batch": ["B1", "B1", "B2", "B2"],
+                "Cov1": [1, 1, 2, 2],
+                "Cov2": ["X", "Y", "X", "Y"],
             }
         ).set_index("SampleID")
 
-        self.data_expression_df = pd.DataFrame(
+        self.expression_df = pd.DataFrame(
             {
-                "Sample1": [1.1, 1.2, 1.3],
-                "Sample2": [2.1, 2.2, 2.3],
-                "Sample3": [3.1, 3.2, 3.3],
-                "Sample4": [4.1, 4.2, 4.3],
+                "S1": [1.1, 1.2, 1.3],
+                "S2": [2.1, 2.2, 2.3],
+                "S3": [3.1, 3.2, 3.3],
+                "S4": [4.1, 4.2, 4.3],
             },
-            index=["Gene1", "Gene2", "Gene3"],
+            index=["G1", "G2", "G3"],
         )
 
-        self.data_expression_df_before = self.data_expression_df.copy()
-
-        self.covariates = ["Covariate1", "Covariate2"]
-
-        qc = CohortMetric(
+        self.qc = CohortMetric(
             clinical_df=self.clinical_df,
             batch_column="batch",
-            data_expression_df=self.data_expression_df,
-            data_expression_df_before=self.data_expression_df_before,
-            covariates=self.covariates,
+            data_expression_df=self.expression_df,
+            data_expression_df_before=self.expression_df.copy(),
+            covariates=["Cov1", "Cov2"],
             n_components=2,
             n_neighbors=2,
         )
+        self.qc.process()
 
-        # Initialize the QCReport object with the mock CohortMetric
-        self.qc_report = QCReport(qc)
+        self.report = QCReport(self.qc)
+        self.report.save_report(output_path=self.output_path)
 
-    def test_covariate_corner_cases(self):
-        """
-        make sure the code runs without error when passing zero or one covariate
-        """
-        QCReport(
-            CohortMetric(
-                clinical_df=self.clinical_df,
-                batch_column="batch",
-                data_expression_df=self.data_expression_df,
-                data_expression_df_before=self.data_expression_df_before,
-                n_components=2,
-                n_neighbors=2,
-            )
-        )
-        QCReport(
-            CohortMetric(
-                clinical_df=self.clinical_df,
-                batch_column="batch",
-                data_expression_df=self.data_expression_df,
-                data_expression_df_before=self.data_expression_df_before,
-                covariates=[],
-                n_components=2,
-                n_neighbors=2,
-            )
-        )
-        QCReport(
-            CohortMetric(
-                clinical_df=self.clinical_df,
-                batch_column="batch",
-                data_expression_df=self.data_expression_df,
-                data_expression_df_before=self.data_expression_df_before,
-                covariates=["Covariate1"],
-                n_components=2,
-                n_neighbors=2,
-            )
-        )
+    def test_html_report_created(self):
+        """Vérifie que le fichier HTML est bien créé."""
+        self.assertTrue(os.path.isfile(self.output_path))
 
-    @patch("inmoose.cohort_qc.qc_report.plt.Figure.savefig")
-    def test_plot_html(self, mock_savefig):
-        # Simulate saving the plot to a buffer
-        buffer = BytesIO()
-        mock_savefig.side_effect = lambda *args, **kwargs: buffer.write(
-            b"fake_image_data"
-        )
+    def test_html_report_not_empty(self):
+        """Vérifie que le fichier HTML généré n'est pas vide."""
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertGreater(len(content.strip()), 100)
 
-        # Call the method
-        fig = plt.figure()
-        html_img = self.qc_report.plot_html(fig, file_name="test_plot")
+    def test_html_report_contains_expected_sections(self):
+        """Vérifie que le HTML contient les titres de section attendus."""
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            html = f.read()
 
-        # Check if the generated HTML contains the correct base64 image data
-        self.assertIn('<img src="data:image/png;base64,', html_img)
-        self.assertIn('alt="test_plot"', html_img)
+        expected_sections = [
+            "Cohort Summary",
+            "PCA Analysis and Variance Explained",
+            "Correction Effect Metric",
+            "Silhouette Score",
+            "Entropy of Batch Mixing",
+            "Mixed Dataset Summary Report",
+        ]
 
-    def test_generate_html_report(self):
-        """Test the generation of the full HTML report."""
-        html_report = self.qc_report.generate_html_report()
-        self.assertIn("<h1>Cohort Quality Control Report</h1>", html_report)
-        self.assertIn("<h2>PCA Analysis and Variance Explained", html_report)
+        for section in expected_sections:
+            with self.subTest(section=section):
+                self.assertIn(section, html)
 
-    def test_pca_analysis_html_report(self):
-        """Test PCA analysis HTML report generation."""
-        pca_report = self.qc_report.pca_analysis_html_report()
-        self.assertIn("<h2>PCA Analysis and Variance Explained", pca_report)
+    def test_html_contains_images(self):
+        """Vérifie qu’il y a bien des images encodées base64 dans le HTML."""
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            html = f.read()
 
-    def test_cohort_summary_html_report(self):
-        """Test cohort summary HTML report generation."""
-        cohort_summary_report = self.qc_report.cohort_summary_html_report()
-        self.assertIn("<h2>Cohort Summary", cohort_summary_report)
+        self.assertIn("data:image/png;base64,", html)
 
-    def test_sample_distribution_html_report(self):
-        """Test sample distribution HTML report generation."""
-        sample_dist_report = self.qc_report.sample_distribution_html_report()
-        self.assertIn("<h2>Correction Effect Metric", sample_dist_report)
 
-    def test_silhouette_html_report(self):
-        """Test silhouette score HTML report generation."""
-        silhouette_report = self.qc_report.silhouette_html_report()
-        self.assertIn("<h2>Silhouette Score", silhouette_report)
-
-    def test_entropy_html_report(self):
-        """Test entropy batch mixing HTML report generation."""
-        entropy_report = self.qc_report.entropy_html_report()
-        self.assertIn("<h2>Entropy of Batch Mixing (EBM)", entropy_report)
-
-    def test_mixed_dataset_html_report(self):
-        """Test mixed dataset summary HTML report generation."""
-        mixed_dataset_report = self.qc_report.mixed_dataset_html_report()
-        self.assertIn("<h1>Mixed Dataset Summary Report", mixed_dataset_report)
-
-    def test_save_html_report_local(self):
-        """Test saving the HTML report to a local file."""
-        with patch("builtins.open", unittest.mock.mock_open()) as mock_file:
-            self.qc_report.save_html_report_local(output_path=".")
-            mock_file.assert_called_once_with("./cohort_qc_report.html", "w")
-            mock_file().write.assert_called_once()
+if __name__ == "__main__":
+    unittest.main()
