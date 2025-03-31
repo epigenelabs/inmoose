@@ -1,8 +1,10 @@
-import unittest
 import os
-from inmoose.cohort_qc.qc_report import QCReport
-from inmoose.cohort_qc.cohort_metric import CohortMetric
+import unittest
+
 import pandas as pd
+
+from inmoose.cohort_qc.cohort_metric import CohortMetric
+from inmoose.cohort_qc.qc_report import QCReport
 
 
 class TestQCReport(unittest.TestCase):
