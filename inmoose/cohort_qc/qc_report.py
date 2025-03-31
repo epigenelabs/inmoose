@@ -105,13 +105,6 @@ class QCReport:
             )
         )
 
-        assoc_matrix_before = (
-            self.cohort_qc.association_matrix_before.to_html()
-            if self.cohort_qc.association_matrix_before is not None
-            else None
-        )
-        assoc_matrix_after = self.cohort_qc.association_matrix.to_html()
-
         summary = self.cohort_qc.cohort_summary()
         samples_by_comb = summary.get("Samples by Covariate Combination", [])
         covariates = self.cohort_qc.covariates
