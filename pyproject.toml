@@ -19,7 +19,7 @@ dependencies = [
   "anndata",
   "fastcluster",
   "mpmath>=1.1.0",
-  "numpy<2.0.0",  # downgraded from <2.1.0
+  "numpy<2.1.0",
   "pandas",
   "patsy",
   "scipy>=1.11.0",
@@ -30,6 +30,10 @@ dependencies = [
   "yattag"
 ]
 
+[project.urls]
+Source = "https://github.com/epigenelabs/inmoose"
+Documentation = "https://inmoose.readthedocs.io/en/latest/"
+
 [project.optional-dependencies]
 doc = [
   "scanpy",
@@ -38,13 +42,5 @@ doc = [
   "sphinxcontrib-repl",
 ]
 
-[project.urls]
-Source = "https://github.com/epigenelabs/inmoose"
-Documentation = "https://inmoose.readthedocs.io/en/latest/"
-
 [build-system]
-requires = ["setuptools", "numpy<2.0.0", "scipy", "Cython>=3.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.package-data]
-"inmoose.cohort_qc" = ["qc_report.html"]
+requires = ["setuptools", "numpy>=2.0.0", "scipy", "Cython>=3.0.0", "wheel"]
