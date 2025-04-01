@@ -27,7 +27,7 @@ dependencies = [
   "scikit-learn",
   "statsmodels",
   "matplotlib",
-  "yattag"
+  "jinja2"
 ]
 
 [project.urls]
