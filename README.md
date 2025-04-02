@@ -1,4 +1,10 @@
-<img src="docs/source/inmoose.png" width="600">
+<p align="center">
+  
+<img src="docs/source/inmoose.png" width="500">
+  
+</p>
+
+<h1 align="center">
 
 [![pypi version](https://img.shields.io/pypi/v/inmoose)](https://pypi.org/project/inmoose)
 [![PyPI Downloads](https://static.pepy.tech/badge/inmoose)](https://pepy.tech/project/inmoose)
@@ -7,7 +13,13 @@
 [![Documentation Status](https://readthedocs.org/projects/inmoose/badge/?version=latest)](https://inmoose.readthedocs.io/en/latest/?badge=latest)
 [![license](https://img.shields.io/pypi/l/inmoose)](LICENSE)
 
-# InMoose
+</h1>
+
+<h1 align="center">
+  
+InMoose
+
+</h1>
 
 InMoose is the **In**tegrated **M**ulti **O**mic **O**pen **S**ource **E**nvironment.
 It is a collection of tools for the analysis of omic data.
