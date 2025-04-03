@@ -101,6 +101,7 @@ setup(
             "untreated3fb.txt",
             "untreated4fb.txt",
         ],
+        "inmoose/cohort_qc": ["qc_report.html"],
     },
     ext_modules=[common_cpp, edgepy_cpp, stats_cpp],
 )

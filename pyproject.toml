@@ -27,7 +27,7 @@ dependencies = [
   "scikit-learn",
   "statsmodels",
   "matplotlib",
-  "yattag"
+  "jinja2"
 ]
 
 [project.urls]
@@ -44,4 +44,3 @@ doc = [
 
 [build-system]
 requires = ["setuptools", "numpy>=2.0.0", "scipy", "Cython>=3.0.0", "wheel"]
-
