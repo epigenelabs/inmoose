@@ -23,3 +23,9 @@ cython_debug/
 
 # IDE settings
 .vscode/
+
+# Virtual environment
+.venv/
+
+# Test results
+tests/**/*.html
