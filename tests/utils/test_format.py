@@ -9,7 +9,6 @@ class TestFormat(unittest.TestCase):
         result = round_scientific_notation(0.0000123456)
         self.assertEqual(result, "1.23e-05")
 
-
     def test_truncate_name(self):
         """Test case where the name is longer than max_length."""
         result = truncate_name("ThisNameIsTooLong", 11)
