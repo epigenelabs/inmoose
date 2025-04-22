@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (C) 2024 L. Meunier
+# Copyright (C) 2024-2025 L. Meunier
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -666,7 +666,6 @@ class CohortMetric:
             Silhouette scores before and after correction.
         """
         if self.clinical_df[self.batch_column].nunique() > 1:
-
             # Compute silhouette score for after batch correction
             score_after = silhouette_score(
                 self.data_expression_df.T, self.clinical_df[self.batch_column]
@@ -675,7 +674,8 @@ class CohortMetric:
             if self.data_expression_df_before is not None:
                 # Compute silhouette score before correction if available
                 score_before = silhouette_score(
-                    self.data_expression_df_before.T, self.clinical_df[self.batch_column]
+                    self.data_expression_df_before.T,
+                    self.clinical_df[self.batch_column],
                 )
             else:
                 score_before = None
@@ -727,7 +727,6 @@ class CohortMetric:
             Entropy values before and after correction.
         """
         if self.clinical_df[self.batch_column].nunique() > 1:
-
             # Compute entropy of batch mixing after batch correction
             entropy_after = self.compute_entropy(self.data_expression_df)
 

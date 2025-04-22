@@ -154,7 +154,12 @@ class TestCohortMetric(unittest.TestCase):
 
     def test_create_correlation_matrix_with_pc(self):
         clinical_df_with_pc = self.clinical_df.copy()
-        clinical_df_with_pc["Data Element With Spaces"] = ["value_0", "value_2", "value_1", "value_2"]
+        clinical_df_with_pc["Data Element With Spaces"] = [
+            "value_0",
+            "value_2",
+            "value_1",
+            "value_2",
+        ]
         clinical_df_with_pc["PC1"] = [1, 2, 3, 1]
         clinical_df_with_pc["PC2"] = [2, 2, 3, 5]
         result_matrix = self.qc.create_correlation_matrix_with_pc(clinical_df_with_pc)
@@ -203,7 +208,7 @@ class TestCohortMetric(unittest.TestCase):
         self.assertIsInstance(mad_before, float)
         self.assertIsInstance(mad_after, float)
         self.assertIsInstance(effect_metric, float)
-    
+
     def test_quantify_correction_effect_only_one_batch(self):
         self.qc.clinical_df[self.qc.batch_column] = "only_one_batch"
         mad_before, mad_after, effect_metric = self.qc.quantify_correction_effect()
@@ -218,7 +223,7 @@ class TestCohortMetric(unittest.TestCase):
         score_before, score_after = self.qc.silhouette_score()
         self.assertEqual(score_before, 0.3)
         self.assertEqual(score_after, 0.5)
-    
+
     def test_silhouette_score_only_one_batch(self):
         self.qc.clinical_df[self.qc.batch_column] = "only_one_batch"
         assert self.qc.silhouette_score() == (None, None)
@@ -235,7 +240,7 @@ class TestCohortMetric(unittest.TestCase):
         entropy_before, entropy_after = self.qc.entropy_batch_mixing()
         self.assertIsInstance(entropy_before, float)
         self.assertIsInstance(entropy_after, float)
-    
+
     def test_entropy_batch_mixing_only_one_batch(self):
         self.qc.clinical_df[self.qc.batch_column] = "only_one_batch"
         assert self.qc.entropy_batch_mixing() == (None, None)
