@@ -4,7 +4,7 @@
 
 - fix single sample clustering error, changing cluster consensus to nan
 - improve pyDESeq2 documentation 
-- fix some cohort metrics when there is only one batch
+- raise error on cohort metrics when there is only one batch
 - fix patsy formula parsing of categorical variables with spaces in their names
 
 ## [0.7.3]

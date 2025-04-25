@@ -133,6 +133,10 @@ class CohortMetric:
                 f"Covariates {', '.join(missing_covariates)} are not present in the clinical dataframe."
             )
         self.batch_column = batch_column
+        if self.clinical_df[self.batch_column].nunique() <= 1:
+            raise ValueError(
+                "Cohort QC is not applicable to cohorts with only one batch."
+            )
         # remove covariates with only one unique value
         self.covariates = [
             cov for cov in covariates if clinical_df[cov].unique().size > 1
@@ -153,7 +157,6 @@ class CohortMetric:
             self.data_expression_df_before = None
         self.n_components = n_components
         self.n_neighbors = n_neighbors
-        self.process()
 
     def identify_mixed_datasets(self) -> list:
         """
@@ -180,7 +183,7 @@ class CohortMetric:
 
         return mixed_datasets
 
-    def _pca_plot(
+    def pca_plot(
         self,
         pcs: np.ndarray,
         labels: pd.Series,
@@ -230,7 +233,7 @@ class CohortMetric:
         # Return the figure object
         return fig
 
-    def _plot_pca_variance(
+    def plot_pca_variance(
         self, explained_variance: np.ndarray, ylim: float = None
     ) -> plt.Figure:
         """
@@ -656,34 +659,30 @@ class CohortMetric:
         fig.tight_layout()
         return fig
 
-    def silhouette_score(self) -> tuple[float | None, float | None]:
+    def silhouette_score(self) -> tuple[float, float]:
         """
         Compute the Silhouette Score for batch mixing before and after batch correction.
 
         Returns
         -------
-        tuple[float | None, float | None]
+        tuple[float, float]
             Silhouette scores before and after correction.
         """
-        if self.clinical_df[self.batch_column].nunique() > 1:
-            # Compute silhouette score for after batch correction
-            score_after = silhouette_score(
-                self.data_expression_df.T, self.clinical_df[self.batch_column]
+        # Compute silhouette score for after batch correction
+        score_after = silhouette_score(
+            self.data_expression_df.T, self.clinical_df[self.batch_column]
+        )
+
+        if self.data_expression_df_before is not None:
+            # Compute silhouette score before correction if available
+            score_before = silhouette_score(
+                self.data_expression_df_before.T,
+                self.clinical_df[self.batch_column],
             )
-
-            if self.data_expression_df_before is not None:
-                # Compute silhouette score before correction if available
-                score_before = silhouette_score(
-                    self.data_expression_df_before.T,
-                    self.clinical_df[self.batch_column],
-                )
-            else:
-                score_before = None
-
-            return score_before, score_after
-
         else:
-            return None, None
+            score_before = None
+
+        return score_before, score_after
 
     def compute_entropy(self, data_expression_df: pd.DataFrame) -> float:
         """
@@ -717,29 +716,25 @@ class CohortMetric:
 
         return np.mean(entropies)
 
-    def entropy_batch_mixing(self) -> tuple[float | None, float | None]:
+    def entropy_batch_mixing(self) -> tuple[float, float]:
         """
         Compute the entropy of batch mixing before and after batch correction.
 
         Returns
         -------
-        tuple[float | None, float | None]
+        tuple[float, float]
             Entropy values before and after correction.
         """
-        if self.clinical_df[self.batch_column].nunique() > 1:
-            # Compute entropy of batch mixing after batch correction
-            entropy_after = self.compute_entropy(self.data_expression_df)
+        # Compute entropy of batch mixing after batch correction
+        entropy_after = self.compute_entropy(self.data_expression_df)
 
-            if self.data_expression_df_before is not None:
-                # Compute entropy of batch mixing before batch correction
-                entropy_before = self.compute_entropy(self.data_expression_df_before)
-            else:
-                entropy_before = None
-
-            return entropy_before, entropy_after
-
+        if self.data_expression_df_before is not None:
+            # Compute entropy of batch mixing before batch correction
+            entropy_before = self.compute_entropy(self.data_expression_df_before)
         else:
-            return None, None
+            entropy_before = None
+
+        return entropy_before, entropy_after
 
     def summarize_and_compare_mixed_datasets(self) -> dict:
         """
