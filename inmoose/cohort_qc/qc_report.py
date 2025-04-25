@@ -63,14 +63,14 @@ class QCReport:
         for covariate in covariates:
             before = None
             if self.cohort_qc.data_expression_df_before is not None:
-                fig_before = self.cohort_qc._pca_plot(
+                fig_before = self.cohort_qc.pca_plot(
                     self.cohort_qc.pcs_before,
                     self.cohort_qc.clinical_df[covariate],
                     title=f"PCA before correction - {covariate}",
                 )
                 before = self.plot_to_base64(fig_before)
 
-            fig_after = self.cohort_qc._pca_plot(
+            fig_after = self.cohort_qc.pca_plot(
                 self.cohort_qc.pcs_after,
                 self.cohort_qc.clinical_df[covariate],
                 title=f"PCA after correction - {covariate}",
@@ -91,7 +91,7 @@ class QCReport:
 
         pca_variance_before = (
             self.plot_to_base64(
-                self.cohort_qc._plot_pca_variance(
+                self.cohort_qc.plot_pca_variance(
                     self.cohort_qc.pca_before.explained_variance_ratio_, ylim
                 )
             )
@@ -100,7 +100,7 @@ class QCReport:
         )
 
         pca_variance_after = self.plot_to_base64(
-            self.cohort_qc._plot_pca_variance(
+            self.cohort_qc.plot_pca_variance(
                 self.cohort_qc.pca_after.explained_variance_ratio_, ylim
             )
         )

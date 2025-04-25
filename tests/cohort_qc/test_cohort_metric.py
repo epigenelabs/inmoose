@@ -52,6 +52,19 @@ class TestCohortMetric(unittest.TestCase):
             n_neighbors=2,
         )
 
+    def test_cohort_qc_only_one_batch(self):
+        self.clinical_df["batch"] = "unique_batch"
+        with self.assertRaises(ValueError):
+            CohortMetric(
+                clinical_df=self.clinical_df,
+                batch_column="batch",
+                data_expression_df=self.data_expression_df,
+                data_expression_df_before=self.data_expression_df_before,
+                covariates=self.covariates,
+                n_components=2,
+                n_neighbors=2,
+            )
+
     def test_covariate_corner_cases(self):
         """
         make sure the code runs without error when passing zero or one covariate
@@ -125,7 +138,7 @@ class TestCohortMetric(unittest.TestCase):
         labels = self.clinical_df["batch"]
 
         # Call the private method _pca_plot
-        result_fig = self.qc._pca_plot(pcs=pcs, labels=labels, title="Test PCA")
+        result_fig = self.qc.pca_plot(pcs=pcs, labels=labels, title="Test PCA")
 
         # Check that the method returns a matplotlib figure
         self.assertIsInstance(result_fig, plt.Figure)
@@ -145,7 +158,7 @@ class TestCohortMetric(unittest.TestCase):
         explained_variance = np.array([0.4, 0.3, 0.2, 0.05, 0.05])
 
         # Call the private method _plot_pca_variance
-        result_fig = self.qc._plot_pca_variance(
+        result_fig = self.qc.plot_pca_variance(
             explained_variance=explained_variance, ylim=0.5
         )
 
@@ -155,10 +168,10 @@ class TestCohortMetric(unittest.TestCase):
     def test_create_correlation_matrix_with_pc(self):
         clinical_df_with_pc = self.clinical_df.copy()
         clinical_df_with_pc["Data Element With Spaces"] = [
-            "value_0",
-            "value_2",
-            "value_1",
-            "value_2",
+            "Some Value",
+            "other-value",
+            "otherValue",
+            "other-value",
         ]
         clinical_df_with_pc["PC1"] = [1, 2, 3, 1]
         clinical_df_with_pc["PC2"] = [2, 2, 3, 5]
@@ -209,13 +222,6 @@ class TestCohortMetric(unittest.TestCase):
         self.assertIsInstance(mad_after, float)
         self.assertIsInstance(effect_metric, float)
 
-    def test_quantify_correction_effect_only_one_batch(self):
-        self.qc.clinical_df[self.qc.batch_column] = "only_one_batch"
-        mad_before, mad_after, effect_metric = self.qc.quantify_correction_effect()
-        self.assertIsInstance(mad_before, float)
-        self.assertIsInstance(mad_after, float)
-        self.assertIsInstance(effect_metric, float)
-
     @mock.patch("inmoose.cohort_qc.cohort_metric.silhouette_score")
     def test_silhouette_score(self, mock_silhouette_score):
         """Test silhouette_score method."""
@@ -223,10 +229,6 @@ class TestCohortMetric(unittest.TestCase):
         score_before, score_after = self.qc.silhouette_score()
         self.assertEqual(score_before, 0.3)
         self.assertEqual(score_after, 0.5)
-
-    def test_silhouette_score_only_one_batch(self):
-        self.qc.clinical_df[self.qc.batch_column] = "only_one_batch"
-        assert self.qc.silhouette_score() == (None, None)
 
     @mock.patch("sklearn.neighbors.NearestNeighbors.kneighbors")
     def test_compute_entropy(self, mock_kneighbors):
@@ -240,10 +242,6 @@ class TestCohortMetric(unittest.TestCase):
         entropy_before, entropy_after = self.qc.entropy_batch_mixing()
         self.assertIsInstance(entropy_before, float)
         self.assertIsInstance(entropy_after, float)
-
-    def test_entropy_batch_mixing_only_one_batch(self):
-        self.qc.clinical_df[self.qc.batch_column] = "only_one_batch"
-        assert self.qc.entropy_batch_mixing() == (None, None)
 
     @mock.patch("inmoose.cohort_qc.cohort_metric.sns.violinplot")
     def test_compare_sample_distribution_by_covariates(self, mock_violinplot):
