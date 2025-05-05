@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.7.4-dev]
+## [0.7.4]
 
 - fix single sample clustering error, changing cluster consensus to nan
 - improve pyDESeq2 documentation
