@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.5-dev]
+
+None
+
 ## [0.7.4]
 
 - fix single sample clustering error, changing cluster consensus to nan
