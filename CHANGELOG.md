@@ -3,7 +3,10 @@
 ## [0.7.4-dev]
 
 - fix single sample clustering error, changing cluster consensus to nan
-- improve pyDESeq2 documentation 
+- improve pyDESeq2 documentation
+- various doc improvements
+- support for Python 3.13
+- beautify the cohort QC report
 - raise error on cohort metrics when there is only one batch
 - fix patsy formula parsing of categorical variables with spaces in their names
 
