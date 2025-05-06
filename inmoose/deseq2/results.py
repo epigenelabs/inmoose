@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2022 Michael I. Love, Constantin Ahlmann-Eltze
-# Copyright (C) 2023 Maximilien Colange
+# Copyright (C) 2023-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ class DESeqResults(DEResults):
             test_col = "svalue"
             test_col_name = "s-value"
         else:
-            test_col = "padj"
+            test_col = "adj_pvalue"
             test_col_name = "adjusted p-value"
 
         if alpha is None:
@@ -131,7 +131,7 @@ class DESeqResults(DEResults):
         up = np.nansum((self[test_col] < alpha) & (self["log2FoldChange"] > T))
         down = np.nansum((self[test_col] < alpha) & (self["log2FoldChange"] < -T))
         if not sval:
-            filt = (~(self["pvalue"].isna()) & self["padj"].isna()).sum()
+            filt = (~(self["pvalue"].isna()) & self["adj_pvalue"].isna()).sum()
             outlier = ((self["baseMean"] > 0) & self["pvalue"].isna()).sum()
             if self.filterThreshold is None:
                 ft = 0
@@ -359,7 +359,7 @@ def results_dds(
         :class:`.DESeqResults` object), :code:`filter` (the quantity for
         filtering tests), :code:`alpha` (the target FDR),
         :code:`pAdjustMethod`. This function should resturn a
-        :class:`.DESeqResults` object with a :code:`padj` column.
+        :class:`.DESeqResults` object with a :code:`adj_pvalue` column.
     saveCols : array-like
         the columns of :code:`obj.var` to pass into the output results table
     test : { "Wald", "LRT" }
@@ -755,7 +755,7 @@ def pvalueAdjustment(res, independentFiltering, filter, theta, alpha, pAdjustMet
             else:
                 j = 0
 
-        padj = filtPadj[:, j]
+        adj_pvalue = filtPadj[:, j]
         cutoffs = np.quantile(filter, theta)
         filterThreshold = cutoffs[j]
         filterNumRej = pd.DataFrame({"theta": theta, "numRej": numRej})
@@ -771,11 +771,11 @@ def pvalueAdjustment(res, independentFiltering, filter, theta, alpha, pAdjustMet
         # regular p-value adjustment
         # does not include those rows which were removed
         # by maximum Cook's distance
-        padj = p_adjust(res.pvalue, method=pAdjustMethod)
+        adj_pvalue = p_adjust(res.pvalue, method=pAdjustMethod)
 
-    res["padj"] = padj
-    res.type["padj"] = "results"
-    res.description["padj"] = f"{pAdjustMethod} adjusted p-values"
+    res["adj_pvalue"] = adj_pvalue
+    res.type["adj_pvalue"] = "results"
+    res.description["adj_pvalue"] = f"{pAdjustMethod} adjusted p-values"
 
     return res
 

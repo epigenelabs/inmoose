@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2004-2022 Gordon Smyth, Yifang Hu, Matthew Ritchie, Jeremy Silver, James Wettenhall, Davis McCarthy, Di Wu, Wei Shi, Belinda Phipson, Aaron Lun, Natalie Thorne, Alicia Oshlack, Carolyn de Graaf, Yunshun Chen, Mette Langaas, Egil Ferkingstad, Marcus Davy, Francois Pepin, Dongseok Choi
-# Copyright (C) 2024 Maximilien Colange
+# Copyright (C) 2024-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -175,7 +175,7 @@ def topTable(
         - stat: moderated *t*-statistic (:class:`DEResults` only)
         - F: moderated *F*-statistic (:class:`pd.DataFrame` only)
         - pvalue: raw *p*-value
-        - adj_P_Value: adjusted *p*-value or *q*-value
+        - adj_pvalue: adjusted *p*-value or *q*-value
         - B: log-odds that the gene is differentially expressed
     """
     if not isinstance(fit, MArrayLM):
@@ -282,7 +282,7 @@ def _topTableF(
         raise ValueError(f"invalid value {sort_by} for argument sort_by")
 
     # Apply multiple testing adjustment
-    adj_P_Value = multipletests(Fp, method=adjust_method)[1]
+    adj_pvalue = multipletests(Fp, method=adjust_method)[1]
 
     # Thin out fit by lfc and p_value thresholds
     if lfc > 0 or p_value < 1:
@@ -291,7 +291,7 @@ def _topTableF(
         else:
             big = True
         if p_value < 1:
-            sig = adj_P_Value <= p_value
+            sig = adj_pvalue <= p_value
             sig[np.isnan(sig)] = False
         else:
             sig = True
@@ -303,7 +303,7 @@ def _topTableF(
             Fstat = Fstat[keep]
             Fp = Fp[keep]
             genelist = genelist[keep, :]
-            adj_P_Value = adj_P_Value[keep]
+            adj_pvalue = adj_pvalue[keep]
 
     # Enough rows left?
     if M.shape[0] < number:
@@ -325,7 +325,7 @@ def _topTableF(
     tab["AveExpr"] = Amean.iloc[o]
     tab["F"] = Fstat[o]
     tab["pvalue"] = Fp[o]
-    tab["adj_P_Val"] = adj_P_Value[o]
+    tab["adj_pvalue"] = adj_pvalue[o]
     tab.index = rn[o]
     return tab
 
@@ -448,11 +448,11 @@ def _topTableT(
         B = eb.lods.loc[:, coef]
 
     # Apply multiple testing adjustment
-    adj_P_Value = multipletests(P_Value, method=adjust_method)[1]
+    adj_pvalue = multipletests(P_Value, method=adjust_method)[1]
 
     # Thin out fit by p_value and lfc thresholds
     if p_value < 1 or lfc > 0:
-        sig = (adj_P_Value <= p_value) & (np.abs(M) >= lfc)
+        sig = (adj_pvalue <= p_value) & (np.abs(M) >= lfc)
         if np.any(np.isnan(sig)):
             sig[np.isnan(sig)] = False
         if not np.any(sig):
@@ -463,7 +463,7 @@ def _topTableT(
         A = A[sig]
         tstat = tstat[sig]
         P_Value = P_Value[sig]
-        adj_P_Value = adj_P_Value[sig]
+        adj_pvalue = adj_pvalue[sig]
         if include_B:
             B = B[sig]
         rn = rn[sig]
@@ -514,7 +514,7 @@ def _topTableT(
         tab["AveExpr"] = A.iloc[top]
     tab["stat"] = tstat.iloc[top]
     tab["pvalue"] = P_Value.iloc[top]
-    tab["adj_P_Val"] = adj_P_Value[top]
+    tab["adj_pvalue"] = adj_pvalue[top]
 
     if include_B:
         tab["B"] = B.iloc[top]

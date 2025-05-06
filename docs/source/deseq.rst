@@ -255,16 +255,16 @@ Note on factor levels
 ---------------------
 
 By default, Python will choose a *reference level* for factors based on
-alphabetical order, it chooses the first value as the reference. Then, if you 
-never tell the DESeq2 functions which level you want to compare against 
-(*e.g.* which level represents the control group), the comparisons will 
+alphabetical order, it chooses the first value as the reference. Then, if you
+never tell the DESeq2 functions which level you want to compare against
+(*e.g.* which level represents the control group), the comparisons will
 be based on the alphabetical order of the levels. There are two
 solutions: you can either explicitly tell :meth:`.DESeqDataSet.results` which
 comparison to make using the :code:`contrast` argument (this will be shown
-later), or you can explicitly set the factors levels by specifying the desired 
-reference value first. In order to see the change of reference levels reflected 
-in the results names, you need to either run :func:`DESeq` or 
-:func:`nbinomWaldTest` / :func:`nbinomLRT` after the re-leveling operation.  
+later), or you can explicitly set the factors levels by specifying the desired
+reference value first. In order to see the change of reference levels reflected
+in the results names, you need to either run :func:`DESeq` or
+:func:`nbinomWaldTest` / :func:`nbinomLRT` after the re-leveling operation.
 Setting the factor levels can be done with the:code:`reorder_categories` function:
 
 .. repl::
@@ -388,7 +388,7 @@ function:
 How many adjusted *p*-values were less than 0.1:
 
 .. repl::
-   (res.padj < 0.1).sum()
+   (res.adj_pvalue < 0.1).sum()
 
 The :meth:`.DESeqDataSet.results` function contains a number of arguments to
 customize the results table which is generated. You can read about these
@@ -404,7 +404,7 @@ should be set to that value:
 .. repl::
    res05 = dds.results(alpha=0.05)
    print(res05.summary())
-   (res05.padj < 0.05).sum()
+   (res05.adj_pvalue < 0.05).sum()
 
 .. _IHW:
 
@@ -676,7 +676,7 @@ Exporting only the results which pass an adjusted *p*-value threshold can be
 accomplished by subsetting the results:
 
 .. repl::
-   resSig = resOrdered[resOrdered.padj < 0.1]
+   resSig = resOrdered[resOrdered.adj_pvalue < 0.1]
    resSig.head()
 
 
@@ -1648,8 +1648,8 @@ to :code:`FALSE`.
 
 .. repl::
    resNoFilt = dds.results(independentFiltering=False)
-   df = pd.DataFrame({"filtering": (res.padj < .1),
-                      "noFiltering": (resNoFilt.padj < .1)})
+   df = pd.DataFrame({"filtering": (res.adj_pvalue < .1),
+                      "noFiltering": (resNoFilt.adj_pvalue < .1)})
    df.groupby(["filtering", "noFiltering"]).size()
 
 

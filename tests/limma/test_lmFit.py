@@ -578,7 +578,7 @@ class Test(unittest.TestCase):
                     7.539558e-01,
                     8.390000e-01,
                 ],
-                "adj_P_Val": [
+                "adj_pvalue": [
                     5.883976e-11,
                     8.377287e-01,
                     8.377287e-01,
@@ -696,7 +696,7 @@ class Test(unittest.TestCase):
                     8.206597e-01,
                     9.648163e-01,
                 ],
-                "adj_P_Val": [
+                "adj_pvalue": [
                     0.0003070827,
                     0.7324425460,
                     0.8905096522,
@@ -832,7 +832,7 @@ class Test(unittest.TestCase):
                     0.8593745912,
                     0.9285127413,
                 ],
-                "adj_P_Val": [
+                "adj_pvalue": [
                     0.003984447,
                     0.474510726,
                     0.928512741,
