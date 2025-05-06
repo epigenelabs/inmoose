@@ -352,7 +352,7 @@ class Test(unittest.TestCase):
         t = topTags(exactTest(self.d))
         self.assertTrue(
             np.array_equal(
-                t.table.index,
+                t.index,
                 [
                     "gene9",
                     "gene7",

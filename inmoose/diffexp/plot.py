@@ -90,7 +90,7 @@ def plotMA_res(
     if sval:
         test_col = "svalue"
     else:
-        test_col = "padj"
+        test_col = "adj_pvalue"
 
     if MLE:
         if "lfcMLE" not in self.columns:

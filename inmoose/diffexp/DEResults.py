@@ -39,7 +39,7 @@ class DEResults(pd.DataFrame):
     def __init__(self, df, *args, **kwargs):
         super().__init__(df, *args, **kwargs)
         # TODO what about baseMean (mean of normalized counts)?
-        # TODO what about padj (adjusted p-values)?
+        # TODO what about adjusted p-values (would be adj_pvalue)?
         for col in ["log2FoldChange", "lfcSE", "pvalue"]:
             if col not in self.columns:
                 raise ValueError(f"{col} missing from results table")

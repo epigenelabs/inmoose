@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
-# Copyright (C) 2024 Maximilien Colange
+# Copyright (C) 2024-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,13 +22,32 @@ import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
+from ..diffexp import DEResults
 from ..utils import LOGGER
 from .DGEExact import DGEExact
 
 
-class TopTags:
-    def __init__(self, table, adjust_method, comparison, test):
-        self.table = table
+class TopTags(DEResults):
+    _metadata = ["adjust_method", "comparison", "test"]
+
+    @property
+    def _constructor(self):
+        def f(*args, **kwargs):
+            return TopTags(
+                *args,
+                adjust_method=self.adjust_method,
+                comparison=self.comparison,
+                test=self.test,
+            )
+
+        return f
+
+    @property
+    def _constructor_slided(self):
+        return pd.Series
+
+    def __init__(self, table, adjust_method, comparison, test, *args, **kwargs):
+        super().__init__(table, *args, **kwargs)
         self.adjust_method = adjust_method
         self.comparison = comparison
         self.test = test
@@ -78,20 +97,24 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
     Returns
     -------
     TopTags
-        an object with the following components:
+        a dataframe containing differential expression results for the top
+        genes in a sorted order. The number of rows is the smaller of :code:`n`
+        and the number of genes with adjusted *p*-value less than or equal to
+        :code:`p_value`. The dataframe includes all the annotation columns from
+        :code:`self.genes` and all statistic columns from :code:`self` plus one
+        of:
 
-        - :code:`table`, a dataframe containing differential expression results
-          for the top genes in a sorted order. The number of rows is the
-          smaller of :code:`n` and the number of genes with adjusted *p*-value
-          less than or equal to :code:`p_value`. The dataframe includes all the
-          annotation columns from :code:`self.genes` and all statistic columns
-          from :code:`self.table` plus one of:
+        - :code:`"FDR"`, false discovery rate (only when
+          :code:`adjust_method` is :code:`"fdr_bh"`, :code:`"fdr_by"`))
+        - :code:`"FWER"`, family-wise error rate (only when
+          :code:`adjust_method` is :code:`"holm"`, :code:`"simes-hochberg"`,
+          :code:`"hommel"` or :code:`"bonferroni"`)
 
-            - :code:`"FDR"`, false discovery rate (only when
-              :code:`adjust_method` is :code:`"fdr_bh"`, :code:`"fdr_by"`))
-            - :code:`"FWER"`, family-wise error rate (only when
-              :code:`adjust_method` is :code:`"holm"`, :code:`"simes-hochberg"`,
-              :code:`"hommel"` or :code:`"bonferroni"`)
+        For consistency with other modules, the dataframe also contains a
+        :code:`"adj_pvalue"` column with the same content as the :code:`"FDR"`
+        or :code:`"FWER"` column.
+
+        The object also contains the following components:
 
         - :code:`adjust_method`, string specifying the method used to adjust
           *p*-values for multiple testing, same as input argument
@@ -105,11 +128,6 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
     else:
         test = "glm"
     MultipleContrasts = test == "glm" and self.shape[1] > 5
-
-    # Check n
-    n = np.min([n, self.shape[0]])
-    if n < 1:
-        raise ValueError("No rows to output")
 
     # Check adjust_method
     FWER_methods = ["holm", "simes-hochberg", "hommel", "bonferroni"]
@@ -158,6 +176,7 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
         if adjust_method in FDR_methods:
             adjustment = "FDR"
         self.loc[self.index[o], adjustment] = adj_p_val[o]
+        self.loc[self.index[o], "adj_pvalue"] = adj_p_val[o]
 
     # Add gene annotation if appropriate
     if self.genes is not None:
@@ -176,7 +195,7 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
     if tab.shape[0] < n:
         n = tab.shape[0]
     if n < 1:
-        return pd.DataFrame()
+        raise ValueError("No rows to output")
 
     # Output object
     return TopTags(

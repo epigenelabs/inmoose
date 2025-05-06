@@ -542,7 +542,7 @@ class test_glm(unittest.TestCase):
         t = topTags(s)
         self.assertTrue(
             np.array_equal(
-                t.table.index,
+                t.index,
                 [
                     "gene1",
                     "gene5",

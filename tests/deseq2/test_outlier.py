@@ -128,7 +128,9 @@ class Test(unittest.TestCase):
             0.8937823,
             0.8580403,
         ]
-        self.assertTrue(np.allclose(dds0.results().padj, padj_ref, equal_nan=True))
+        self.assertTrue(
+            np.allclose(dds0.results().adj_pvalue, padj_ref, equal_nan=True)
+        )
 
         # filtered
         self.assertTrue(np.all(np.isnan(pval0)))
