@@ -540,20 +540,30 @@ class test_glm(unittest.TestCase):
         self.d.estimateGLMCommonDisp()
         s = glmLRT(self.d.glmFit())
         t = topTags(s)
-        self.assertTrue(
-            np.array_equal(
-                t.index,
-                [
-                    "gene1",
-                    "gene5",
-                    "gene13",
-                    "gene9",
-                    "gene15",
-                    "gene4",
-                    "gene6",
-                    "gene12",
-                    "gene10",
-                    "gene20",
-                ],
-            )
+        self.assertListEqual(
+            list(t.index),
+            [
+                "gene1",
+                "gene5",
+                "gene13",
+                "gene9",
+                "gene15",
+                "gene4",
+                "gene6",
+                "gene12",
+                "gene10",
+                "gene20",
+            ],
+        )
+        self.assertListEqual(
+            list(t.columns),
+            [
+                "log2FoldChange",
+                "lfcSE",
+                "logCPM",
+                "stat",
+                "pvalue",
+                "FDR",
+                "adj_pvalue",
+            ],
         )

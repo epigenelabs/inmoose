@@ -350,20 +350,30 @@ class Test(unittest.TestCase):
 
     def test_topTags(self):
         t = topTags(exactTest(self.d))
-        self.assertTrue(
-            np.array_equal(
-                t.index,
-                [
-                    "gene9",
-                    "gene7",
-                    "gene17",
-                    "gene10",
-                    "gene12",
-                    "gene18",
-                    "gene13",
-                    "gene2",
-                    "gene15",
-                    "gene19",
-                ],
-            )
+        self.assertListEqual(
+            list(t.index),
+            [
+                "gene9",
+                "gene7",
+                "gene17",
+                "gene10",
+                "gene12",
+                "gene18",
+                "gene13",
+                "gene2",
+                "gene15",
+                "gene19",
+            ],
+        )
+
+        self.assertListEqual(
+            list(t.columns),
+            [
+                "log2FoldChange",
+                "lfcSE",
+                "logCPM",
+                "pvalue",
+                "FDR",
+                "adj_pvalue",
+            ],
         )
