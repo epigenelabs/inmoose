@@ -26,6 +26,7 @@ from scipy import stats
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
 from sklearn.neighbors import NearestNeighbors
+from sklearn.preprocessing import StandardScaler
 from statsmodels.formula.api import ols
 
 from ..utils import round_scientific_notation, truncate_name
@@ -400,12 +401,17 @@ class CohortMetric:
         """
         # Perform PCA for data after batch effect correction
         pca_after = PCA(n_components=self.n_components)
-        pcs_after = pca_after.fit_transform(self.data_expression_df.T)
+        scaler = StandardScaler()
+        pcs_after = pca_after.fit_transform(
+            scaler.fit_transform(self.data_expression_df.T)
+        )
 
         # If data_expression_df_before is not None, compute PCA for it
         if self.data_expression_df_before is not None:
             pca_before = PCA(n_components=self.n_components)
-            pcs_before = pca_before.fit_transform(self.data_expression_df_before.T)
+            pcs_before = pca_before.fit_transform(
+                scaler.fit_transform(self.data_expression_df_before.T)
+            )
             association_matrix_before = self._compute_pc_associations(pcs_before)
         else:
             pca_before = None
