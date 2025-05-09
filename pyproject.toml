@@ -6,6 +6,7 @@ readme = "README.md"
 authors = [
   {name = "Guillaume Appé", email = "guillaume@epigenelabs.com"},
   {name = "Maximilien Colange", email = "maximilien@epigenelabs.com"},
+  {name = "Antoine Gaston", email = "antoine@epigenelabs.com"},
   {name = "Léa Meunier", email = "lea@epigenelabs.com"},
   {name = "Todd Tavernier", email = "todd.tavernier@epigenelabs.com"},
   {name = "Solène Weill", email = "solene@epigenelabs.com"},
