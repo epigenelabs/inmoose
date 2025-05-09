@@ -1,7 +1,7 @@
 # distutils: language = c++
 #-----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
-# Copyright (C) 2022-2024 Maximilien Colange
+# Copyright (C) 2022-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 import numpy as np
 cimport cython
 from libcpp.cmath cimport abs, log, isfinite, exp, isnan
-from numpy.math cimport INFINITY
+from libc.math cimport INFINITY
 
 from libc.math cimport sqrt
 from scipy.special cimport cython_special as sp
