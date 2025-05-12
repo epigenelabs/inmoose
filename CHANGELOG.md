@@ -1,8 +1,9 @@
 # InMoose release changelog
 
-## [0.7.5-dev]
+## [0.7.5]
 
-None
+- harmonize the adjusted p-values in diff exp modules
+- fix build issues with Cython 3.1.0
 
 ## [0.7.4]
 
