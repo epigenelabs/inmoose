@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.6-dev]
+
+None
+
 ## [0.7.5]
 
 - harmonize the adjusted p-values in diff exp modules
