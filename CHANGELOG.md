@@ -2,7 +2,7 @@
 
 ## [0.7.6-dev]
 
-None
+- add doc for cohort QC report
 
 ## [0.7.5]
 

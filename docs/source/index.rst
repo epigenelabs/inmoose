@@ -25,6 +25,7 @@ limma [Ritchie2015]_ and splatter [Zappia2017]_.
 
    deseq
    clustering
+   cohort_qc
    edgepy
    limma
    sim
