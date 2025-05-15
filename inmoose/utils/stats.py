@@ -22,7 +22,7 @@ from .stats_cpp import nbinom_logpmf
 
 
 def rnbinom(n, size, mu, seed=None):
-    """mimic R rnbinom function, to draw samples from a Negative Binomial distribution.
+    r"""mimic R rnbinom function, to draw samples from a Negative Binomial distribution.
 
     The (:math:`size`, :math:`p`) parameterization used in R is the same as in scipy.stats:
     :math:`p = 1 / (1 + \mu/size) = size / (size + \mu)`.
