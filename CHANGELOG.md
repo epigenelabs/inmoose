@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.7-dev]
+
+None
+
 ## [0.7.6]
 
 - add doc for cohort QC report
