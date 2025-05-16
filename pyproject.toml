@@ -1,11 +1,12 @@
 [project]
 name = "inmoose"
-version = "0.7.6-dev"
+version = "0.7.6"
 description = "InMoose: the Integrated Multi Omic Open Source Environment"
 readme = "README.md"
 authors = [
   {name = "Guillaume Appé", email = "guillaume@epigenelabs.com"},
   {name = "Maximilien Colange", email = "maximilien@epigenelabs.com"},
+  {name = "Lukaš Gazdik", email = "lukas@epigenelabs.com"},
   {name = "Antoine Gaston", email = "antoine@epigenelabs.com"},
   {name = "Léa Meunier", email = "lea@epigenelabs.com"},
   {name = "Todd Tavernier", email = "todd.tavernier@epigenelabs.com"},

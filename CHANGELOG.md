@@ -1,8 +1,9 @@
 # InMoose release changelog
 
-## [0.7.6-dev]
+## [0.7.6]
 
 - add doc for cohort QC report
+- better handling of PCAs in QC report
 
 ## [0.7.5]
 
