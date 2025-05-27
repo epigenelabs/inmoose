@@ -315,9 +315,9 @@ class consensusClustering:
             Array of the item consensus (nb_items * k)
         """
         assert self.consensus_matrices is not None, "First compute consensus clustering"
-        assert self.min_k <= k <= self.max_k, (
-            "Number of clusters must be between min_k and max_k"
-        )
+        assert (
+            self.min_k <= k <= self.max_k
+        ), "Number of clusters must be between min_k and max_k"
         predictions = self.predict(k)
         clusters_consensus = self.compute_clusters_consensus(predictions, k)
         items_consensus = self.compute_items_consensus(predictions, k)
@@ -341,9 +341,9 @@ class consensusClustering:
         clusters_consensus
             Array of cluster consensus
         """
-        assert self.min_k <= k <= self.max_k, (
-            "Number of clusters must be between min_k and max_k"
-        )
+        assert (
+            self.min_k <= k <= self.max_k
+        ), "Number of clusters must be between min_k and max_k"
         clusters_consensus = np.zeros(k)
         for clust in range(k):
             ids = np.where(prediction == clust)[0]
@@ -378,9 +378,9 @@ class consensusClustering:
         items_consensus
             Array of the item consensus (nb_items * k)
         """
-        assert self.min_k <= k <= self.max_k, (
-            "Number of clusters must be between min_k and max_k"
-        )
+        assert (
+            self.min_k <= k <= self.max_k
+        ), "Number of clusters must be between min_k and max_k"
         items_consensus = np.zeros(
             (self.consensus_matrices[k - self.min_k].shape[0], k)
         )
@@ -416,9 +416,9 @@ class consensusClustering:
         predicted cluster for k clusters
         """
         assert self.consensus_matrices is not None, "First compute consensus clustering"
-        assert self.min_k <= k <= self.max_k, (
-            "Number of clusters must be between min_k and max_k"
-        )
+        assert (
+            self.min_k <= k <= self.max_k
+        ), "Number of clusters must be between min_k and max_k"
         return self.cluster_(n_clusters=k).fit_predict(
             1 - self.consensus_matrices[k - self.min_k]
         )
@@ -441,7 +441,7 @@ class consensusClustering:
 
     def plot_clustermap(self, k, saving_path, col_color=None):
         """
-        Plot and save clustermap
+        Compute and save a consensus clustering heatmap and dendrogram showing the consensus clustering stability.
 
         Arguments
         ---------
@@ -455,9 +455,9 @@ class consensusClustering:
 
         """
         assert self.consensus_matrices is not None, "First compute consensus clustering"
-        assert self.min_k <= k <= self.max_k, (
-            "Number of clusters must be between min_k and max_k"
-        )
+        assert (
+            self.min_k <= k <= self.max_k
+        ), "Number of clusters must be between min_k and max_k"
         cluster_map = sn.clustermap(
             pd.DataFrame(self.consensus_matrices[k - self.min_k]),
             method="ward",
@@ -468,7 +468,11 @@ class consensusClustering:
             figsize=(10, 10),
             col_colors=col_color,
         )
+        cluster_map.ax_col_dendrogram.set_title(
+            f"Consensus clustering heatmap and dendrogram: n_clusters={k}"
+        )
         cluster_map.figure.savefig(saving_path)
+        return cluster_map
 
     def build_clusters_consensus_df(self):
         """
@@ -512,6 +516,7 @@ class consensusClustering:
         )
         plt.tick_params(rotation=45)
         plt.ylim(0, 1)
+        plt.title("Cluster consensus measuring cluster stability")
         plt.xlabel("Number of clusters")
         plt.ylabel("Cluster consensus measuring cluster stability")
         ax.legend(bbox_to_anchor=(1, 1), title="Cluster")
@@ -559,8 +564,9 @@ class consensusClustering:
         fig_path: str
             Path to store the plot
         """
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(10, 10))
         plt.plot(range(self.min_k, self.max_k), self.deltaK, marker="o", color="black")
+        plt.title("Relative change in area under the curve, showing the best number of clusters")
         plt.xlabel("Number of clusters")
         plt.ylabel("Relative change in area under the curve")
         plt.savefig(fig_path)
