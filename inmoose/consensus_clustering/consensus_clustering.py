@@ -441,7 +441,7 @@ class consensusClustering:
 
     def plot_clustermap(self, k, saving_path, col_color=None):
         """
-        Plot and save clustermap
+        Compute and save a consensus clustering heatmap and dendrogram showing the consensus clustering stability.
 
         Arguments
         ---------
@@ -468,7 +468,11 @@ class consensusClustering:
             figsize=(10, 10),
             col_colors=col_color,
         )
+        cluster_map.ax_col_dendrogram.set_title(
+            f"Consensus clustering heatmap and dendrogram: n_clusters={k}"
+        )
         cluster_map.figure.savefig(saving_path)
+        return cluster_map
 
     def build_clusters_consensus_df(self):
         """
@@ -512,6 +516,7 @@ class consensusClustering:
         )
         plt.tick_params(rotation=45)
         plt.ylim(0, 1)
+        plt.title("Cluster consensus measuring cluster stability")
         plt.xlabel("Number of clusters")
         plt.ylabel("Cluster consensus measuring cluster stability")
         ax.legend(bbox_to_anchor=(1, 1), title="Cluster")
@@ -559,8 +564,11 @@ class consensusClustering:
         fig_path: str
             Path to store the plot
         """
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(10, 10))
         plt.plot(range(self.min_k, self.max_k), self.deltaK, marker="o", color="black")
+        plt.title(
+            "Relative change in area under the curve, showing the best number of clusters"
+        )
         plt.xlabel("Number of clusters")
         plt.ylabel("Relative change in area under the curve")
         plt.savefig(fig_path)

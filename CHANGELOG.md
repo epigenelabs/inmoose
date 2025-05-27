@@ -2,7 +2,7 @@
 
 ## [0.7.7-dev]
 
-None
+- improve CC plots layout
 
 ## [0.7.6]
 
