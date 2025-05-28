@@ -1,7 +1,8 @@
 <img src="docs/source/inmoose.png" width="600">
 
 [![pypi version](https://img.shields.io/pypi/v/inmoose)](https://pypi.org/project/inmoose)
-[![pypiDownloads](https://static.pepy.tech/badge/inmoose)](https://pepy.tech/project/inmoose)
+[![PyPI Downloads](https://static.pepy.tech/badge/inmoose)](https://pepy.tech/project/inmoose)
+[![PyPI Downloads](https://static.pepy.tech/badge/inmoose/month)](https://pepy.tech/projects/inmoose)
 [![coverage](https://img.shields.io/coverallsCoverage/github/epigenelabs/inmoose.svg)](https://coveralls.io/github/epigenelabs/inmoose)
 [![Documentation Status](https://readthedocs.org/projects/inmoose/badge/?version=latest)](https://inmoose.readthedocs.io/en/latest/?badge=latest)
 [![license](https://img.shields.io/pypi/l/inmoose)](LICENSE)
