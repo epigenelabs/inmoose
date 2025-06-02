@@ -3,6 +3,7 @@
 ## [0.7.7-dev]
 
 - improve CC plots layout
+- fix `glmLRT` when given a contrast in argument
 
 ## [0.7.6]
 
