@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
-# Copyright (C) 2022-2024 Maximilien Colange
+# Copyright (C) 2022-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -370,7 +370,7 @@ def glmLRT(glmfit, coef=None, contrast=None):
         raise ValueError(
             "Need at least two columns for design, usually the first is the intercept columns"
         )
-    coef_names = design.design_info.column_names
+    coef_names = np.array(design.design_info.column_names)
 
     # Evaluate logFC for coef to be tested
     # Note that contrast takes precedence over coef: if contrast is given then reform
@@ -391,13 +391,17 @@ def glmLRT(glmfit, coef=None, contrast=None):
         logFC = glmfit.coefficients[:, coef] / np.log(2)
         lfcSE = glmfit.coeff_SE[:, coef] / np.log(2)
     else:
-        # TODO make sure contrast is a matrix
+        contrast = np.array(contrast)
+        if contrast.ndim > 2:
+            raise ValueError("contrast must be 1-D or 2-D")
+        if contrast.ndim < 2:
+            contrast = contrast.reshape(contrast.shape[0], 1)
         if contrast.shape[0] != glmfit.coefficients.shape[1]:
             raise ValueError(
                 "contrast vector of wrong length, should be equal to number of coefficients in the linear model"
             )
         ncontrasts = np.linalg.matrix_rank(contrast)
-        Q, R = np.linalg.qr(contrast)
+        Q, R = np.linalg.qr(contrast, mode="complete")
         if ncontrasts == 0:
             raise ValueError("contrasts are all zero")
         coef = np.arange(ncontrasts)
