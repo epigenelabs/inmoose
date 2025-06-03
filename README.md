@@ -130,6 +130,9 @@ CC = consensusClustering(AgglomerativeClustering)
 CC.compute_consensus_clustering(numpy_ndarray)
 ```
 
+# Agnetic documentation
+Hello we created an agent
+
 # How to contribute
 
 Please refer to [CONTRIBUTING.md](https://github.com/epigenelabs/inmoose/blob/master/CONTRIBUTING.md) to learn more about the contribution guidelines.
