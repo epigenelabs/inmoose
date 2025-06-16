@@ -85,6 +85,7 @@ cohort_quality_control = CohortMetric(
     data_expression_df_before=gene_expression_before_correction,
     covariates=["biopsy_site", "sample_type"]
 )
+cohort_quality_control.process()
 ```
 
 `QCReport`: This class takes a CohortMetric argument, and generates an HTML report summarizing the QC results.
@@ -98,7 +99,7 @@ from inmoose.cohort_qc.qc_report import QCReport
 
 # Generate and save the QC report
 qc_report = QCReport(cohort_quality_control)
-qc_report.save_html_report_local(output_path='reports')
+qc_report.save_report(output_path='reports')
 ```
 
 # Differential Expression Analysis
