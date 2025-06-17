@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.8-dev]
+
+None
+
 ## [0.7.7]
 
 - improve CC plots layout
