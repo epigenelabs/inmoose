@@ -1,6 +1,6 @@
 # InMoose release changelog
 
-## [0.7.7-dev]
+## [0.7.7]
 
 - improve CC plots layout
 - fix `glmLRT` when given a contrast in argument
