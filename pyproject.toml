@@ -22,13 +22,13 @@ dependencies = [
   "anndata",
   "fastcluster",
   "mpmath>=1.1.0",
-  "numpy<2.1.0",
+  "numpy",
   "pandas",
   "patsy",
   "scipy>=1.11.0",
   "seaborn",
   "scikit-learn",
-  "statsmodels",
+  "statsmodels>=0.14.3",
   "matplotlib",
   "jinja2"
 ]
