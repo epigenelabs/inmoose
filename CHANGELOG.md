@@ -4,6 +4,7 @@
 
 - improve CC plots layout
 - fix `glmLRT` when given a contrast in argument
+- fix argument type in `fitDispGridWrapper`
 
 ## [0.7.6]
 

@@ -97,7 +97,6 @@ def log_posterior(
         mu = mu[:, None]
     if len(weights.shape) == 1:
         weights = weights[:, None]
-
     # helper variables to control the shapes
     M = np.maximum(y.shape[-1], log_alpha.shape[-1])
     (N, P) = x.shape
@@ -793,6 +792,7 @@ def fitDispGrid(
     ndarray
         the estimated dispersion parameters, on the log scale. Shape N.
     """
+
     y_n = y.shape[1]
     disp_grid_n = disp_grid.shape[0]
     delta = disp_grid[1] - disp_grid[0]
@@ -861,6 +861,9 @@ def fitDispGridWrapper(**kwargs):
     maxLogAlpha = np.log(np.maximum(10, kwargs["y"].shape[0]))
     dispGrid = np.linspace(minLogAlpha, maxLogAlpha, 20)
     kwargs["mu_hat"] = kwargs["mu"]
+    # Convert pandas Series to numpy array if needed
+    if isinstance(kwargs["log_alpha_prior_mean"], pd.Series):
+        kwargs["log_alpha_prior_mean"] = kwargs["log_alpha_prior_mean"].values
     del kwargs["mu"]
     kwargs["disp_grid"] = dispGrid
     logAlpha = fitDispGrid(**kwargs)

@@ -13,7 +13,7 @@ from inmoose.deseq2 import (
     estimateDispersionsMAP,
     makeExampleDESeqDataSet,
 )
-from inmoose.deseq2.deseq2_cpp import fitDisp
+from inmoose.deseq2.deseq2_cpp import fitDisp, fitDispGridWrapper
 from inmoose.deseq2.fitNbinomGLMs import fitNbinomGLMs
 from inmoose.utils import Factor, dnbinom_mu, dnorm
 
@@ -198,3 +198,64 @@ class Test(unittest.TestCase):
         self.assertTrue(
             np.allclose(dds.var["trueDisp"], dds.var["dispGeneEst"], rtol=0.7)
         )
+
+    def test_fitDispGridWrapper_pandas_series(self):
+        """test that fitDispGridWrapper properly handles pandas Series input for log_alpha_prior_mean"""
+        # Create test data
+        n_samples = 4
+        n_genes = 8
+        y = np.random.poisson(20, size=(n_samples, n_genes))
+        x = np.column_stack([np.ones(n_samples), np.repeat([0, 1], n_samples // 2)])
+        mu = np.random.gamma(2, 10, size=(n_samples, n_genes))
+        weights = np.ones((n_samples, n_genes))
+
+        # Create a pandas Series with gene names as index
+        gene_names = [f"gene_{i}" for i in range(n_genes)]
+        log_alpha_prior_mean = pd.Series(
+            np.random.normal(-1, 0.5, n_genes), index=gene_names, name="dispFit"
+        )
+
+        # Test that fitDispGridWrapper doesn't fail with pandas Series input
+        try:
+            result = fitDispGridWrapper(
+                y=y,
+                x=x,
+                mu=mu,
+                log_alpha_prior_mean=log_alpha_prior_mean,
+                log_alpha_prior_sigmasq=1.0,
+                usePrior=True,
+                weights=weights,
+                useWeights=False,
+                weightThreshold=1e-2,
+                useCR=True,
+            )
+
+            # Verify the result is a numpy array with correct shape
+            self.assertIsInstance(result, np.ndarray)
+            self.assertEqual(result.shape, (n_genes,))
+            self.assertTrue(np.all(np.isfinite(result)))
+            self.assertTrue(np.all(result > 0))  # dispersions should be positive
+
+        except Exception as e:
+            self.fail(f"fitDispGridWrapper failed with pandas Series input: {e}")
+
+        # Test that it also works with numpy array input (for comparison)
+        try:
+            result_numpy = fitDispGridWrapper(
+                y=y,
+                x=x,
+                mu=mu,
+                log_alpha_prior_mean=log_alpha_prior_mean.values,
+                log_alpha_prior_sigmasq=1.0,
+                usePrior=True,
+                weights=weights,
+                useWeights=False,
+                weightThreshold=1e-2,
+                useCR=True,
+            )
+
+            # Results should be similar (allowing for small numerical differences)
+            self.assertTrue(np.allclose(result, result_numpy, rtol=1e-10))
+
+        except Exception as e:
+            self.fail(f"fitDispGridWrapper failed with numpy array input: {e}")
