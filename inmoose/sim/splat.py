@@ -95,6 +95,7 @@ def sim_rnaseq(
     x0=0,
     k=-1,
     random_state=None,
+    logfc=False,
 ):
     """
     Simulate (sc)RNASeq data.
@@ -151,6 +152,8 @@ def sim_rnaseq(
         int, a new ``RandomState`` instance is used, seeded with
         `random_state`.  If `random_state` is already a ``Generator`` or
         ``RandomState`` instance, that instance is used.
+    logfc : bool, optional
+        whether the logFC should be returned
 
     Returns
     -------
@@ -213,13 +216,13 @@ def sim_rnaseq(
     trended_cell_means = gamma.rvs(1 / B2, cell_means * B2, random_state=random_state)
 
     # DE fold-changes between cell types
-    de_lf = [
+    de_lf_orig = [
         get_lognorm_factors(
             nb_genes, 0.1, 0.5, 0.3 + 0.2 * i, 0.1 + i * 0.5, random_state=random_state
         )
         for i in range(nb_groups)
     ]
-    de_lf = np.choose(group.codes, [x[:, None] for x in de_lf])
+    de_lf = np.choose(group.codes, [x[:, None] for x in de_lf_orig])
 
     # cell type specific cell means
     de_trended_cell_means = de_lf * trended_cell_means
@@ -242,4 +245,6 @@ def sim_rnaseq(
         pi = expit(k * (np.log(batch_cell_means) - x0))
         y = bernoulli.rvs(pi, random_state=random_state) * y
 
+    if logfc:
+        return y, np.log2(de_lf_orig)
     return y
