@@ -296,7 +296,7 @@ def results_dds(
         If specified, the :code:`name` argument is ignored.
     name : str
         the name of the individual effect (coefficient) for building a results
-        table. Use this argument rahter than :code:`contrast` for continuous
+        table. Use this argument rather than :code:`contrast` for continuous
         variables, individual effects or for individual interaction terms. The
         value provided to :code:`name` must be an element of
         :code:`obj.resultsNames()`.
