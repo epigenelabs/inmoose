@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+from scipy.stats import norm
 
 from inmoose.deseq2 import DESeq, makeExampleDESeqDataSet
 from inmoose.utils import Factor
@@ -307,6 +308,39 @@ low counts [2]     : 0, 0.00%
         # test remove results
         dds = dds.removeResults()
         self.assertTrue(dds.var.description.filter("results").empty)
+
+    def test_confidence_intervals(self):
+        """test that confidence intervals are properly computed when required"""
+        dds = makeExampleDESeqDataSet(n=100)
+        dds = DESeq(dds)
+
+        res = dds.results()
+        self.assertFalse("CI_L" in res.columns)
+        self.assertFalse("CI_R" in res.columns)
+
+        res = dds.results(confint=True)
+        self.assertAlmostEqual(
+            res["CI_L"],
+            res["log2FoldChange"] + norm.isf(0.975) * res["lfcSE"],
+            1e-6,
+        )
+        self.assertAlmostEqual(
+            res["CI_R"],
+            res["log2FoldChange"] + norm.ppf(0.975) * res["lfcSE"],
+            1e-6,
+        )
+
+        res = dds.results(confint=0.75)
+        self.assertAlmostEqual(
+            res["CI_L"],
+            res["log2FoldChange"] + norm.isf(0.75) * res["lfcSE"],
+            1e-6,
+        )
+        self.assertAlmostEqual(
+            res["CI_R"],
+            res["log2FoldChange"] + norm.ppf(0.75) * res["lfcSE"],
+            1e-6,
+        )
 
     @unittest.skip("not sure what to test")
     def test_results_custom_filters(self):
