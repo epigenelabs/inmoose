@@ -2,7 +2,7 @@
 
 ## [0.7.8-dev]
 
-None
+- add confidence intervals on log-fold-changes to `deseq2` results
 
 ## [0.7.7]
 

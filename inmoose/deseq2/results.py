@@ -182,6 +182,7 @@ def results_dds(
     tidy=False,
     parallel=False,
     minmu=0.5,
+    confint=False,
 ):
     r"""
     Extract results from a :func:`.DESeq` analysis
@@ -381,6 +382,10 @@ def results_dds(
         unimplemented
     minmu : float
         lower bound on the estimated count (used when calculating contrasts)
+    confint : bool or float
+        whether the confidence 95% intervals should be output for log2 fold
+        changes.  Alternatively, can be a value between 0 and 1 specifying the
+        required confidence level.
 
     Returns
     -------
@@ -646,6 +651,19 @@ def results_dds(
             "version": __version__,
             "betaPriorVar": obj.betaPriorVar,
         }
+
+    # add confidence interval on log2FoldChange
+    if confint is not False:
+        if isinstance(confint, float):
+            ci_alpha = (1 + confint) / 2
+        else:
+            ci_alpha = 0.975
+        res["CI_L"] = (
+            res["log2FoldChange"] + scipy.stats.norm.isf(ci_alpha) * res["lfcSE"]
+        )
+        res["CI_R"] = (
+            res["log2FoldChange"] + scipy.stats.norm.ppf(ci_alpha) * res["lfcSE"]
+        )
 
     # make results object
     deseqRes = DESeqResults(res, priorInfo=priorInfo)
