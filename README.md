@@ -28,10 +28,15 @@ Documentation is hosted on [readthedocs.org](https://inmoose.readthedocs.io/en/l
 
 # Citing
 
-Depending on the features you use, you may cite one of the following papers:
-- Behdenna A, Colange M, Haziza J, Gema A, Appé G, Azencot CA and Nordor A. (2023) pyComBat, a Python tool for batch effects correction in high-throughput molecular data using empirical Bayes methods. BMC Bioinformatics 7;24(1):459. https://doi.org/10.1186/s12859-023-05578-5.
-- Colange M, Appé G, Meunier L, Weill S, Nordor A, Behdenna A. (2024)
-  Differential Expression Analysis with InMoose, the Integrated Multi-Omic Open-Source Environment in Python. BioRxiv. https://doi.org/XXX
+When using InMoose in research projects, please cite:
+- Colange M, Appé G, Meunier L, Weill S, Johnson WE, Nordor A, Behdenna A. (2025)
+  Bridging the gap between R and Python in bulk transcriptomic data analysis with InMoose. Nature Scientific Reports 15;18104. https://doi.org/10.1038/s41598-025-03376-y.
+
+Depending on the features you use, you may also cite one of the following papers:
+- Behdenna A, Colange M, Haziza J, Gema A, Appé G, Azencot CA and Nordor A. (2023)
+  pyComBat, a Python tool for batch effects correction in high-throughput molecular data using empirical Bayes methods. BMC Bioinformatics 24;459. https://doi.org/10.1186/s12859-023-05578-5.
+- Colange M, Appé G, Meunier L, Weill S, Nordor A, Behdenna A. (2025)
+  Differential Expression Analysis with InMoose, the Integrated Multi-Omic Open-Source Environment in Python. BMC Bioinformatics 26;160. https://doi.org/10.1186/s12859-025-06180-7.
 
 # Batch Effect Correction
 

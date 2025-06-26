@@ -59,14 +59,20 @@ The :doc:`pycombat <pycombat>` module was previously `distributed independently 
 
 To cite InMoose, please use one of the following references:
 
+M. Colange, G. Appé, L. Meunier, S. Weill, W.E. Johnson, A. Nordor, A. Behdenna.
+2025.  Bridging the gap between R and Python in bulk transcriptomic data
+analysis with InMoose. Nature Scientific Reports 15:18104.
+:doi:`10.1038/s41598-025-03376-y`.
+
 A. Behdenna, M. Colange, J. Haziza, A. Gema, G. Appé, C.-A. Azencott and A.
 Nordor. 2023. pyComBat, a Python tool for batch effects correction in
 high-throughput molecular data using empirical Bayes methods.  *BMC
-Bioinformatics* 7;24(1):459. :doi:`10.1186/s12859-023-05578-5`
+Bioinformatics* 24:459. :doi:`10.1186/s12859-023-05578-5`
 
-M. Colange, G. Appé, L. Meunier, S. Weill, A. Nordor, A.  Behdenna. 2024.
+M. Colange, G. Appé, L. Meunier, S. Weill, A. Nordor, A.  Behdenna. 2025.
 Differential Expression Analysis with InMoose, the Integrated Multi-Omic
-Open-Source Environment in Python. *Bioarxiv*. :doi:`10.1101/2024.11.14.623578`
+Open-Source Environment in Python. *BMC Bioinformatics* 26:160.
+:doi:`10.1186/s12859-025-06180-7`
 
 
 Indices and tables
