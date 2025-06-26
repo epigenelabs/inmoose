@@ -61,7 +61,7 @@ To cite InMoose, please use one of the following references:
 
 M. Colange, G. Appé, L. Meunier, S. Weill, W.E. Johnson, A. Nordor, A. Behdenna.
 2025.  Bridging the gap between R and Python in bulk transcriptomic data
-analysis with InMoose. Nature Scientific Reports 15:18104.
+analysis with InMoose. *Nature Scientific Reports* 15:18104.
 :doi:`10.1038/s41598-025-03376-y`.
 
 A. Behdenna, M. Colange, J. Haziza, A. Gema, G. Appé, C.-A. Azencott and A.
