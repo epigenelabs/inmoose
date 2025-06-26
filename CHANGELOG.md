@@ -1,8 +1,11 @@
 # InMoose release changelog
 
-## [0.7.8-dev]
+## [0.7.8]
 
 - add confidence intervals on log-fold-changes to `deseq2` results
+- fix an import with statsmodels
+- update paper references
+- fix documentation build
 
 ## [0.7.7]
 
