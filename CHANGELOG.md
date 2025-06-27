@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.7.9-dev]
+
+None
+
 ## [0.7.8]
 
 - add confidence intervals on log-fold-changes to `deseq2` results
