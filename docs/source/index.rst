@@ -11,6 +11,8 @@ It comprises Python ports of popular and recognized R tools, name ComBat
 [Johnson2007]_, ComBat-Seq [Zhang2020]_, DESeq2 [Love2014]_, edgeR [Chen2016]_,
 limma [Ritchie2015]_ and splatter [Zappia2017]_.
 
+Check out `our tutorial notebook <https://colab.research.google.com/drive/1bzmNDZeaw1A6tSgfx61O6PFtaQDve6SV?usp=sharing>`_!
+
 .. toctree::
    :maxdepth: 1
    :caption: Features
@@ -42,7 +44,7 @@ Authors
 Contact
 -------
 To report bugs (if any?), ask for support or request improvements and new
-features, please open a ticket on our Github repository.
+features, please open a ticket on our `Github repository <https://github.com/epigenelabs/inmoose>`_.
 You may also directly contact:
 
 Maximilien Colange at maximilien@epigenelabs.com
