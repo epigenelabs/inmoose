@@ -1,6 +1,6 @@
 # distutils: language = c++
 #-----------------------------------------------------------------------------
-# Copyright (C) 2022-2023 Maximilien Colange
+# Copyright (C) 2022-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,5 @@ from numpy cimport ndarray
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data)
 cdef public double compute_unit_nb_deviance(double, double, double)
 
-
-cdef extern from "maximize_interpolant.cpp":
-    cpdef vector.vector[double] cxx_maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, ndarray[double] likelihoods) except +
+cpdef public vector.vector[double] maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, const double[:,:] likelihoods)
 

@@ -25,6 +25,9 @@
 #   and `acr_compute`)
 # - 'src/glm_one_group.cpp' (function `glm_one_group_cython`)
 # - 'R/q2qnbinom.R' (function _q2qnbinom)
+# - 'src/interpolator.cpp' and 'src/interpolator.h' (class `interpolator` and function
+#   `quad_solver`)
+# - 'src/R_maximize_interpolant.cpp' (function `maximize_interpolant` function)
 
 import numpy as np
 cimport cython
@@ -424,3 +427,310 @@ cpdef (double, bool) glm_one_group_cython(Py_ssize_t nlibs,
             break
 
     return (cur_beta, has_converged)
+
+
+cdef struct solution:
+    double sol1, sol2
+    bool solvable
+
+cdef solution quad_solver(double a, double b, double c):
+    """
+    Solve quadratic equation ax^2 + bx + c = 0.
+
+    Parameters
+    ----------
+    a : double
+        Coefficient of x^2
+    b : double
+        Coefficient of x
+    c : double
+        Constant term
+
+    Returns
+    -------
+    solution
+        Structure containing the solutions and whether they exist
+    """
+    cdef:
+        solution cur_sol
+        double back, front
+
+    if a == 0 and b == 0:
+        if c == 0:
+            cur_sol.solvable = True
+        else:
+            cur_sol.solvable = False
+        return cur_sol
+
+    if a == 0:
+        cur_sol.sol1 = -c/b
+        cur_sol.sol2 = -c/b
+        cur_sol.solvable = True
+        return cur_sol
+
+    back = b * b - 4 * a * c
+    if back < 0:
+        cur_sol.solvable = False
+        return cur_sol
+
+    front = -b / (2 * a)
+    back = sqrt(back) / (2 * a)
+    cur_sol.sol1 = front - back
+    cur_sol.sol2 = front + back
+    cur_sol.solvable = True
+    return cur_sol
+
+
+cdef class interpolator:
+    """
+    Class to identify the global maximum in the interpolating function.
+
+    This is a Cython port of the C++ interpolator class from edgeR.
+
+    Attributes
+    ----------
+    npts : Py_ssize_t
+        number of points in cubic spline fit
+    b : vector[double]
+        vector of coefficients of degree 1 for the cubic spline
+    c : vector[double]
+        vector of coefficients of degree 2 for the cubic spline
+    d : vector[double]
+        vector of coefficients of degree 3 for the cubic spline
+    """
+
+    cdef:
+        Py_ssize_t npts
+        vector.vector[double] b, c, d
+
+    def __init__(self, Py_ssize_t n):
+        """
+        Initialize the interpolator with the number of points.
+
+        Parameters
+        ----------
+        n : size_t
+            Number of points for interpolation (must be at least 2)
+        """
+        if n < 2:
+            raise RuntimeError("must have at least two points for interpolation")
+        self.npts = n
+        self.b.resize(n)
+        self.c.resize(n)
+        self.d.resize(n)
+
+    cdef double find_max(self, const double* x, const double* y):
+        """
+        Find the maximum of the interpolating spline.
+
+        Parameters
+        ----------
+        x : const double*
+            Array of x-coordinates
+        y : const double*
+            Array of y-coordinates
+
+        Returns
+        -------
+        double
+            The x-coordinate where the maximum occurs
+        """
+        cdef:
+            double maxed = -1
+            Py_ssize_t maxed_at = -1
+            Py_ssize_t i
+            double x_max
+
+            double ld, lc, lb
+            double rd, rc, rb
+            solution sol_left, sol_right
+            double chosen_sol, temp
+
+        # Get initial guess for MLE
+        for i in range(self.npts):
+            if maxed_at == -1 or y[i] > maxed:
+                maxed = y[i]
+                maxed_at = i
+
+        x_max = x[maxed_at]
+
+        # Fit the spline
+        self._fmm_spline(x, y)
+
+        # Check left segment for maximum
+        if maxed_at > 0:
+            ld = self.d[maxed_at-1]
+            lc = self.c[maxed_at-1]
+            lb = self.b[maxed_at-1]
+
+            sol_left = quad_solver(3*ld, 2*lc, lb)
+            if sol_left.solvable:
+                # Use solution with maximum (not minimum)
+                # If the curve is mostly increasing, the maximal point is located at the smaller solution (i.e. sol1 for a>0).
+                # If the curve is mostly decreasing, the maximal point is located at the larger solution (i.e. sol1 for a<0).
+                chosen_sol = sol_left.sol1
+
+                # Check if solution is within segment bounds
+                # The spline coefficients are designed such that 'x' in 'y + b*x + c*x^2 + d*x^3' is
+                # equal to 'x_t - x_l' where 'x_l' is the left limit of that spline segment and 'x_t'
+                # is where you want to get an interpolated value. This is necessary in 'splinefun' to
+                # ensure that you get 'y' (i.e. the original data point) when 'x=0'. For our purposes,
+                # the actual MLE corresponds to 'x_t' and is equal to 'solution + x_0'.
+                if chosen_sol > 0 and chosen_sol < x[maxed_at] - x[maxed_at-1]:
+                    temp = ((ld*chosen_sol + lc)*chosen_sol + lb)*chosen_sol + y[maxed_at-1]
+                    if temp > maxed:
+                        maxed = temp
+                        x_max = chosen_sol + x[maxed_at-1]
+
+        # Check right segment for maximum
+        if maxed_at < self.npts - 1:
+            rd = self.d[maxed_at]
+            rc = self.c[maxed_at]
+            rb = self.b[maxed_at]
+
+            sol_right = quad_solver(3*rd, 2*rc, rb)
+            if sol_right.solvable:
+                chosen_sol = sol_right.sol1
+
+                if chosen_sol > 0 and chosen_sol < x[maxed_at+1] - x[maxed_at]:
+                    temp = ((rd*chosen_sol + rc)*chosen_sol + rb)*chosen_sol + y[maxed_at]
+                    if temp > maxed:
+                        maxed = temp
+                        x_max = chosen_sol + x[maxed_at]
+
+        return x_max
+
+    cdef void _fmm_spline(self, const double* x, const double* y):
+        """
+        Fit a cubic spline using Forsythe Malcolm Moler algorithm.
+
+        In this case the end-conditions are determined by fitting cubic
+        polynomials to the first and last 4 points and matching the third
+        derivitives of the spline at the end-points to the third derivatives of
+        these cubics at the end-points.
+
+        This function is a direct port from splines.c in the R stats package.
+        https://github.com/SurajGupta/r-source/blob/master/src/library/stats/src/splines.c
+
+        Parameters
+        ----------
+        x : const double*
+            Array of x-coordinates
+        y : const double*
+            Array of y-coordinates
+        """
+        cdef:
+            Py_ssize_t nm1, i
+            double t
+
+        if self.npts < 2:
+            raise ValueError("spline interpolation requires at least 2 points")
+
+        if self.npts < 3:
+            t = (y[1] - y[0])
+            self.b[0] = t / (x[1] - x[0])
+            self.b[1] = self.b[0]
+            self.c[0] = self.c[1] = self.d[0] = self.d[1] = 0.0
+            return
+
+        nm1 = self.npts - 1
+
+        # Set up tridiagonal system
+        # b = diagonal, d = offdiagonal, c = right hand side
+        self.d[0] = x[1] - x[0]
+        self.c[1] = (y[1] - y[0]) / self.d[0]
+
+        for i in range(1, self.npts-1):
+            self.d[i] = x[i+1] - x[i]
+            self.b[i] = 2.0 * (self.d[i-1] + self.d[i])
+            self.c[i+1] = (y[i+1] - y[i]) / self.d[i]
+            self.c[i] = self.c[i+1] - self.c[i]
+
+        # End conditions
+        # Third derivatives at x[0] and x[n-1] obtained from divided differences
+
+        self.b[0] = -self.d[0]
+        self.b[self.npts-1] = -self.d[nm1-1]
+        self.c[0] = self.c[self.npts-1] = 0.0
+
+        if self.npts > 3:
+            self.c[0] = self.c[2] / (x[3] - x[1]) - self.c[1] / (x[2] - x[0])
+            self.c[self.npts-1] = self.c[nm1-1] / (x[self.npts-1] - x[self.npts-3]) - self.c[self.npts-3] / (x[nm1-1] - x[self.npts-4])
+            self.c[0] = self.c[0] * self.d[0] * self.d[0] / (x[3] - x[0])
+            self.c[self.npts-1] = -self.c[self.npts-1] * self.d[nm1-1] * self.d[nm1-1] / (x[self.npts-1] - x[self.npts-4])
+
+        # Gaussian elimination
+        for i in range(1, self.npts):
+            t = self.d[i-1] / self.b[i-1]
+            self.b[i] = self.b[i] - t * self.d[i-1]
+            self.c[i] = self.c[i] - t * self.c[i-1]
+
+        # Backward substitution
+        self.c[self.npts-1] = self.c[self.npts-1] / self.b[self.npts-1]
+        for i in range(nm1-1, -1, -1):
+            self.c[i] = (self.c[i] - self.d[i] * self.c[i+1]) / self.b[i]
+
+        # c[i] is now the sigma[i-1] of the text
+        # Compute polynomial coefficients
+        self.b[self.npts-1] = (y[self.npts-1] - y[self.npts-2]) / self.d[self.npts-2] + self.d[self.npts-2] * (self.c[self.npts-2] + 2.0 * self.c[self.npts-1])
+        for i in range(nm1):
+            self.b[i] = (y[i+1] - y[i]) / self.d[i] - self.d[i] * (self.c[i+1] + 2.0 * self.c[i])
+            self.d[i] = (self.c[i+1] - self.c[i]) / self.d[i]
+            self.c[i] = 3.0 * self.c[i]
+
+        self.c[self.npts-1] = 3.0 * self.c[self.npts-1]
+        self.d[self.npts-1] = self.d[nm1-1]
+
+
+
+@cython.wraparound(False)
+@cython.boundscheck(False)
+cpdef vector.vector[double] maximize_interpolant(vector.vector[double] spts, const double[:,:] likelihoods):
+    """
+    Find the maximum of interpolating splines for each row in the likelihood matrix.
+
+    This is a Cython port of the maximize_interpolant function from edgeR.
+
+    Parameters
+    ----------
+    spts : vector[double]
+        Spline points (x-coordinates)
+    likelihoods : const double[:,:]
+        Matrix of likelihood values, where each row represents a different tag/gene
+        and each column corresponds to a spline point
+
+    Returns
+    -------
+    vector[double]
+        Vector of x-coordinates where the maximum occurs for each tag/gene
+
+    Raises
+    ------
+    RuntimeError
+        If the number of columns in likelihood matrix doesn't match the number of spline points
+    """
+    cdef:
+        Py_ssize_t num_pts = spts.size()
+        Py_ssize_t num_tags = likelihoods.shape[0]
+        Py_ssize_t tag, i
+        interpolator maxinterpol
+        vector.vector[double] current_ll
+        vector.vector[double] all_spts
+        vector.vector[double] output
+
+    if num_pts != likelihoods.shape[1]:
+        raise RuntimeError("number of columns in likelihood matrix should be equal to number of spline points")
+
+    maxinterpol = interpolator(num_pts)
+    current_ll.resize(num_pts)
+    all_spts = spts  # Make a copy to guarantee contiguousness
+    output.resize(num_tags)
+
+    for tag in range(num_tags):
+        # Copy current row to working array
+        for i in range(num_pts):
+            current_ll[i] = likelihoods[tag, i]
+
+        output[tag] = maxinterpol.find_max(&all_spts[0], &current_ll[0])
+
+    return output
