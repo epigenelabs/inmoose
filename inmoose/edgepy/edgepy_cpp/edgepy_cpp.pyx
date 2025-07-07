@@ -33,6 +33,7 @@ import numpy as np
 cimport cython
 from libcpp.cmath cimport abs, log, isfinite, exp, isnan
 from libc.math cimport INFINITY
+from libc.stdint cimport int64_t
 
 from libc.math cimport sqrt
 from scipy.special cimport cython_special as sp
@@ -45,7 +46,7 @@ cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector
 
 
 ctypedef fused count_type:
-    long
+    int64_t
     double
 
 
