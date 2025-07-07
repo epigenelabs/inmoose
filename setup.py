@@ -24,16 +24,6 @@ if "--profile" in sys.argv:
     macros += [("CYTHON_TRACE_NOGIL", "1")]
     sys.argv.remove("--profile")
 
-common_cpp = Extension(
-    "inmoose.common_cpp",
-    [
-        "inmoose/common_cpp/common_cpp.pyx",
-        "inmoose/common_cpp/matrix.cpp",
-    ],
-    include_dirs=[numpy.get_include()],
-    define_macros=macros,
-)
-
 stats_cpp = Extension(
     "inmoose.utils.stats_cpp",
     [
@@ -48,7 +38,7 @@ edgepy_cpp = Extension(
     [
         "inmoose/edgepy/edgepy_cpp/edgepy_cpp.pyx",
     ],
-    include_dirs=[numpy.get_include(), "inmoose/common_cpp/"],
+    include_dirs=[numpy.get_include()],
     define_macros=macros,
 )
 
@@ -63,7 +53,6 @@ setup(
         "inmoose/data/pasilla",
         "inmoose/pycombat",
         "inmoose/limma",
-        "inmoose/common_cpp",
         "inmoose/edgepy",
         "inmoose/edgepy/edgepy_cpp",
         "inmoose/sim",
@@ -77,9 +66,6 @@ setup(
             "edgepy_cpp.pyx",
             "__init__.pxd",
             "edgepy_cpp.h",
-        ],
-        "inmoose/common_cpp": [
-            "matrix.h",
         ],
         "inmoose/data/airway": [
             "airway.h5ad",
@@ -99,5 +85,5 @@ setup(
         ],
         "inmoose/cohort_qc": ["qc_report.html"],
     },
-    ext_modules=[common_cpp, edgepy_cpp, stats_cpp],
+    ext_modules=[edgepy_cpp, stats_cpp],
 )
