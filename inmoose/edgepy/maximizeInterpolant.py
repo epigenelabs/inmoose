@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
-# Copyright (C) 2022-2023 Maximilien Colange
+# Copyright (C) 2022-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 import numpy as np
 
-from .edgepy_cpp import cxx_maximize_interpolant
+from .edgepy_cpp import maximize_interpolant
 
 
 def maximizeInterpolant(x, y):
@@ -62,5 +62,5 @@ def maximizeInterpolant(x, y):
         raise ValueError("spline points must be unique and sorted")
 
     # Performing some type checking
-    out = cxx_maximize_interpolant(x, y)
+    out = maximize_interpolant(x, y)
     return out
