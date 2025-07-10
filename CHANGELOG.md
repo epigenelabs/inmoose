@@ -1,8 +1,9 @@
 # InMoose release changelog
 
-## [0.7.9-dev]
+## [0.8.0]
 
-None
+- add a tutorial shared notebook
+- inmoose now works on Windows
 
 ## [0.7.8]
 
