@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.8.1-dev]
+
+None
+
 ## [0.8.0]
 
 - add a tutorial shared notebook
