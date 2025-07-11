@@ -2,7 +2,7 @@
 
 ## [0.8.1-dev]
 
-None
+- PEP639 compliance
 
 ## [0.8.0]
 
