@@ -53,7 +53,7 @@ class TopTags(DEResults):
         self.test = test
 
     def __repr__(self):
-        return f"Coefficient: {self.comparison}\n{self.table}"
+        return f"Coefficient: {self.comparison}\n{self}"
 
 
 def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
