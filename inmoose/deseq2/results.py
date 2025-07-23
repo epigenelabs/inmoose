@@ -193,7 +193,7 @@ def results_dds(
 
     The results table when printed will provide the information about the
     comparison, *e.g.* "log2 fold change (MAP): condition treated vs.
-    untreated", meaning that the estimates are of lof2(treated / untreated), as
+    untreated", meaning that the estimates are of log2(treated / untreated), as
     would be returned using :code:`contrast=c("condition", "treated",
     "untreated")`. Multiple results can be returned for analyses beyond a
     simple two group comparison, so this function takes arguments
