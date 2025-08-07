@@ -105,7 +105,7 @@ def eBayes(
 
     If :code:`robust=True`, then the robust empirical Bayes procedure of
     [Phipson2016]_ is used. This is frequently useful to protect the empirical
-    Bayes procedure agains hyper-variable or hypo-variable genes, especially
+    Bayes procedure against hyper-variable or hypo-variable genes, especially
     when analysing RNA-Seq data. See :func:`squeezeVar` for more details.
 
     Arguments

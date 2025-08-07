@@ -607,7 +607,7 @@ cdef class interpolator:
 
         In this case the end-conditions are determined by fitting cubic
         polynomials to the first and last 4 points and matching the third
-        derivitives of the spline at the end-points to the third derivatives of
+        derivatives of the spline at the end-points to the third derivatives of
         these cubics at the end-points.
 
         This function is a direct port from splines.c in the R stats package.

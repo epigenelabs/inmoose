@@ -63,7 +63,7 @@ def estimateDispersions_dds(
     likelihood estimates; a normal prior is determined for the log dispersion
     estimates centered on the predicted value from the trended fit with
     variance equal to the difference between the observed variance of the log
-    dispersion estimates and te expected sampling variance; finally maximum a
+    dispersion estimates and the expected sampling variance; finally maximum a
     posteriori dispersion estimates are returned.  This final dispersion
     parameter is used in subsequent tests. The final dispersion estimates can
     be accessed through :attr:`DESeqDataSet.dispersions`. The fitted
@@ -375,7 +375,7 @@ def estimateDispersionsGeneEst(
         mu[:, fitidx] = fitMu
 
         # use of kappa_0 in backtracking search
-        # inital proposal = log(alpha) + kappa_0 * deriv. of log lik. w.r.t. log(alpha)
+        # initial proposal = log(alpha) + kappa_0 * deriv. of log lik. w.r.t. log(alpha)
         # use log(minDisp/10) to stop if dispersions going to -infinity
         if type_ == "DESeq2":
             dispRes = fitDispWrapper(

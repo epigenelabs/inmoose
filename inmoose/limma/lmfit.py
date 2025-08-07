@@ -78,7 +78,7 @@ def lmFit(
     If :code:`obj` is a matrix then it should contain log-ratios or
     log-expression data with rows corresponding to probes and columns to
     arrays. A vector is treated the same as a matrix with a single column. For
-    objects of other classes, a matrix of epression values is taken from the
+    objects of other classes, a matrix of expression values is taken from the
     appropriate component or slot of the object. If :code:`obj` is of class
     :code:`MAList` or :code:`marrayNorm`, then the matrix of log-ratios
     (M-values) is extracted.
@@ -300,7 +300,7 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
           linear model. Same number of rows as :code:`M`, same number of
           columns as :code:`design`.
         - stdev_unscaled: matrix conformal with :code:`coef` containing the
-          unscaled standard deviations for the coefficent estimators. The
+          unscaled standard deviations for the coefficient estimators. The
           standard errors are given by :code:`stdev_unscaled * sigma`.
         - sigma: numeric vector containing the residual standard deviation for
           each gene.

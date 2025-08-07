@@ -211,7 +211,7 @@ def results_dds(
     The argument :code:`contrast` can be used to generate results tables for
     any comparison of interest, for example, the log2 fold change between two
     levels of a factor, and its usage is described below. It can also
-    accomodate more complicated numeric comparisons. Note that :code:`contrast`
+    accommodate more complicated numeric comparisons. Note that :code:`contrast`
     will set to 0 the estimated LFC in a comparison of two groups, where all
     the counts in the two groups are equal to 0 (while other groups have
     positive counts), while :code:`name` will not automatically set these LFC
@@ -348,7 +348,7 @@ def results_dds(
         other than 0.1, :code:`alpha` should be set to that value.
     filter
         the vector of filter statistics over which the independent filtering
-        will be optimized. By default, the mane of normalized counts is used.
+        will be optimized. By default, the mean of normalized counts is used.
     theta : array-like
         the quantiles at which to assess the number of rejections from
         independent filtering
@@ -359,7 +359,7 @@ def results_dds(
         p-value adjustment, with arguments :code:`res` (a
         :class:`.DESeqResults` object), :code:`filter` (the quantity for
         filtering tests), :code:`alpha` (the target FDR),
-        :code:`pAdjustMethod`. This function should resturn a
+        :code:`pAdjustMethod`. This function should return a
         :class:`.DESeqResults` object with a :code:`adj_pvalue` column.
     saveCols : array-like
         the columns of :code:`obj.var` to pass into the output results table

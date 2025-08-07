@@ -239,7 +239,7 @@ class DESeqDataSet(AnnData):
         r"""
         accessor for the normalization factors
 
-        Gene-specific normalization factors for eacg sample can be provided as
+        Gene-specific normalization factors for each sample can be provided as
         a matrix, which will preempt :attr:`sizeFactors`. In some experiments,
         counts for each sample have varying dependence on covariates, *e.g.* on
         GC-content for sequencing data run on different days, and in this case

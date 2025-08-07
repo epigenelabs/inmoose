@@ -53,7 +53,7 @@ def estimateGLMCommonDisp_DGEList(
     -------
     DGEList
         :code:`self` updated with :code:`common_dispersion`, and :code:`AveLogCPM`
-        if it was not alread present in input :code:`self`.
+        if it was not already present in input :code:`self`.
     """
     y = validDGEList(self)
     AveLogCPM = y.aveLogCPM(dispersion=0.05)

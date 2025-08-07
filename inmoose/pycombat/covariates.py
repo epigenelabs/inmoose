@@ -77,7 +77,7 @@ class VirtualCohortInput:
             model matrix (dataframe, list or numpy array) for one or multiple
             covariates to include in linear model (signal from these variables
             are kept in data after adjustment). Covariates have to be
-            categorial, they can not be continious values (default: :code:`None`).
+            categorial, they can not be continuous values (default: :code:`None`).
         ref_batch : any
             batch id of the batch to use as reference. Must be one of the element of
             :code:`batch` (default: :code:`None`).
@@ -105,7 +105,7 @@ class VirtualCohortInput:
                         f"the batch column \"{batch}\" must appear in 'counts.obs'"
                     )
         else:
-            raise ValueError("counts must be a pandas DataFrame or a numpy nd array")
+            raise ValueError("counts must be a pandas DataFrame or a numpy ndarray")
 
         self.input_type = input_type
         self.list_samples = list_samples
@@ -416,7 +416,7 @@ def make_design_matrix(
         model matrix (dataframe, list or numpy array) for one or multiple
         covariates to include in linear model (signal from these variables are
         kept in data after adjustment). Covariates have to be categorial, they
-        can not be continious values (default: `None`).
+        can not be continuous values (default: `None`).
     ref_batch : any
         batch id of the batch to use as reference. Must be one of the element of
         `batch` (default: `None`).

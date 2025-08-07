@@ -73,7 +73,7 @@ def squeezeVar(var, df, covariate=None, robust=False, winsor_tail_p=(0.05, 0.1))
     Returns
     -------
     dict
-        a dictionnary with keys:
+        a dictionary with keys:
 
         - :code:`"var_post"`, 1-D array of posterior variances. Same length as
           :code:`var`.

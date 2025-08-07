@@ -388,17 +388,17 @@ class consensusClustering:
         clusters, sizes = np.unique(prediction, return_counts=True)
 
         for id in range(items_consensus.shape[0]):
-            for clust, siz in zip(clusters, sizes):
+            for clust, size in zip(clusters, sizes):
                 clust_elem = np.where(prediction == clust)[0]
                 if id in clust_elem:
                     cols = clust_elem[clust_elem != id]
                     items_consensus[id, clust] = np.sum(
                         self.consensus_matrices[k - self.min_k, id, cols]
-                    ) / (siz - 1)
+                    ) / (size - 1)
                 else:
                     items_consensus[id, clust] = (
                         np.sum(self.consensus_matrices[k - self.min_k, id, clust_elem])
-                        / siz
+                        / size
                     )
         return items_consensus
 

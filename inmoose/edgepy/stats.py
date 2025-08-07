@@ -42,7 +42,7 @@ def pnbinom(q, size, prob=None, mu=None, lower_tail=True):
     ----------
     q           vector of quantiles
     size        dispersion parameter. Must be strictly positive but not necessarily an integer
-    prob        probablity of success in each trial. 0 < prob <= 1
+    prob        probability of success in each trial. 0 < prob <= 1
     mu          mean (alternative characterization)
     lower_tail  if True, probabilities are P[X <= x], otherwise P[X > x]
     """
@@ -68,7 +68,7 @@ def qnbinom(p, size, prob=None, mu=None, lower_tail=True):
     ----------
     p           vector of probabilities
     size        dispersion parameter. Must be strictly positive but not necessarily an integer
-    prob        probablity of success in each trial. 0 < prob <= 1
+    prob        probability of success in each trial. 0 < prob <= 1
     mu          mean (alternative characterization)
     lower_tail  if True, probabilities are P[X <= x], otherwise P[X > x]
     """
