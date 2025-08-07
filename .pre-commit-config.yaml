@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+
+  # GitLeaks - Scans for sensitive data (like API keys) in your codebase
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.23.1
+    hooks:
+      - id: gitleaks
+        name: Detect Hardcoded Secrets
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
