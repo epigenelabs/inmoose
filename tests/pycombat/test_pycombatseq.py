@@ -86,10 +86,10 @@ class test_pycombatseq(unittest.TestCase):
         res2 = pycombat_seq(self.y, ["a", "a", "b", "b", "b"], ref_batch="a")
         self.assertTrue(np.array_equal(res, res2))
 
-        # test raise error for incorect counts format
+        # test raise error for incorrect counts format
         with self.assertRaisesRegex(
             ValueError,
-            expected_regex="counts must be a pandas DataFrame or a numpy nd array",
+            expected_regex="counts must be a pandas DataFrame or a numpy ndarray",
         ):
             pycombat_seq(
                 [

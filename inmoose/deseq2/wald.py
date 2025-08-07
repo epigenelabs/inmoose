@@ -139,7 +139,7 @@ def nbinomWaldTest(
         coefficient vector
     useOptim : bool
         whether to use the native optimization function on rows that do not
-        converged withing :code:`maxit` iterations
+        converged within :code:`maxit` iterations
     quiet : bool
         whether to print messages at each step
     useT : bool
@@ -479,7 +479,7 @@ def robustMethodOfMomentsDisp(obj, modelMatrix):
     m = np.mean(cnts, axis=0)
     alpha = (v - m) / m**2
     # cannot use the typical minDisp = 1e-8 here or else all counts in the same
-    # group as the outlier count will get an extrem Cook's distance
+    # group as the outlier count will get an extreme Cook's distance
     minDisp = 0.04
     alpha = np.maximum(alpha, minDisp)
     return alpha

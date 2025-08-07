@@ -77,7 +77,7 @@ def glmQLFit_DGEList(
           :code:`robust=True`), giving the prior degrees of freedom for the QL
           dispersions.
         - :code:`var_prior`, a float (if :code:`robust=False`) or array (if
-          :code:`robust=True`), giving the location of the prior distrbution
+          :code:`robust=True`), giving the location of the prior distribution
           for the QL dispersions.
         - :code:`var_post`, an array containing the posterior empirical Bayes
           QL dispersions.
@@ -197,7 +197,7 @@ def glmQLFit(
           :code:`robust=True`), giving the prior degrees of freedom for the QL
           dispersions.
         - :code:`var_prior`, a float (if :code:`robust=False`) or array (if
-          :code:`robust=True`), giving the location of the prior distrbution
+          :code:`robust=True`), giving the location of the prior distribution
           for the QL dispersions.
         - :code:`var_post`, an array containing the posterior empirical Bayes
           QL dispersions.

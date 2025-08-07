@@ -55,7 +55,7 @@ class test_consensusClustering(unittest.TestCase):
             self.mocked_data.to_numpy(), random_state=0
         )
 
-        # test consensus matrix is symetric
+        # test consensus matrix is symmetric
         for i in range(len(self.CC.consensus_matrices)):
             assert np.allclose(
                 self.CC.consensus_matrices[i], self.CC.consensus_matrices[i].T

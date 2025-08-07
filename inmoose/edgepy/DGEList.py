@@ -183,8 +183,8 @@ class DGEList(object):
                 "Length of 'group' must be equal to the number of columns in 'counts'"
             )
 
-        # Make data frame of sample informations
-        # in R, acts as a dictionnary of info for each row. R allows duplicated column names (with a warning message)
+        # Make data frame of sample information
+        # in R, acts as a dictionary of info for each row. R allows duplicated column names (with a warning message)
         sam = pd.DataFrame(
             {"group": group, "lib_size": lib_size, "norm_factors": norm_factors}
         )

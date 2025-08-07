@@ -69,7 +69,7 @@ def topTable(
 
     Note, if there is no good evidence for differential expression in the
     experiment, that it is quite possible for all the adjusted *p*-values to be
-    large, even for all of them to be equal to one. It is quite posssible for
+    large, even for all of them to be equal to one. It is quite possible for
     all the adjusted *p*-values to be equal to one if the smallest *p*-values
     is no smaller than :code:`1/ngenes` where :code:`ngenes` is the number of
     genes with non-missing *p*-values.

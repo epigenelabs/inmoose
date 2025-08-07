@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
 
         # interactions error
         with self.assertRaisesRegex(
-            ValueError, expected_regex="designs with interations"
+            ValueError, expected_regex="designs with interactions"
         ):
             DESeq(dds, betaPrior=True)
 

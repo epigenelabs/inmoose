@@ -152,7 +152,7 @@ class Test(unittest.TestCase):
             )
         )
 
-        # check that outlier filtering catched throughout range of mu
+        # check that outlier filtering catches throughout range of mu
         beta0 = np.linspace(1, 16, 100)
         idx = np.repeat(np.repeat([True, False], [1, 9]), 10)
         for disp0 in [0.01, 0.1]:

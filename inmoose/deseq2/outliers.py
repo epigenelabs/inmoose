@@ -156,7 +156,7 @@ def replaceOutliers(
     function then sets the p-values to NA for genes which contain an outlying
     count as defined by a Cook's distance above a threshold. With may degrees
     of freedom, i.e. many more samples than number of parameters to be
-    estimated, it might be undesirable to remove entire genes fomr the analysis
+    estimated, it might be undesirable to remove entire genes from the analysis
     just because their data include a single count outlier.  An alternative
     strategy is to replace the outlier counts with the trimmed mean over all
     samples, adjusted by the size factor or normalization factor for that

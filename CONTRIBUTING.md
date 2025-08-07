@@ -1,6 +1,6 @@
 # Contributing to InMoose
 
-InMoose aims at brining state-of-the-art bioinformatics tools to the Python
+InMoose aims at bringing state-of-the-art bioinformatics tools to the Python
 ecosystem. The project is still in development, and any contribution is
 important!
 

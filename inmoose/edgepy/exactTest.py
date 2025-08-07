@@ -95,7 +95,7 @@ def exactTest(
         :code:`self.samples["group"]` corresponding to those indices and using
         those levels as the groups to be compared. If :code:`None`, then first
         two levels of :code:`self.samples["group"]` (a factor) are used. Note that
-        the first group listed in the pair is the baseline for the comparision,
+        the first group listed in the pair is the baseline for the comparison,
         so if the pair is :code:`("A","B")` then the comparison is :code:`B -
         A`, so genes with positive log-fold changes are up-regulated in group B
         compared with group A (and vice versa for genes with negative log-fold

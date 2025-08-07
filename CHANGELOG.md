@@ -106,7 +106,7 @@
 - bump github actions versions
 - publish coverage report to coveralls.io
 - port `edgeR` functions for differential expression to `inmoose`
-- Modifiy clustering stability plot
+- Modify clustering stability plot
 - remove many (not all) warnings
 
 ## [0.3.1]

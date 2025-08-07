@@ -612,7 +612,7 @@ class CohortMetric:
         ].values
 
         width = (11 / (12 - min(11, mean_after["Covariate_Combination"].nunique()))) + 4
-        heigth = max(
+        height = max(
             10,
             (
                 max(
@@ -632,7 +632,7 @@ class CohortMetric:
                 mean_before["Sample"], "Covariate_Combination"
             ].values
 
-            fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(width, heigth))
+            fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(width, height))
 
             # Plot before correction
             sns.violinplot(
@@ -649,7 +649,7 @@ class CohortMetric:
             axs[0].tick_params(axis="x", rotation=45)
             ax = axs[1]
         else:
-            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(width, heigth / 2))
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(width, height / 2))
 
         # Plot after correction
         sns.violinplot(

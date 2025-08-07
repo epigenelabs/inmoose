@@ -27,7 +27,7 @@ from ..utils import LOGGER
 
 def getAndCheckWeights(obj, modelMatrix, weightThreshold=1e-2):
     """
-    Check and retrive weights
+    Check and retrieve weights
 
     Weights checking consists in verifying that the model matrix remains full
     rank, even when considering weights below `weightThreshold` are considered

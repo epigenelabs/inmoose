@@ -275,7 +275,7 @@ low counts [2]     : 0, 0.00%
             dds.results(addMLE=True)
         with self.assertRaisesRegex(
             ValueError,
-            expected_regex="tests of log fold change above or below a theshold must be Wald tests",
+            expected_regex="tests of log fold change above or below a threshold must be Wald tests",
         ):
             dds.results(lfcThreshold=1, test="LRT")
 

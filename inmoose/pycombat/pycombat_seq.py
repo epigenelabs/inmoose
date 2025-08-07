@@ -48,7 +48,7 @@ def pycombat_seq(
     covar_mod : list or matrix, optional
         model matrix (dataframe, list or numpy array) for one or multiple covariates to include in linear model (signal
         from these variables are kept in data after adjustment). Covariates have to be categorial,
-        they can not be continious values (default: `None`).
+        they can not be continuous values (default: `None`).
     shrink : bool, optional
         whether to apply shrinkage on parameter estimation
     shrink_disp : bool, optional
@@ -199,7 +199,7 @@ def pycombat_seq(
         )
     phi_star = phi_star_mat.mean(axis=1)
 
-    ####### Ajust the data #######
+    ####### Adjust the data #######
     LOGGER.info("Adjusting the data")
     adjust_counts = np.full(counts.shape, np.nan)
     for kk in range(n_batch):

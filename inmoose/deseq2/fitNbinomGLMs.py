@@ -81,7 +81,7 @@ def fitNbinomGLMs(
     This is a low-level function. Users typically call :func:`nbinomWaldTest`
     or :func:`nbinomLRT` which calls this function to perform fitting. These
     functions return a :func:`DESeqDataSet` object with the appropriate columns
-    added. This function returns its resuts as a list.
+    added. This function returns its results as a list.
 
     Arguments
     ---------
@@ -293,7 +293,8 @@ def fitNbinomGLMs(
     if forceOptim:
         colsForOptim = np.arange(len(betaConv))
     else:
-        # switch based on wether we should also use optim on rows which did not converge
+        # switch based on whether we should also use optim on rows which did not
+        # converge
         if useOptim:
             colsForOptim = ~betaConv | ~colStable | ~colVarPositive
         else:

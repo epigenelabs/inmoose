@@ -83,7 +83,7 @@ def DESeq(
     :math:`\mu_{ij}` and a gene-specific dispersion parameter
     :math:`\\alpha_i`.  The fitted mean is composed of a sample-specific size
     factor :math:`s_j` and a parameter :math:`q_{ij}` proportional to the
-    expected true concentration of framents for sample :math:`j`.  The
+    expected true concentration of fragments for sample :math:`j`.  The
     coefficients :math:`\\beta_i` give the log2 fold changes for gene :math:`i`
     for each column of the model matrix :math:`X`.  The sample-specific size
     factors can be replaced by gene-specific normalization factors for each
@@ -146,7 +146,7 @@ def DESeq(
         for :code:`test="LRT"`, the full model formula, which is restricted to
         the formula in :code:`obj.design`. Alternatively, it can be a model
         matrix constructed by the user.
-        Advanced use: specifying a model matric for full and
+        Advanced use: specifying a model matrix for full and
         :code:`test="Wald"` is possible if :code:`betaPrior=False`.
     reduced : formula or design matrix, optional
         for :code:`test="LRT"`, a reduced formula to compare against, i.e. the

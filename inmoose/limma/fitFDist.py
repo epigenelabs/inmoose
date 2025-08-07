@@ -57,7 +57,7 @@ def fitFDist(x, df1, covariate=None):
     Returns
     -------
     dict
-        a dictionnary with the following components:
+        a dictionary with the following components:
 
         - :code:`"scale"`, a scale factor for F-distribution. An array if
           :code:`covariate` is not :code:`None`, a scalar otherwise.

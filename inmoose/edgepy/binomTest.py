@@ -31,7 +31,7 @@ def binomTest(y1, y2, n1=None, n2=None, p=None):
     variation.
 
     An exact two-sided binomial test is computed for each gene. This test is
-    closely releated to Fisher's exact test for 2x2 contingency tables but,
+    closely related to Fisher's exact test for 2x2 contingency tables but,
     unlike Fisher's test, it conditions on the total number of counts for each
     gene. The null hypothesis is that the expected counts are in the same
     proportions as the library sizes, *i.e.* that the binomial probability for

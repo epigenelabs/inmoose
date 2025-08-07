@@ -66,7 +66,7 @@ def dispCoxReidInterpolateTagwise(
         design matrix for the GLM to fit
     dispersion : float or array_like
         scalar or vector giving the dispersion(s) towards which the genewise
-        dispersion parametes are shrunk
+        dispersion parameters are shrunk
     offset : float or array_like, optional
         scalar, vector or matrix giving the offset (in addition to the log of
         the effective library size) that is to be included in the NB GLM for the

@@ -136,7 +136,7 @@ def mglmOneWay(
         tuple with the following components:
 
         - matrix of estimated coefficients for the linear models. Rows
-          corrspond to row of :code:`y` and columns to columns of :code:`design`
+          correspond to row of :code:`y` and columns to columns of :code:`design`
         - matrix of fitted values. Same shape as :code:`y`.
     """
     y = np.asarray(y)
