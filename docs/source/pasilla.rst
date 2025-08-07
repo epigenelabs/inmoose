@@ -55,4 +55,3 @@ References
    Dudoit, S.E. Brenner, B.R. Graveley. 2011. Conservation of an RNA regulatory
    map between Drosophila and mammals. *Genome Research*
    :doi:`10.1101/gr.108662.110`
-

@@ -4,4 +4,3 @@
 .. currentmodule:: inmoose.deseq2.results
 
 .. autoclass:: DESeqResults
-

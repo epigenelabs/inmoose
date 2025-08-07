@@ -28,4 +28,3 @@ References
    Profiling Identifies CRISPLD2 as a Glucocorticoid Responsive Gene that
    Modulates Cytokine Function in Airway Smooth Muscle Cells. *PLoS One*.
    9(6):e99625. :doi:`10.1371/journal.pone.0099625`.
-

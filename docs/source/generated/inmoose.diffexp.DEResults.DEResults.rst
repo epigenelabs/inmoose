@@ -12,5 +12,3 @@
 
       ~DEResults.__init__
       ~DEResults.plotMA
-
-

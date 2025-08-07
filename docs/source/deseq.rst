@@ -2326,4 +2326,3 @@ Code documentation
    replaceOutliers
    varianceStabilizingTransformation
    ~Hmisc.wtd_quantile
-
