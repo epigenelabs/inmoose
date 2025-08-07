@@ -7,6 +7,13 @@ on:
       - published
 
 jobs:
+  precommit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
+
   ruff:
     runs-on: ubuntu-latest
     steps:
@@ -19,7 +26,7 @@ jobs:
         run: ruff check --output-format=github .
 
   tests_and_coverage:
-    needs: [ruff]
+    needs: [precommit,ruff]
     name: Run unit tests and upload coverage report
     runs-on: ${{ matrix.os }}
     strategy:
@@ -58,7 +65,7 @@ jobs:
           parallel-finished: true
 
   build_sdist:
-    needs: [ruff]
+    needs: [precommit,ruff]
     name: Build source distribution
     runs-on: ubuntu-latest
 

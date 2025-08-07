@@ -1,0 +1,3 @@
+[codespell]
+skip = inmoose/deseq2/dispersions.py, README.md
+ignore-words-list = Weill
