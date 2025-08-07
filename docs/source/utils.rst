@@ -12,4 +12,3 @@ This module contains various utilities, often mimicking the R API.
    lm_fit
    lm_wfit
    rnbinom
-

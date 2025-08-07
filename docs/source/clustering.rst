@@ -102,4 +102,3 @@ Code documentation
    :toctree: generated/
 
    ~consensus_clustering.consensusClustering
-

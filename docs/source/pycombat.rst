@@ -36,4 +36,3 @@ References
 .. [Zhang2020] Y. Zhang, G. Parmigiani, W. E. Johnson. 2020. ComBat-Seq: batch
    effect adjustment for RNASeq count data. *NAR Genomics and Bioinformatics*,
    2(3).  :doi:`10.1093/nargab/lqaa078`
-

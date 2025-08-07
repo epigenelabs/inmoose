@@ -151,4 +151,3 @@ CC.compute_consensus_clustering(numpy_ndarray)
 # How to contribute
 
 Please refer to [CONTRIBUTING.md](https://github.com/epigenelabs/inmoose/blob/master/CONTRIBUTING.md) to learn more about the contribution guidelines.
-

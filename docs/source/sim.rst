@@ -20,5 +20,3 @@ References
 .. [Zappia2017] L. Zappia, B. Phipson, A. Oshlack. 2017. Splatter: simulation of
    single-cell RNA sequencing data. *Genome Biology* 18(174).
    :doi:`10.1186/s13059-017-1305-0`
-
-

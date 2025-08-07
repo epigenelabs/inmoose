@@ -28,5 +28,3 @@
       ~DESeqDataSet.dispersions
       ~DESeqDataSet.normalizationFactors
       ~DESeqDataSet.sizeFactors
-
-
