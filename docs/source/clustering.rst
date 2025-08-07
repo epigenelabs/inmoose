@@ -55,7 +55,7 @@ We then run the consensus clustering algorithm.
 .. repl::
    from inmoose.consensus_clustering.consensus_clustering import consensusClustering
    from sklearn.cluster import AgglomerativeClustering
-   
+
    cc = consensusClustering(AgglomerativeClustering)
    cc.compute_consensus_clustering(counts, random_state=None)
 
@@ -72,13 +72,13 @@ We can now look at the clusters found.
    from anndata import AnnData
    from inmoose.utils import Factor
    import scanpy as sc
-   
+
 
    ad = AnnData(counts, obs=clinical)
    for k in range(2, 11):
        # Factor ensures that cluster ID are interpreted as categorical data
        ad.obs[f"k={k}"] = Factor(cc.predict(k))
-   
+
    # compute the PCA
    sc.tl.pca(ad)
    # plot the PCA
