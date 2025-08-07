@@ -1,7 +1,7 @@
 <p align="center">
-  
+
 <img src="docs/source/inmoose.png" width="500">
-  
+
 </p>
 
 <h1 align="center">
@@ -16,7 +16,7 @@
 </h1>
 
 <h1 align="center">
-  
+
 InMoose
 
 </h1>

@@ -256,7 +256,7 @@
 <body>
     <div class="container">
         <h1>Cohort Quality Control Report</h1>
-        
+
         <details open>
             <summary>Cohort Summary</summary>
             <div class="section">
@@ -368,10 +368,10 @@
                 <p>Results format: statistics, p-value, test performed, and number of samples used.</p>
                 {{ association_matrix_before | safe }}
             {% endif %}
-            
+
             <h4>After Batch Effect:</h4>
             {{ association_matrix_after | safe }}
-            
+
             </div>
         </details>
 
@@ -448,7 +448,7 @@
                         </div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="plot">
                     <h4>Total Sample Distribution</h4>
                     <img src="data:image/png;base64,{{ global_distribution_plot }}" alt="Global distribution">
@@ -553,7 +553,7 @@
                         {% endfor %}
                         <th>Proportion of Mixed Samples</th>
                     </tr>
-                
+
                     {% for row in mixed_proportions_table %}
                         <tr>
                             {% for cov in covariate_names %}
@@ -563,7 +563,7 @@
                         </tr>
                     {% endfor %}
                 </table>
-                
+
 
                 <div class="interpretation-box">
                     <h4>Interpretation</h4>
