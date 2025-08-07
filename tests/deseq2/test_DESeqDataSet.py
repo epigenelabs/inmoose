@@ -9,9 +9,7 @@ from inmoose.deseq2 import DESeqDataSet
 class Test(unittest.TestCase):
     def test_counts(self):
         """test that normalized counts are properly computed"""
-        dds = DESeqDataSet(
-            np.arange(24).reshape(4, 6), clinicalData=["A", "A", "B", "B"], design="~1"
-        )
+        dds = DESeqDataSet(np.arange(24).reshape(4, 6), design="~1")
         with self.assertRaisesRegex(
             ValueError,
             expected_regex="first calculate size factors, add normalizationFactors, or set normalized=False",
