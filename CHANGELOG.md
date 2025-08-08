@@ -1,8 +1,10 @@
 # InMoose release changelog
 
-## [0.8.1-dev]
+## [0.8.1]
 
 - PEP639 compliance
+- fix a bug with `topTags`
+- spell check over code, comments and documentation
 
 ## [0.8.0]
 

@@ -1,6 +1,6 @@
 [project]
 name = "inmoose"
-version = "0.8.1-dev"
+version = "0.8.1"
 license = "GPL-3.0-or-later"
 description = "InMoose: the Integrated Multi Omic Open Source Environment"
 readme = "README.md"
