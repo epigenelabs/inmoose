@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.8.2-dev]
+
+None
+
 ## [0.8.1]
 
 - PEP639 compliance
