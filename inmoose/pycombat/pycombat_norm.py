@@ -520,7 +520,7 @@ def adjust_data(
 
     # correction for reference batch
     if ref is not None:
-        bayes_data[batches[ref]] = dat[batches[ref]]
+        bayes_data[:, batches[ref]] = dat[:, batches[ref]]
 
     # returns the data corrected for batch effects
     return bayes_data
