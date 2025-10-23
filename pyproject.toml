@@ -25,10 +25,10 @@ dependencies = [
   "numpy",
   "pandas",
   "patsy",
-  "scipy>=1.11.0,<1.16",
+  "scipy>=1.16.0",
   "seaborn",
   "scikit-learn",
-  "statsmodels>=0.14.3",
+  "statsmodels>=0.14.5",
   "matplotlib",
   "jinja2"
 ]
