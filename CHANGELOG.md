@@ -1,8 +1,10 @@
 # InMoose release changelog
 
-## [0.8.2-dev]
+## [0.9.0]
 
-None
+- bump `scipy` version to 1.16
+- drop support for Python 3.9 and 3.10
+- fix a slicing error in `pycombat_norm`
 
 ## [0.8.1]
 
