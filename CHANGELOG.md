@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.9.1-dev]
+
+None
+
 ## [0.9.0]
 
 - bump `scipy` version to 1.16
