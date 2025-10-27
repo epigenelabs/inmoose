@@ -75,7 +75,7 @@ jobs:
       - name: Build source distribution
         run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: inmoose_sdist
           path: dist/inmoose-*.tar.gz
