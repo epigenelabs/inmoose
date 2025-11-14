@@ -388,8 +388,8 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
                 out = lm_wfit(X, y, w)
 
             est = ~np.isnan(out.coefficients)
-            beta[i, :] = out.coefficients
-            stdev_unscaled[i, est] = np.sqrt(np.diag(np.linalg.inv(X.T @ X)))
+            beta.iloc[i, :] = out.coefficients
+            stdev_unscaled.iloc[i, est] = np.sqrt(np.diag(np.linalg.inv(X.T @ X)))
             df_residual[i] = out.df_residuals
             if df_residual[i] > 0:
                 sigma[i] = np.sqrt(np.mean(out.effects[out.rank :] ** 2))
