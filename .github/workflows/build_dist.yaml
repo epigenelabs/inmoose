@@ -49,7 +49,7 @@ jobs:
 
       # upload the coverage report to coveralls.io
       - name: Upload coverage reports to Coveralls
-        uses: coverallsapp/github-action@v2.3.6
+        uses: coverallsapp/github-action@v2.3.7
         with:
           parallel: true
         if: ${{ matrix.python-version == '3.12' }}
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Close parallel build
-        uses: coverallsapp/github-action@v2.3.6
+        uses: coverallsapp/github-action@v2.3.7
         with:
           parallel-finished: true
 
