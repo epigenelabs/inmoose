@@ -2,14 +2,18 @@ import unittest
 
 import numpy as np
 
-from inmoose.deseq2 import makeExampleDESeqDataSet, varianceStabilizingTransformation
+from inmoose.deseq2 import (
+    makeExampleDESeqDataSet,
+    varianceStabilizingTransformation,
+    vst,
+)
 
 
 class Test(unittest.TestCase):
     def test_varianceStabilizingTransform(self):
-        """check that variance StabilizingTransform works as expected"""
+        """check that varianceStabilizingTransform works as expected"""
         dds = makeExampleDESeqDataSet(n=15, m=12, seed=42)
-        vst = varianceStabilizingTransformation(dds)
+        dds_vst = varianceStabilizingTransformation(dds)
 
         ref = np.array(
             [
@@ -226,7 +230,7 @@ class Test(unittest.TestCase):
             ]
         )
 
-        self.assertTrue(np.allclose(vst.X, ref.T, atol=2e-2))
+        self.assertTrue(np.allclose(dds_vst.X, ref.T, atol=2e-2))
 
         ref = np.array(
             [
@@ -444,6 +448,41 @@ class Test(unittest.TestCase):
         )
 
         dds = makeExampleDESeqDataSet(n=15, m=12, seed=42)
-        vst = varianceStabilizingTransformation(dds, fitType="mean")
+        dds_vst = varianceStabilizingTransformation(dds, fitType="mean")
 
-        self.assertTrue(np.allclose(vst.X, ref.T, atol=3e-2))
+        self.assertTrue(np.allclose(dds_vst.X, ref.T, atol=3e-2))
+
+    def test_vst(self):
+        """check that vst works as expected"""
+        dds = makeExampleDESeqDataSet(n=15, m=12, seed=42)
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="Object has less than 1000 rows"
+        ):
+            dds_vst = vst(dds)
+
+        dds = makeExampleDESeqDataSet(n=1100, m=12, seed=42)
+        with self.assertRaisesRegex(
+            ValueError,
+            expected_regex="Object has less than 1000 genes with mean normalized count",
+        ):
+            dds_vst = vst(dds)
+
+        dds_vst = vst(dds, nsub=100)
+
+        ref = np.array(
+            [
+                [3.72386123, 3.39386743, 4.41032594, 5.2210661, 0.42388627],
+                [2.00779307, 0.42388627, 6.81393694, 6.84789253, 2.00779307],
+                [6.88879994, 2.71725223, 6.132565, 3.9912849, 1.53341485],
+                [3.53584006, 0.42388627, 4.48495254, 5.28237966, 0.42388627],
+                [4.36669943, 1.54941829, 2.53813524, 2.92580311, 1.97979658],
+                [5.4427759, 3.14311642, 4.80934688, 5.9249515, 1.57954715],
+                [4.26258207, 1.95592777, 0.42388627, 2.71367139, 1.95592777],
+                [5.05682579, 0.42388627, 6.43390958, 4.52623741, 0.42388627],
+                [4.94803453, 0.42388627, 2.53504962, 3.46977523, 0.42388627],
+                [4.6055427, 1.55603305, 5.96912266, 2.30041727, 2.54925257],
+                [6.7893035, 2.01299263, 5.89048377, 4.36357337, 1.57448902],
+                [2.9278023, 0.42388627, 3.22882227, 5.10722712, 0.42388627],
+            ]
+        )
+        self.assertTrue(np.allclose(dds_vst.X[:, :5], ref, atol=1e-5))

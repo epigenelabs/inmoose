@@ -23,4 +23,5 @@ from .parallel import estimateMLEForBetaPriorVar as estimateMLEForBetaPriorVar
 from .prior import estimateBetaPriorVar as estimateBetaPriorVar
 from .replicates import collapseReplicates as collapseReplicates
 from .vst import varianceStabilizingTransformation as varianceStabilizingTransformation
+from .vst import vst as vst
 from .wald import nbinomWaldTest as nbinomWaldTest

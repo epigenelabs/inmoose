@@ -264,7 +264,7 @@ def vst(obj, blind=True, nsub=1000, fitType="parametric"):
     DESeqTransform or matrix
         same as :func:`varianceStabilizingTransformation`
     """
-    if obj.n_var < nsub:
+    if obj.n_vars < nsub:
         raise ValueError(
             f"Object has less than {nsub} rows, it is recommended to use varianceStabilizingTransformation directly"
         )
@@ -282,7 +282,7 @@ def vst(obj, blind=True, nsub=1000, fitType="parametric"):
     baseMean = obj.counts(normalized=True).mean(axis=0)
     if (baseMean > 5).sum() < nsub:
         raise ValueError(
-            "Object has less than {nsub} genes with mean normalized count > 5, it is recommended to use varianceStabilizingTransformation directly."
+            f"Object has less than {nsub} genes with mean normalized count > 5, it is recommended to use varianceStabilizingTransformation directly."
         )
 
     # subset to a specified number of genes with mean normalized count > 5
@@ -290,14 +290,14 @@ def vst(obj, blind=True, nsub=1000, fitType="parametric"):
     baseMean = baseMean[baseMean > 5]
     o = np.argsort(baseMean)
     idx = o[np.linspace(0, len(o) - 1, num=nsub, dtype=int)]
-    obj_sub = obj_sub[idx, :]
+    obj_sub = obj_sub[:, idx]
 
     # estimate dispersion trend
     obj_sub = estimateDispersionsGeneEst(obj_sub, quiet=True)
     obj_sub = estimateDispersionsFit(obj_sub, fitType=fitType, quiet=True)
 
     # assign to the full object
-    obj.setDispFunction(obj_sub.dispersionFunction)
+    obj.setDispFunction(obj_sub.dispersionFunction, estimateVar=False)
 
     # calculate and apply the VST (note blinding is accomplished above, here
     # :code:`blind=False` is used to avoid re-calculating dispersion)
