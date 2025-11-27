@@ -564,6 +564,10 @@ class Test(unittest.TestCase):
         fit.stdev_unscaled = pd.DataFrame(
             fit.stdev_unscaled, index=self.y.index, columns=self.contrast_matrix.index
         )
+        with self.assertRaisesRegex(
+            ValueError, expected_regex="contrasts must be a pandas dataframe"
+        ):
+            contrasts_fit(fit, self.contrast_matrix.values)
         fit2 = contrasts_fit(fit, self.contrast_matrix)
 
         coef_ref = pd.DataFrame(

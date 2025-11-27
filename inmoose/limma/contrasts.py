@@ -125,7 +125,7 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
     fit : MArrayLM
         object produced by :func:`lm_series` or equivalent. Must contain
         components :code:`coefficients` and :code:`stdev_unscaled`.
-    contrasts : array_like
+    contrasts : pd.DataFrame
         numeric matrix with rows corresponding to coefficients in :code:`fit`
         and columns containing contrasts. May be a vector if there is only one
         contrast. :code:`NA` are not allowed.
@@ -153,6 +153,8 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
     fit = copy.deepcopy(fit)
     if (contrasts is None) == (coefficients is None):
         raise ValueError("must specify exactly one of contrasts or coefficients")
+    if contrasts is not None and not isinstance(contrasts, pd.DataFrame):
+        raise ValueError("contrasts must be a pandas dataframe")
 
     if coefficients is not None:
         return fit[:, coefficients]
