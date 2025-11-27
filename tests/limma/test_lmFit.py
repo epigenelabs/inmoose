@@ -145,6 +145,33 @@ class Test(unittest.TestCase):
         )
         pd.testing.assert_series_equal(fit.Amean, Amean_ref)
 
+        fit = lmFit(self.y, pd.DataFrame(self.design))
+        coef_ref.columns = ["column0", "column1"]
+        pd.testing.assert_frame_equal(fit.coefficients, coef_ref, rtol=1e-6)
+        self.assertTrue(np.array_equal(fit.df_residual, [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]))
+        pd.testing.assert_series_equal(fit.sigma, sigma_ref)
+        cov_ref.index = ["column0", "column1"]
+        cov_ref.columns = ["column0", "column1"]
+        pd.testing.assert_frame_equal(fit.cov_coefficients, cov_ref)
+        self.assertTrue(np.allclose(fit.stdev_unscaled, 0.5773503))
+        self.assertTrue(np.array_equal(fit.stdev_unscaled.index, self.y.index))
+        self.assertTrue(
+            np.array_equal(fit.stdev_unscaled.columns, fit.coefficients.columns)
+        )
+        pd.testing.assert_series_equal(fit.Amean, Amean_ref)
+
+        fit = lmFit(self.y, np.array(self.design))
+        pd.testing.assert_frame_equal(fit.coefficients, coef_ref, rtol=1e-6)
+        self.assertTrue(np.array_equal(fit.df_residual, [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]))
+        pd.testing.assert_series_equal(fit.sigma, sigma_ref)
+        pd.testing.assert_frame_equal(fit.cov_coefficients, cov_ref)
+        self.assertTrue(np.allclose(fit.stdev_unscaled, 0.5773503))
+        self.assertTrue(np.array_equal(fit.stdev_unscaled.index, self.y.index))
+        self.assertTrue(
+            np.array_equal(fit.stdev_unscaled.columns, fit.coefficients.columns)
+        )
+        pd.testing.assert_series_equal(fit.Amean, Amean_ref)
+
         fit = lmFit(self.y, self.design_covariates)
         coef_ref = pd.DataFrame(
             {

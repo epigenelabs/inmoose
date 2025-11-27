@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Copyright (C) 2004-2022 Gordon Smyth, Yifang Hu, Matthew Ritchie, Jeremy Silver, James Wettenhall, Davis McCarthy, Di Wu, Wei Shi, Belinda Phipson, Aaron Lun, Natalie Thorne, Alicia Oshlack, Carolyn de Graaf, Yunshun Chen, Mette Langaas, Egil Ferkingstad, Marcus Davy, Francois Pepin, Dongseok Choi
-# Copyright (C) 2024 Maximilien Colange
+# Copyright (C) 2024-2025 Maximilien Colange
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -124,7 +124,7 @@ def lmFit(
         the design matrix of the microarray experiment, with rows corresponding
         to samples and columns to coefficients to be estimated.
         Defaults to :code:`obj.design` if not :code:`None`, otherwise to the
-        unit vector, meaning that all samples will be treated as replicated of
+        unit vector, meaning that all samples will be treated as replicates of
         a single treatment group.
     ndups : int
         positive integer giving the number of times each distinct probe is
@@ -172,7 +172,7 @@ def lmFit(
         design = patsy.dmatrix("~1", data=y.exprs)
     else:
         if not isinstance(design, patsy.DesignMatrix):
-            raise ValueError("design must be a patsy DesignMatrix")
+            design = patsy.DesignMatrix(design)
         if design.shape[0] != y.exprs.shape[1]:
             raise ValueError(
                 "row dimension of design does not match column dimension of data object"
