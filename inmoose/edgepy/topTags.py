@@ -83,7 +83,8 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
         maximum number of genes/tags to return
     adjust_method : str
         specify the method used to adjust *p*-values for multiple testing. See
-        :func:`statsmodels.stats.multitest` for possible values
+        :func:`statsmodels.stats.multitest` for possible values. Also accepts
+        the values accepted by :code:`p.adjust` from the :code:`stats` package.
     sort_by : {"PValue, "logFC", "none"}
         specify the sort method
 
@@ -133,6 +134,14 @@ def topTags(self, n=10, adjust_method="fdr_bh", sort_by="PValue", p_value=1):
     # Check adjust_method
     FWER_methods = ["holm", "simes-hochberg", "hommel", "bonferroni"]
     FDR_methods = ["fdr_bh", "fdr_by"]
+    map_R_method = {
+        "hochberg": "simes-hochberg",
+        "BH": "fdr_bh",
+        "fdr": "fdr_bh",
+        "BY": "fdr_by",
+    }
+    if adjust_method in map_R_method:
+        adjust_method = map_R_method[adjust_method]
     if adjust_method not in FWER_methods and adjust_method not in FDR_methods:
         raise ValueError(f"invalid argument {adjust_method} for 'adjust_method'")
 
