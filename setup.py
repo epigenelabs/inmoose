@@ -1,3 +1,5 @@
+import platform
+import subprocess
 import sys
 
 import numpy
@@ -13,6 +15,9 @@ class build_ext_cxx17(build_ext):
         for e in self.extensions:
             e.extra_compile_args.append(std_flag)
         super().build_extensions()
+        if platform.system() == "Darwin" and platform.processor() == "arm":
+            ext_path = self.get_ext_fullpath(e.name)
+            subprocess.call(["codesign", "-f", "-s", "-", ext_path])
 
 
 macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
