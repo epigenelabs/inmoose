@@ -6,6 +6,7 @@ import numpy as np
 import numpy.testing as npt
 import pandas as pd
 from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
 
 from inmoose.cohort_qc.cohort_metric import CohortMetric
 
@@ -232,6 +233,14 @@ class TestCohortMetric(unittest.TestCase):
 
     def test_compute_entropy(self):
         """Test compute_entropy method."""
+        self.assertEqual(self.qc.n_neighbors, 2)
+
+        nbrs = NearestNeighbors(
+            n_neighbors=self.qc.n_neighbors, metric="euclidean"
+        ).fit(self.qc.data_expression_df.T)
+        _, indices = nbrs.kneighbors(self.qc.data_expression_df.T)
+        assert (indices == [[0, 1], [1, 2], [2, 3], [3, 2]]).all(), f"{indices}"
+
         entropy = self.qc.compute_entropy(self.qc.data_expression_df)
         self.assertIsInstance(entropy, float)
         self.assertEqual(entropy, 0.25)
