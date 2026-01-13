@@ -6,6 +6,7 @@ import numpy as np
 import numpy.testing as npt
 import pandas as pd
 from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
 
 from inmoose.cohort_qc.cohort_metric import CohortMetric
 
@@ -48,6 +49,28 @@ class TestCohortMetric(unittest.TestCase):
             data_expression_df=self.data_expression_df,
             data_expression_df_before=self.data_expression_df_before,
             covariates=self.covariates,
+            n_components=2,
+            n_neighbors=2,
+        )
+
+        rng = np.random.default_rng(42)
+        self.large_clinical = pd.DataFrame(
+            {
+                "SampleID": [f"Sample{i}" for i in range(100)],
+                "batch": ["DS1"] * 30 + ["D2"] * 30 + ["DS3"] * 40,
+                "Covariate1": ["X"] * 50 + ["Y"] * 50,
+            }
+        ).set_index("SampleID")
+        self.large_expression = pd.DataFrame(
+            {f"Sample{i}": rng.normal(100, 10, size=1000) for i in range(100)},
+            index=[f"Gene{i}" for i in range(1000)],
+        )
+        self.large_qc = CohortMetric(
+            clinical_df=self.large_clinical,
+            batch_column="batch",
+            data_expression_df=self.large_expression,
+            data_expression_df_before=self.large_expression.copy(),
+            covariates=["Covariate1"],
             n_components=2,
             n_neighbors=2,
         )
@@ -230,18 +253,142 @@ class TestCohortMetric(unittest.TestCase):
         self.assertEqual(score_before, 0.3)
         self.assertEqual(score_after, 0.5)
 
-    @mock.patch("sklearn.neighbors.NearestNeighbors.kneighbors")
-    def test_compute_entropy(self, mock_kneighbors):
+    def test_compute_entropy_large(self):
+        nbrs = NearestNeighbors(
+            n_neighbors=self.large_qc.n_neighbors, metric="euclidean"
+        ).fit(self.large_qc.data_expression_df.T)
+        _, indices = nbrs.kneighbors(self.large_qc.data_expression_df.T)
+        indices_ref = np.array(
+            [
+                [0, 72],
+                [1, 4],
+                [2, 25],
+                [3, 9],
+                [4, 49],
+                [5, 23],
+                [6, 55],
+                [7, 27],
+                [8, 90],
+                [9, 3],
+                [10, 37],
+                [11, 63],
+                [12, 77],
+                [13, 87],
+                [14, 15],
+                [15, 57],
+                [16, 62],
+                [17, 49],
+                [18, 93],
+                [19, 67],
+                [20, 88],
+                [21, 15],
+                [22, 15],
+                [23, 67],
+                [24, 67],
+                [25, 71],
+                [26, 33],
+                [27, 72],
+                [28, 37],
+                [29, 77],
+                [30, 51],
+                [31, 82],
+                [32, 90],
+                [33, 88],
+                [34, 90],
+                [35, 94],
+                [36, 72],
+                [37, 46],
+                [38, 3],
+                [39, 48],
+                [40, 88],
+                [41, 88],
+                [42, 72],
+                [43, 90],
+                [44, 67],
+                [45, 13],
+                [46, 37],
+                [47, 41],
+                [48, 83],
+                [49, 4],
+                [50, 97],
+                [51, 88],
+                [52, 55],
+                [53, 67],
+                [54, 0],
+                [55, 52],
+                [56, 68],
+                [57, 15],
+                [58, 15],
+                [59, 27],
+                [60, 64],
+                [61, 83],
+                [62, 63],
+                [63, 62],
+                [64, 60],
+                [65, 88],
+                [66, 51],
+                [67, 74],
+                [68, 56],
+                [69, 15],
+                [70, 16],
+                [71, 25],
+                [72, 0],
+                [73, 55],
+                [74, 67],
+                [75, 27],
+                [76, 10],
+                [77, 80],
+                [78, 16],
+                [79, 37],
+                [80, 77],
+                [81, 34],
+                [82, 31],
+                [83, 23],
+                [84, 63],
+                [85, 49],
+                [86, 71],
+                [87, 13],
+                [88, 40],
+                [89, 15],
+                [90, 34],
+                [91, 49],
+                [92, 15],
+                [93, 51],
+                [94, 91],
+                [95, 84],
+                [96, 51],
+                [97, 88],
+                [98, 55],
+                [99, 83],
+            ]
+        )
+        assert (indices == indices_ref).all()
+
+        entropy = self.large_qc.compute_entropy(self.large_qc.data_expression_df)
+        self.assertAlmostEqual(entropy, 0.65)
+        self.assertEqual(entropy, 0.65)
+
+    def test_compute_entropy(self):
         """Test compute_entropy method."""
-        mock_kneighbors.return_value = (None, np.array([[0, 1], [1, 0]]))
+        self.assertEqual(self.qc.n_neighbors, 2)
+
+        nbrs = NearestNeighbors(
+            n_neighbors=self.qc.n_neighbors, metric="euclidean"
+        ).fit(self.qc.data_expression_df.T)
+        _, indices = nbrs.kneighbors(self.qc.data_expression_df.T)
+        # assert (indices == [[0, 1], [1, 2], [2, 3], [3, 2]]).all(), f"{indices}"
+
         entropy = self.qc.compute_entropy(self.qc.data_expression_df)
         self.assertIsInstance(entropy, float)
+        # self.assertEqual(entropy, 0.25)
 
     def test_entropy_batch_mixing(self):
         """Test entropy_batch_mixing method."""
         entropy_before, entropy_after = self.qc.entropy_batch_mixing()
         self.assertIsInstance(entropy_before, float)
         self.assertIsInstance(entropy_after, float)
+        # self.assertEqual(entropy_before, 0.25)
+        # self.assertEqual(entropy_after, 0.25)
 
     @mock.patch("inmoose.cohort_qc.cohort_metric.sns.violinplot")
     def test_compare_sample_distribution_by_covariates(self, mock_violinplot):
