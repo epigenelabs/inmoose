@@ -230,18 +230,19 @@ class TestCohortMetric(unittest.TestCase):
         self.assertEqual(score_before, 0.3)
         self.assertEqual(score_after, 0.5)
 
-    @mock.patch("sklearn.neighbors.NearestNeighbors.kneighbors")
-    def test_compute_entropy(self, mock_kneighbors):
+    def test_compute_entropy(self):
         """Test compute_entropy method."""
-        mock_kneighbors.return_value = (None, np.array([[0, 1], [1, 0]]))
         entropy = self.qc.compute_entropy(self.qc.data_expression_df)
         self.assertIsInstance(entropy, float)
+        self.assertEqual(entropy, 0.25)
 
     def test_entropy_batch_mixing(self):
         """Test entropy_batch_mixing method."""
         entropy_before, entropy_after = self.qc.entropy_batch_mixing()
         self.assertIsInstance(entropy_before, float)
         self.assertIsInstance(entropy_after, float)
+        self.assertEqual(entropy_before, 0.25)
+        self.assertEqual(entropy_after, 0.25)
 
     @mock.patch("inmoose.cohort_qc.cohort_metric.sns.violinplot")
     def test_compare_sample_distribution_by_covariates(self, mock_violinplot):
