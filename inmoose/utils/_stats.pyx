@@ -1,4 +1,5 @@
 # distutils: language = c++
+# cython: language_level=3
 #-----------------------------------------------------------------------------
 # Copyright (C) 2022-2023 Maximilien Colange
 
@@ -19,7 +20,30 @@
 cimport cython
 from scipy.special cimport cython_special as sp
 
-@cython.ufunc
-cdef double nbinom_logpmf(double x, double n, double p):
-    coeff = sp.gammaln(n+x) - sp.gammaln(x+1) - sp.gammaln(n)
+cdef double _nbinom_logpmf_c(double x, double n, double p):
+    """Internal C function for computing log PMF."""
+    cdef double coeff = sp.gammaln(n+x) - sp.gammaln(x+1) - sp.gammaln(n)
     return coeff + sp.xlogy(n, p) + sp.xlog1py(x, -p)
+
+cpdef nbinom_logpmf(x, n, p):
+    """Compute log probability mass function of negative binomial distribution.
+    
+    Arguments
+    ---------
+    x : float or array-like
+        number of successes
+    n : float or array-like
+        size parameter (number of successes)
+    p : float or array-like
+        probability of success
+    
+    Returns
+    -------
+    float or array
+        log probability mass
+    """
+    cdef double x_val, n_val, p_val
+    x_val = float(x)
+    n_val = float(n)
+    p_val = float(p)
+    return _nbinom_logpmf_c(x_val, n_val, p_val)

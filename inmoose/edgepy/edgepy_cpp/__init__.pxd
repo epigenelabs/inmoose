@@ -23,6 +23,5 @@ from numpy cimport ndarray
 # cf. file src/utils.h from edgeR source repo
 
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data)
-cdef public double compute_unit_nb_deviance(double, double, double)
 
 cpdef public vector.vector[double] maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, double[:,:] likelihoods)

@@ -6,12 +6,34 @@ from setuptools.command.build_ext import build_ext
 
 
 class build_ext_cxx17(build_ext):
+    def _force_cpp_compiler(self):
+        """Force the use of g++ instead of gcc for C++ extensions."""
+        if self.compiler.compiler_type == "unix":
+            # Replace gcc with g++ in compiler commands
+            if hasattr(self.compiler, 'compiler_so'):
+                self.compiler.compiler_so = [c if c != 'gcc' else 'g++' for c in self.compiler.compiler_so]
+            # Force C++ compiler to be used
+            if hasattr(self.compiler, 'compiler_cxx'):
+                if not self.compiler.compiler_cxx:
+                    self.compiler.compiler_cxx = ['g++']
+                else:
+                    self.compiler.compiler_cxx = [c if c != 'gcc' else 'g++' for c in self.compiler.compiler_cxx]
+            # Also set compiler for C files to use g++ (since Cython generates C++ code)
+            if hasattr(self.compiler, 'compiler'):
+                self.compiler.compiler = [c if c != 'gcc' else 'g++' for c in self.compiler.compiler]
+    
+    def finalize_options(self):
+        super().finalize_options()
+        self._force_cpp_compiler()
+    
     def build_extensions(self):
+        self._force_cpp_compiler()
         std_flag = (
             "-std:c++17" if self.compiler.compiler_type == "msvc" else "-std=c++17"
         )
         for e in self.extensions:
-            e.extra_compile_args.append(std_flag)
+            if e.language == "c++":
+                e.extra_compile_args.append(std_flag)
         super().build_extensions()
 
 
@@ -31,6 +53,7 @@ stats_cpp = Extension(
     ],
     include_dirs=[numpy.get_include()],
     define_macros=macros,
+    language="c++",
 )
 
 edgepy_cpp = Extension(
@@ -40,6 +63,7 @@ edgepy_cpp = Extension(
     ],
     include_dirs=[numpy.get_include()],
     define_macros=macros,
+    language="c++",
 )
 
 
