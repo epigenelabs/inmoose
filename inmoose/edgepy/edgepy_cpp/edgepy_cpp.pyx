@@ -170,6 +170,45 @@ cdef double _q2qnbinom_c(double x, double input_mean, double output_mean, double
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+cpdef _q2qnbinom(x, input_mean, output_mean, dispersion):
+    """
+    Vectorized wrapper for _q2qnbinom_c that handles arrays.
+    
+    This function applies _q2qnbinom_c element-wise to arrays.
+    """
+    x = np.asarray(x, dtype=np.float64)
+    input_mean = np.asarray(input_mean, dtype=np.float64)
+    output_mean = np.asarray(output_mean, dtype=np.float64)
+    dispersion = np.asarray(dispersion, dtype=np.float64)
+    
+    # Broadcast arrays to compatible shapes
+    x, input_mean, output_mean, dispersion = np.broadcast_arrays(
+        x, input_mean, output_mean, dispersion
+    )
+    
+    # Flatten for iteration
+    x_flat = x.flatten()
+    input_mean_flat = input_mean.flatten()
+    output_mean_flat = output_mean.flatten()
+    dispersion_flat = dispersion.flatten()
+    
+    # Apply _q2qnbinom_c element-wise
+    result = np.zeros_like(x_flat)
+    cdef Py_ssize_t i
+    for i in range(x_flat.shape[0]):
+        result[i] = _q2qnbinom_c(
+            x_flat[i],
+            input_mean_flat[i],
+            output_mean_flat[i],
+            dispersion_flat[i]
+        )
+    
+    # Reshape to original shape
+    return result.reshape(x.shape)
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 @cython.cdivision(True)
 cpdef ndarray compute_apl(count_type[:,:] y, double[:,:] means, double[:,:] disps, double[:,:] weights, bool adjust, ndarray design):
     """
