@@ -1,4 +1,5 @@
 # distutils: language = c++
+# cython: language_level=3
 #-----------------------------------------------------------------------------
 # Copyright (C) 2008-2022 Yunshun Chen, Aaron TL Lun, Davis J McCarthy, Matthew E Ritchie, Belinda Phipson, Yifang Hu, Xiaobei Zhou, Mark D Robinson, Gordon K Smyth
 # Copyright (C) 2022-2025 Maximilien Colange
@@ -30,12 +31,14 @@
 # - 'src/R_maximize_interpolant.cpp' (function `maximize_interpolant` function)
 
 import numpy as np
+import math
 cimport cython
-from libcpp.cmath cimport abs, log, isfinite, exp, isnan
-from libc.math cimport INFINITY
+from libc.math cimport abs as c_abs, log, exp, sqrt, INFINITY
 from libc.stdint cimport int64_t
-
-from libc.math cimport sqrt
+from libcpp cimport bool, vector
+from numpy cimport ndarray
+cimport numpy as np
+from numpy cimport PyArray_DIMS, PyArray_NDIM
 from scipy.special cimport cython_special as sp
 from scipy.special.cython_special cimport gammaln as lgamma
 from scipy.linalg.lapack import get_lapack_funcs
@@ -55,33 +58,8 @@ cdef double log_low_value = log(low_value)
 cdef double mildly_low_value = 1e-8
 
 
-@cython.ufunc
-@cython.cdivision(True)
-cdef double compute_unit_nb_deviance(double y, double mu, double phi):
-    """
-    Calculate the deviance of a negative binomial fit
-
-    Note the protection for very large mu*phi (where we use a Gamma instead) or
-    very small mu*phi (where we use a Poisson instead). This approximation
-    protects against numerical instability introduced by subtracting a very
-    large log value in (log mu) with another very large logarithm (log mu+1/phi).
-    We need to consider the phi as the approximation is only good when the
-    product is very big or very small.
-
-    Arguments
-    ---------
-    y : array_like
-        counts matrix
-    mu : array_like
-        expected means matrix (broadcastable to the shape of :code:`y`)
-    phi : array_like
-        dispersion matrix (broadcastable to the shape of :code:`y`)
-
-    Returns
-    -------
-    ndarray
-        matrix of deviances (same shape as :code:`y`)
-    """
+cdef double _compute_unit_nb_deviance_c(double y, double mu, double phi):
+    """Internal C function for computing unit NB deviance."""
     # add a small value to protect against zero during division and log
     y = y + mildly_low_value
     mu = mu + mildly_low_value
@@ -99,8 +77,39 @@ cdef double compute_unit_nb_deviance(double y, double mu, double phi):
     else:
         return 2 * (y * log(y/mu) + (y + 1/phi) * log((mu + 1/phi)/(y + 1/phi)))
 
-@cython.ufunc
-cdef double _q2qnbinom(double x, double input_mean, double output_mean, double dispersion):
+@cython.cdivision(True)
+def compute_unit_nb_deviance(y, mu, phi):
+    """
+    Calculate the deviance of a negative binomial fit
+
+    Note the protection for very large mu*phi (where we use a Gamma instead) or
+    very small mu*phi (where we use a Poisson instead). This approximation
+    protects against numerical instability introduced by subtracting a very
+    large log value in (log mu) with another very large logarithm (log mu+1/phi).
+    We need to consider the phi as the approximation is only good when the
+    product is very big or very small.
+
+    Arguments
+    ---------
+    y : float or array-like
+        counts
+    mu : float or array-like
+        expected means (broadcastable to the shape of :code:`y`)
+    phi : float or array-like
+        dispersion (broadcastable to the shape of :code:`y`)
+
+    Returns
+    -------
+    float or array
+        deviances (same shape as :code:`y`)
+    """
+    cdef double y_val, mu_val, phi_val
+    y_val = float(y)
+    mu_val = float(mu)
+    phi_val = float(phi)
+    return _compute_unit_nb_deviance_c(y_val, mu_val, phi_val)
+
+cdef double _q2qnbinom_c(double x, double input_mean, double output_mean, double dispersion):
     """
     Interpolated quantile to quantile mapping between negative-binomial distributions with the same dispersion but different means.
 
@@ -162,7 +171,7 @@ cdef double _q2qnbinom(double x, double input_mean, double output_mean, double d
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cpdef ndarray compute_apl(const count_type[:,:] y, const double[:,:] means, const double[:,:] disps, const double[:,:] weights, bool adjust, ndarray design):
+cpdef ndarray compute_apl(count_type[:,:] y, double[:,:] means, double[:,:] disps, double[:,:] weights, bool adjust, ndarray design):
     """
     Compute adjusted profile log-likelihoods of genewise negative binomial GLMs
 
@@ -257,7 +266,7 @@ cpdef ndarray compute_apl(const count_type[:,:] y, const double[:,:] means, cons
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cdef double acr_compute(const double[:] wptr, ndarray design, long lwork):
+cdef double acr_compute(double[:] wptr, ndarray design, long lwork):
     """
     Compute the Cox-Reid adjustment factor
 
@@ -329,7 +338,7 @@ cdef double acr_compute(const double[:] wptr, ndarray design, long lwork):
     # log-determinant as sum of the log-diagonals, then halving
     assert d.shape[0] == d.shape[1]
     for i in range(ldu.shape[0]):
-        if d[i,i] < low_value or not isfinite(d[i,i]):
+        if d[i,i] < low_value or not math.isfinite(d[i,i]):
             res += log_low_value
         else:
             res += log(d[i,i])
@@ -341,8 +350,8 @@ cdef double acr_compute(const double[:] wptr, ndarray design, long lwork):
 @cython.wraparound(False)
 @cython.cdivision(True)
 cpdef (double, bool) glm_one_group_cython(Py_ssize_t nlibs,
-                                          const count_type[:] counts, const double[:] offset,
-                                          const double[:] disp, const double[:] weights,
+                                          count_type[:] counts, double[:] offset,
+                                          double[:] disp, double[:] weights,
                                           long maxit, double tolerance, double cur_beta):
     """
     Simplified fit for negative binomial GLM when the design matrix is one group
@@ -390,7 +399,7 @@ cpdef (double, bool) glm_one_group_cython(Py_ssize_t nlibs,
     # (which is the limit of the NB as the dispersion goes to infinity).
     # However, if cur_beta is not NA, then we assume it is good.
     nonzero = False
-    if isnan(cur_beta):
+    if math.isnan(cur_beta):
         cur_beta = 0
         totweight = 0
         for j in range(nlibs):
@@ -686,7 +695,7 @@ cdef class interpolator:
 
 @cython.wraparound(False)
 @cython.boundscheck(False)
-cpdef vector.vector[double] maximize_interpolant(vector.vector[double] spts, const double[:,:] likelihoods):
+cpdef vector.vector[double] maximize_interpolant(vector.vector[double] spts, double[:,:] likelihoods):
     """
     Find the maximum of interpolating splines for each row in the likelihood matrix.
 
