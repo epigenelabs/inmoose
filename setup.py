@@ -8,9 +8,11 @@ from setuptools.command.build_ext import build_ext
 class build_ext_cxx17(build_ext):
     def _force_cpp_compiler(self):
         """Force the use of g++ instead of gcc for C++ extensions."""
+        if self.compiler is None or not hasattr(self.compiler, 'compiler_type'):
+            return
         if self.compiler.compiler_type == "unix":
             # Replace gcc with g++ in compiler commands
-            if hasattr(self.compiler, 'compiler_so'):
+            if hasattr(self.compiler, 'compiler_so') and self.compiler.compiler_so:
                 self.compiler.compiler_so = [c if c != 'gcc' else 'g++' for c in self.compiler.compiler_so]
             # Force C++ compiler to be used
             if hasattr(self.compiler, 'compiler_cxx'):
@@ -19,7 +21,7 @@ class build_ext_cxx17(build_ext):
                 else:
                     self.compiler.compiler_cxx = [c if c != 'gcc' else 'g++' for c in self.compiler.compiler_cxx]
             # Also set compiler for C files to use g++ (since Cython generates C++ code)
-            if hasattr(self.compiler, 'compiler'):
+            if hasattr(self.compiler, 'compiler') and self.compiler.compiler:
                 self.compiler.compiler = [c if c != 'gcc' else 'g++' for c in self.compiler.compiler]
     
     def finalize_options(self):
@@ -28,12 +30,13 @@ class build_ext_cxx17(build_ext):
     
     def build_extensions(self):
         self._force_cpp_compiler()
-        std_flag = (
-            "-std:c++17" if self.compiler.compiler_type == "msvc" else "-std=c++17"
-        )
-        for e in self.extensions:
-            if e.language == "c++":
-                e.extra_compile_args.append(std_flag)
+        if self.compiler is not None:
+            std_flag = (
+                "-std:c++17" if self.compiler.compiler_type == "msvc" else "-std=c++17"
+            )
+            for e in self.extensions:
+                if e.language == "c++":
+                    e.extra_compile_args.append(std_flag)
         super().build_extensions()
 
 
