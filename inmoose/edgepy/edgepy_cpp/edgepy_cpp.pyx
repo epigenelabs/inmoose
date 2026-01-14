@@ -204,7 +204,7 @@ cpdef ndarray compute_apl(count_type[:,:] y, double[:,:] means, double[:,:] disp
 
     if adjust:
         routine = get_lapack_funcs('sytrf_lwork', dtype=np.double)
-        ret = routine(design.shape[1])
+        ret = routine(PyArray_DIMS(design)[1])
         assert len(ret) == 2
         if ret[1] != 0:
             raise ValueError("Internal work array size computation failed: "
@@ -253,7 +253,7 @@ cpdef ndarray compute_apl(count_type[:,:] y, double[:,:] means, double[:,:] disp
                 working_weights[lib] = curmu / (1 + curd*curmu)
 
         if adjust:
-            if design.shape[1] == 1:
+            if PyArray_DIMS(design)[1] == 1:
                 adj = working_weights_array.sum()
                 adj = 0.5*log(abs(adj))
                 sum_loglike[tag] -= adj
@@ -337,7 +337,7 @@ cdef double acr_compute(double[:] wptr, ndarray design, long lwork):
 
     # log-determinant as sum of the log-diagonals, then halving
     assert d.shape[0] == d.shape[1]
-    for i in range(ldu.shape[0]):
+    for i in range(d.shape[0]):
         if d[i,i] < low_value or not math.isfinite(d[i,i]):
             res += log_low_value
         else:
