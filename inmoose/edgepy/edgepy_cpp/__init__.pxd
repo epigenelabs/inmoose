@@ -1,4 +1,5 @@
 # distutils: language = c++
+# cython: language_level=3
 #-----------------------------------------------------------------------------
 # Copyright (C) 2022-2025 Maximilien Colange
 
@@ -24,4 +25,4 @@ from numpy cimport ndarray
 cdef public ndarray[double, ndim=1] vector2ndarray "vector2ndarray"(const vector.vector[double]& data)
 cdef public double compute_unit_nb_deviance(double, double, double)
 
-cpdef public vector.vector[double] maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, const double[:,:] likelihoods)
+cpdef public vector.vector[double] maximize_interpolant "maximize_interpolant"(vector.vector[double] spts, double[:,:] likelihoods)
