@@ -1,8 +1,14 @@
 # InMoose release changelog
 
-## [0.9.1-dev]
+## [0.9.1]
 
-None
+- fix a display bug for `TopTags` class
+- fix an indexing bug in `limma` internals
+- fix a bug in `vst` computation
+- relax typing constraints for design matrices in `limma`
+- properly check that the input to `contrast_fit` is a pandas dataframe
+- accept R-like values for adjustment method in class `TopTags`
+- support for Python 3.14 in CI/CD
 
 ## [0.9.0]
 
