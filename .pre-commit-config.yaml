@@ -10,12 +10,19 @@ repos:
       - id: check-merge-conflict
       - id: check-toml
 
-  # GitLeaks - Scans for sensitive data (like API keys) in your codebase
+  # GitLeaks -- Scans for sensitive data (like API keys) in your codebase
   - repo: https://github.com/zricethezav/gitleaks
     rev: v8.23.1
     hooks:
       - id: gitleaks
         name: Detect Hardcoded Secrets
+
+  # Trufflehog -- Scans for sensitive data (like API keys) in your codebase
+  # Complements GitLeaks e.g. for Azure primary keys
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.88.31
+    hooks:
+      - id: trufflehog
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
