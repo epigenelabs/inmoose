@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -12,7 +12,7 @@ repos:
 
   # GitLeaks -- Scans for sensitive data (like API keys) in your codebase
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.23.1
+    rev: v8.30.0
     hooks:
       - id: gitleaks
         name: Detect Hardcoded Secrets
@@ -20,9 +20,10 @@ repos:
   # Trufflehog -- Scans for sensitive data (like API keys) in your codebase
   # Complements GitLeaks e.g. for Azure primary keys
   - repo: https://github.com/trufflesecurity/trufflehog
-    rev: v3.88.31
+    rev: v3.92.5
     hooks:
       - id: trufflehog
+        args: [--trust-local-git-config]
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
