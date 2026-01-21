@@ -1,5 +1,9 @@
 # InMoose release changelog
 
+## [0.9.2-dev]
+
+None
+
 ## [0.9.1]
 
 - fix a display bug for `TopTags` class
