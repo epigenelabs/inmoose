@@ -44,6 +44,9 @@ doc = [
   "sphinx_rtd_theme",
   "sphinxcontrib-repl",
 ]
+test = [
+  "pytest"
+]
 
 [build-system]
 requires = ["setuptools", "numpy>=2.0.0", "scipy", "Cython>=3.0.0", "wheel"]

@@ -29,3 +29,5 @@ cython_debug/
 
 # Test results
 tests/**/*.html
+
+.DS_Store
