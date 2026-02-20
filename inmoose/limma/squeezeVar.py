@@ -21,7 +21,7 @@
 
 import numpy as np
 
-from .fitFDist import fitFDist
+from .fitFDist import fitFDist, fitFDistRobustly
 
 
 def squeezeVar(var, df, covariate=None, robust=False, winsor_tail_p=(0.05, 0.1)):
@@ -98,7 +98,8 @@ def squeezeVar(var, df, covariate=None, robust=False, winsor_tail_p=(0.05, 0.1))
 
     # Estimate hyperparameters
     if robust:
-        raise NotImplementedError("Robust estimation in squeezeVar is not implemented")
+        fit = fitFDistRobustly(var, df1=df, covariate=covariate, winsor_tail_p=winsor_tail_p)
+        df_prior = fit["df2.shrunk"]
     else:
         fit = fitFDist(var, df1=df, covariate=covariate)
         df_prior = fit["df2"]
