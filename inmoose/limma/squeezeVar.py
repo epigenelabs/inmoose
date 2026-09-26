@@ -138,13 +138,14 @@ def _squeezeVar(var, df, var_prior, df_prior):
     df_prior = np.broadcast_to(df_prior, var.shape)
 
     isfin = np.isfinite(df_prior)
-    var_post = np.zeros(var.shape)
+    var_post = np.copy(var_prior)
 
-    # For infinite df_prior, return var_prior
-    var_post[~isfin] = var_prior[~isfin]
-
-    var_post[isfin] = (df[isfin] * var[isfin] + df_prior[isfin] * var_prior[isfin]) / (
-        df[isfin] + df_prior[isfin]
-    )
+    # For finite df_prior with positive total degrees of freedom,
+    # compute posterior variance
+    pos = isfin & (df + df_prior > 0)
+    if pos.any():
+        df_total = df[pos] + df_prior[pos]
+        var_post[pos] = (df[pos] * var[pos] + df_prior[pos] * var_prior[pos]) / df_total
 
     return var_post
+

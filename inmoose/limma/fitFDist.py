@@ -104,8 +104,14 @@ def fitFDist(x, df1, covariate=None):
     # Remove missing or infinite or negative values and zero degrees of freedom
     ok = ok & np.isfinite(x) & (x > -1e-15)
     nok = ok.sum()
+    if nok == 0:
+        return {"scale": np.nan, "df2": np.nan}
     if nok == 1:
-        return {"scale": x[ok], "df2": 0}
+        val = x[ok]
+        scale_val = val[0] if hasattr(val, "__getitem__") and len(val) > 0 else val
+        if covariate is not None:
+            return {"scale": np.full(n, scale_val), "df2": 0}
+        return {"scale": scale_val, "df2": 0}
     notallok = nok < n
     if notallok:
         x = x[ok]
