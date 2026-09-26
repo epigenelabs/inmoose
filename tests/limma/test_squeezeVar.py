@@ -42,3 +42,11 @@ class Test(unittest.TestCase):
                 atol=1e-6,
             )
         )
+
+    def test_squeezeVar_zero_residual_df(self):
+        # When some genes have df=0 and df_prior evaluates to 0, total df is 0.
+        # Ensure no zero-division / NaNs occur and fallback to var_prior is respected.
+        res = squeezeVar(np.array([1.5, 2.5]), df=np.array([0.0, 3.0]))
+        self.assertFalse(np.isnan(res["var_post"]).any())
+        self.assertTrue(np.allclose(res["var_post"], [2.5, 2.5]))
+
