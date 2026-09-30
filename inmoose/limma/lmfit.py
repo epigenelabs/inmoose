@@ -381,15 +381,29 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
         if obs.sum() > 0:
             X = design[obs, :]
             y = y[obs]
+
+            # Missing observations can make the design rank-deficient for an
+            # individual gene even when the experiment-wide design is full
+            # rank. Fit only an independent subset of columns and leave the
+            # remaining coefficients as NA, matching R's lm.fit behavior.
+            rank = np.linalg.matrix_rank(X)
+            if rank < nbeta:
+                _, _, pivot = scipy.linalg.qr(X, mode="economic", pivoting=True)
+                estimable = np.sort(pivot[:rank])
+            else:
+                estimable = np.arange(nbeta)
+            X_fit = X[:, estimable]
+
             if weights is None:
-                out = lm_fit(X, y)
+                out = lm_fit(X_fit, y)
             else:
                 w = weights[i, obs]
-                out = lm_wfit(X, y, w)
+                out = lm_wfit(X_fit, y, w)
 
-            est = ~np.isnan(out.coefficients)
-            beta.iloc[i, :] = out.coefficients
-            stdev_unscaled.iloc[i, est] = np.sqrt(np.diag(np.linalg.inv(X.T @ X)))
+            beta.iloc[i, estimable] = out.coefficients
+            stdev_unscaled.iloc[i, estimable] = np.sqrt(
+                np.diag(np.linalg.inv(X_fit.T @ X_fit))
+            )
             df_residual[i] = out.df_residuals
             if df_residual[i] > 0:
                 sigma[i] = np.sqrt(np.mean(out.effects[out.rank :] ** 2))
