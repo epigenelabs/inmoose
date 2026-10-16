@@ -8,6 +8,7 @@ from .ebayes import eBayes as eBayes
 from .ebayes import tmixture_matrix as tmixture_matrix
 from .ebayes import tmixture_vector as tmixture_vector
 from .fitFDist import fitFDist as fitFDist
+from .fitFDistUnequalDF1 import fitFDistUnequalDF1 as fitFDistUnequalDF1
 from .lmfit import lm_series as lm_series
 from .lmfit import lmFit as lmFit
 from .lmfit import nonEstimable as nonEstimable

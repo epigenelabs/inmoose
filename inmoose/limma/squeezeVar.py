@@ -16,15 +16,24 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-# This file is based on the file 'R/squeezeVar.R' of the Bioconductor limma package (version 3.55.1).
+# Based on limma's R/squeezeVar.R, including the 12 July 2025 estimator selection.
 
 
 import numpy as np
 
 from .fitFDist import fitFDist
+from .fitFDistUnequalDF1 import fitFDistUnequalDF1
 
 
-def squeezeVar(var, df, covariate=None, robust=False, winsor_tail_p=(0.05, 0.1)):
+def squeezeVar(
+    var,
+    df,
+    covariate=None,
+    robust=False,
+    winsor_tail_p=(0.05, 0.1),
+    legacy=None,
+    span=None,
+):
     """
     Squeeze a set of sample variances together by computing empirical Bayes posterior means
     This function implements empirical Bayes algorithms proposed by
@@ -51,8 +60,11 @@ def squeezeVar(var, df, covariate=None, robust=False, winsor_tail_p=(0.05, 0.1))
     is average log-expression, then the effect is an intensity-dependent trend
     similar to that in [Sartor2006]_.
 
-    :code:`robust=True` implements the robust empirical Bayes procedure of
-    [Phipson2016]_ which allows some of the :code:`var` values to be outliers.
+    With unequal positive residual degrees of freedom, the default estimator
+    is :func:`fitFDistUnequalDF1`, as in limma since version 3.61.8. It uses
+    weighted log-scale moments and profile likelihood. Equal positive df use
+    the legacy moment estimator :func:`fitFDist`. Fewer than three variances
+    are returned unchanged, with zero prior df.
 
     Arguments
     ---------
@@ -64,11 +76,17 @@ def squeezeVar(var, df, covariate=None, robust=False, winsor_tail_p=(0.05, 0.1))
         if not :code:`None`, :code:`var_prior` will depend on this numeric
         covariate. Otherwise, :code:`var_prior` is constant.
     robust : bool
-        whether the estimation of :code:`df_prior` and :code:`var_prior` be
-        robustified against outlier sample variances
+        Robust estimation is not implemented; True raises NotImplementedError
+        when hyperparameter estimation is needed.
     winsor_tail_p : float or pair of floats
         left and right tail proportions of :code:`x` to Winsorize. Only used
         when :code:`robust=True`
+    legacy : bool or None
+        True selects :func:`fitFDist`; False selects :func:`fitFDistUnequalDF1`.
+        None selects the legacy estimator if all positive df are equal.
+    span : float or None
+        LOWESS span for the new estimator's covariate trend. Supplying a span
+        selects the new estimator even if :code:`legacy=True`, as in R limma.
 
     Returns
     -------
@@ -84,24 +102,39 @@ def squeezeVar(var, df, covariate=None, robust=False, winsor_tail_p=(0.05, 0.1))
           array of same length as :code:`var` if :code:`robust=True`, otherwise
           a single value.
     """
+    var = np.array(var, dtype=float, copy=True)
     n = len(var)
 
     # Degenerate special cases
     if n == 0:
         raise ValueError("var is empty")
-    if n == 1:
+    if n < 3:
         return {"var_post": var, "var_prior": var, "df_prior": 0}
 
     # When df==0, guard against missing or infinite values in var
+    df = np.asarray(df, dtype=float)
+    if df.size > 1:
+        var[df == 0] = 0
+
+    if span is not None:
+        legacy = False
+    if legacy is None:
+        positive_df = df[df > 0]
+        # R's min/max comparison also selects legacy when df contains NA;
+        # fitFDist then omits those observations.
+        legacy = np.isnan(df).any() or (
+            positive_df.size > 0 and np.all(positive_df == positive_df[0])
+        )
     df = np.broadcast_to(df, var.shape)
-    var[df == 0] = 0
 
     # Estimate hyperparameters
     if robust:
         raise NotImplementedError("Robust estimation in squeezeVar is not implemented")
-    else:
+    if legacy:
         fit = fitFDist(var, df1=df, covariate=covariate)
-        df_prior = fit["df2"]
+    else:
+        fit = fitFDistUnequalDF1(var, df1=df, covariate=covariate, span=span)
+    df_prior = fit["df2"]
     if np.isnan(df_prior).any():
         raise RuntimeError("Could not estimate prior df")
 

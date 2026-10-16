@@ -113,7 +113,15 @@ contrast for each gene. :func:`treat` tests whether log-fold-changes are greater
 than a threshold rather than merely different to zero.
 
 :func:`eBayes` and :func:`treat` use internal functions :func:`squeezeVar`,
-:func:`fitFDist`, :func:`tmixture_matrix` and :func:`tmixture_vector`.
+:func:`fitFDist`, :func:`fitFDistUnequalDF1`, :func:`tmixture_matrix` and
+:func:`tmixture_vector`.
+
+Empirical Bayes moderation follows current R limma's selection rule: unequal
+positive residual degrees of freedom use weighted log-scale moments and profile
+likelihood; equal positive degrees of freedom use the legacy moment estimator.
+Set ``legacy=True`` to retain the old estimator, or ``legacy=False`` to select
+the new estimator explicitly. A supplied ``span`` selects the new estimator and
+controls its LOWESS trend. Robust estimation (``robust=True``) is not implemented.
 
 Summarizing Model Fits
 ----------------------
@@ -283,6 +291,7 @@ Code documentation
    contrasts_fit
    eBayes
    fitFDist
+   fitFDistUnequalDF1
    lmFit
    lm_series
    makeContrasts
