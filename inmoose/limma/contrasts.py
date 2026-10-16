@@ -199,6 +199,9 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
             "Number of rows of contrast matrix must match number of coefficients in fit"
         )
 
+    # All positional covariance and null-space operations must use the same
+    # coefficient order as pandas' labelled coefficient multiplication.
+    contrasts = contrasts.loc[fit.coefficients.columns]
     fit.contrasts = contrasts
 
     # Special case of contrast matrix with 0 columns
@@ -239,6 +242,8 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
         fit.coefficients[i] = 0
         fit.stdev_unscaled[i] = 1e30
 
+    contrast_values = contrasts.to_numpy()
+
     # New coefficients
     fit.coefficients = fit.coefficients @ contrasts
 
@@ -275,5 +280,24 @@ def contrasts_fit(fit, contrasts=None, coefficients=None):
         i = fit.stdev_unscaled > 1e20
         fit.coefficients[i] = np.nan
         fit.stdev_unscaled[i] = np.nan
+
+    # Coefficient-wise NaNs cannot decide estimability of a linear combination.
+    # A contrast c is estimable exactly when N.T @ c == 0, where the columns of
+    # N span the null space of the feature's observed design. Carry the whole
+    # solution space forward so subsequent contrasts can also cancel aliases.
+    for i, (solution, covariance, null_space) in fit._rank_deficient_fits.items():
+        scale = np.linalg.norm(null_space, ord=2)
+        solution = contrast_values.T @ solution
+        covariance = contrast_values.T @ covariance @ contrast_values
+        null_space = contrast_values.T @ null_space
+        estimable = np.linalg.norm(null_space, axis=1) <= (
+            1e-7 * scale * np.linalg.norm(contrast_values, axis=0)
+        )
+        null_space[estimable, :] = 0
+        fit.coefficients.iloc[i, :] = np.where(estimable, solution, np.nan)
+        fit.stdev_unscaled.iloc[i, :] = np.where(
+            estimable, np.sqrt(np.maximum(np.diag(covariance), 0)), np.nan
+        )
+        fit._rank_deficient_fits[i] = (solution, covariance, null_space)
 
     return fit

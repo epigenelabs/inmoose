@@ -375,6 +375,7 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
     # Genewise QR-decompositions are required, so iterate through genes
     sigma = np.full(ngenes, np.nan)
     df_residual = np.zeros(ngenes)
+    null_spaces = {}
     for i in range(ngenes):
         y = M.iloc[i, :]
         obs = np.isfinite(y)
@@ -382,14 +383,19 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
             X = design[obs, :]
             y = y[obs]
 
-            # Missing observations can make the design rank-deficient for an
-            # individual gene even when the experiment-wide design is full
-            # rank. Fit only an independent subset of columns and leave the
-            # remaining coefficients as NA, matching R's lm.fit behavior.
+            # Keep independent columns in design order, as R's lm.fit does.
+            # A norm-pivoted QR can instead discard a condition column in
+            # favour of a nuisance term. Retain the null space as well: an
+            # aliased coefficient need not make a contrast non-estimable.
             rank = np.linalg.matrix_rank(X)
             if rank < nbeta:
-                _, _, pivot = scipy.linalg.qr(X, mode="economic", pivoting=True)
-                estimable = np.sort(pivot[:rank])
+                estimable = []
+                for j in range(nbeta):
+                    if np.linalg.matrix_rank(X[:, estimable + [j]]) > len(estimable):
+                        estimable.append(j)
+                    if len(estimable) == rank:
+                        break
+                null_spaces[i] = scipy.linalg.null_space(X)
             else:
                 estimable = np.arange(nbeta)
             X_fit = X[:, estimable]
@@ -407,17 +413,32 @@ def lm_series(M, design=None, ndups=1, spacing=1, weights=None):
             df_residual[i] = out.df_residuals
             if df_residual[i] > 0:
                 sigma[i] = np.sqrt(np.mean(out.effects[out.rank :] ** 2))
+        else:
+            null_spaces[i] = np.eye(nbeta)
 
     # Correlation matrix of coefficients
     cov_coef = np.linalg.inv(design.T @ design)
 
-    return MArrayLM(
+    fit = MArrayLM(
         coefficients=beta,
         stdev_unscaled=stdev_unscaled,
         sigma=sigma,
         df_residual=df_residual,
         cov_coef=cov_coef,
     )
+    if null_spaces:
+        correlation = cov_coef / np.sqrt(np.outer(np.diag(cov_coef), np.diag(cov_coef)))
+        for i, null_space in null_spaces.items():
+            # A particular solution plus its null space represents the entire
+            # set of least-squares solutions. Keep the public aliased entries
+            # as NaN; only estimable contrasts may use the particular solution.
+            solution = beta.iloc[i].fillna(0).to_numpy()
+            stdev = stdev_unscaled.iloc[i].fillna(0).to_numpy()
+            # Preserve limma's contrasts.fit approximation based on the common
+            # coefficient correlation, rather than changing SE conventions.
+            covariance = correlation * np.outer(stdev, stdev)
+            fit._rank_deficient_fits[i] = (solution, covariance, null_space)
+    return fit
 
 
 def nonEstimable(x):
