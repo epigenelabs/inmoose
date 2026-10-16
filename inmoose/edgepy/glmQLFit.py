@@ -236,6 +236,8 @@ def glmQLFit(
         covariate=AveLogCPM,
         robust=robust,
         winsor_tail_p=winsor_tail_p,
+        # Preserve the legacy edgeR quasi-likelihood pipeline implemented here.
+        legacy=True,
     )
 
     # Storing results

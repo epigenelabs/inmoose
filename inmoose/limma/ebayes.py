@@ -37,6 +37,8 @@ def eBayes(
     trend=False,
     robust=False,
     winsor_tail_p=(0.05, 0.1),
+    legacy=None,
+    span=None,
 ):
     """
     Empirical Bayes statistics for differential expression
@@ -103,10 +105,10 @@ def eBayes(
     than 3-fold difference from smallest to largest) because of its simplicity
     and speed.
 
-    If :code:`robust=True`, then the robust empirical Bayes procedure of
-    [Phipson2016]_ is used. This is frequently useful to protect the empirical
-    Bayes procedure against hyper-variable or hypo-variable genes, especially
-    when analysing RNA-Seq data. See :func:`squeezeVar` for more details.
+    Unequal positive residual degrees of freedom use the weighted moment and
+    profile-likelihood estimator :func:`fitFDistUnequalDF1` by default.
+    Equal positive df use the legacy :func:`fitFDist` estimator. See
+    :func:`squeezeVar` for details. Robust estimation is not implemented.
 
     Arguments
     ---------
@@ -124,8 +126,13 @@ def eBayes(
         Alternatively, :code:`trend` can be a row-wise array, which will be used
         as the covariate for the prior variance.
     robust : bool
-        whether the estimation of :code:`df_prior` and :code:`var_prior` should
-        be robustified against outlier sample variances.
+        Robust estimation is not implemented; True raises NotImplementedError.
+    legacy : bool or None
+        True selects the legacy hyperparameter estimator, False selects the
+        new estimator, and None selects automatically according to residual df.
+    span : float or None
+        LOWESS span for the new estimator's trend. Supplying a span forces
+        :code:`legacy=False`, as in R limma.
 
     Returns
     -------
@@ -184,6 +191,8 @@ def eBayes(
         trend=trend,
         robust=robust,
         winsor_tail_p=winsor_tail_p,
+        legacy=legacy,
+        span=span,
     )
     fit.df_prior = eb["df_prior"]
     fit.s2_prior = eb["s2_prior"]
@@ -217,6 +226,8 @@ def _ebayes(
     trend=False,
     robust=False,
     winsor_tail_p=(0.05, 0.1),
+    legacy=None,
+    span=None,
 ):
     coefficients = fit.coefficients
     stdev_unscaled = fit.stdev_unscaled
@@ -251,6 +262,8 @@ def _ebayes(
         covariate=covariate,
         robust=robust,
         winsor_tail_p=winsor_tail_p,
+        legacy=legacy,
+        span=span,
     )
     out["s2_prior"] = out["var_prior"]
     out["s2_post"] = pd.Series(out["var_post"], index=fit.coefficients.index)
