@@ -257,7 +257,7 @@ def _ebayes(
     del out["var_prior"]
     del out["var_post"]
     out["t"] = coefficients / stdev_unscaled / np.sqrt(out["s2_post"].values[:, None])
-    df_total = df_residual + out["df_prior"]
+    df_total = df_residual + np.asarray(out["df_prior"])
     df_pooled = np.nansum(df_residual)
     df_total = np.minimum(df_total, df_pooled)
     out["df_total"] = df_total
@@ -277,14 +277,15 @@ def _ebayes(
     r = np.outer(np.ones(out["t"].shape[0]), out["var_prior"])
     r = (stdev_unscaled**2 + r) / stdev_unscaled**2
     t2 = out["t"] ** 2
-    Infdf = out["df_prior"] > 1e6
+    # Use a feature-wise boolean mask even when df_prior is a scalar.
+    Infdf = np.broadcast_to(out["df_prior"], (t2.shape[0],)) > 1e6
     if np.any(Infdf):
         kernel = t2 * (1 - 1 / r) / 2
         if np.any(~Infdf):
-            t2_f = t2[~Infdf]
-            r_f = r[~Infdf]
-            df_total_f = df_total[~Infdf]
-            kernel[~Infdf] = (
+            t2_f = t2.iloc[~Infdf, :]
+            r_f = r.iloc[~Infdf, :]
+            df_total_f = df_total[~Infdf, None]
+            kernel.iloc[~Infdf, :] = (
                 (1 + df_total_f)
                 / 2
                 * np.log((t2_f + df_total_f) / (t2_f / r_f + df_total_f))
