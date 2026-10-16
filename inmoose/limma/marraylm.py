@@ -17,6 +17,7 @@
 # -----------------------------------------------------------------------------
 
 import numpy as np
+import pandas as pd
 
 
 class MArrayLM:
@@ -97,6 +98,11 @@ class MArrayLM:
         self.p_value = None
         self.lods = None
 
+        # For rank-deficient rows: a particular coefficient solution, its
+        # covariance for contrasts.fit, and a basis of non-estimable directions.
+        # Row positions are keys, so duplicate gene labels remain supported.
+        self._rank_deficient_fits = {}
+
     def __getitem__(self, idx):
         row_idx, col_idx = idx
 
@@ -108,7 +114,12 @@ class MArrayLM:
         if self.df_residual is not None:
             res.df_residual = self.df_residual[row_idx]
         if self.cov_coefficients is not None:
-            res.cov_coefficients = self.cov_coefficients.loc[col_idx, col_idx]
+            covariance = pd.DataFrame(
+                self.cov_coefficients,
+                index=self.coefficients.columns,
+                columns=self.coefficients.columns,
+            )
+            res.cov_coefficients = covariance.loc[col_idx, col_idx]
 
         if self.Amean is not None:
             res.Amean = self.Amean[row_idx]
@@ -143,5 +154,22 @@ class MArrayLM:
             res.p_value = self.p_value.loc[row_idx, col_idx]
         if self.lods is not None:
             res.lods = self.lods.loc[row_idx, col_idx]
+
+        if self._rank_deficient_fits:
+            rows = pd.Series(
+                np.arange(len(self.coefficients)), index=self.coefficients.index
+            )
+            cols = pd.Series(
+                np.arange(self.coefficients.shape[1]), index=self.coefficients.columns
+            )
+            columns = np.atleast_1d(cols.loc[col_idx])
+            for new_i, old_i in enumerate(np.atleast_1d(rows.loc[row_idx])):
+                if old_i in self._rank_deficient_fits:
+                    solution, covariance, null_space = self._rank_deficient_fits[old_i]
+                    res._rank_deficient_fits[new_i] = (
+                        solution[columns],
+                        covariance[np.ix_(columns, columns)],
+                        null_space[columns, :],
+                    )
 
         return res

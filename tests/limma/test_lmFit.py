@@ -393,6 +393,39 @@ class Test(unittest.TestCase):
             fit.stdev_unscaled.columns, fit.coefficients.columns
         )
 
+    def test_lmFit_with_nonestimable_missing_values(self):
+        rng = np.random.default_rng(42)
+        scale = np.linspace(0.2, 3.0, 100)[:, None]
+        y = rng.normal(size=(100, 6)) * scale
+        y[:, 3:] += 1
+        y = pd.DataFrame(y, columns=self.y.columns)
+        y.loc["first_group_only"] = [1.0, 1.2, 0.8, np.nan, np.nan, np.nan]
+        y.loc["second_group_only"] = [np.nan, np.nan, np.nan, 4.0, 4.2, 3.8]
+        y.loc["all_missing"] = np.nan
+
+        with self.assertWarnsRegex(UserWarning, "Partial NA coefficients"):
+            fit = lmFit(y, self.design)
+
+        expected = pd.DataFrame(
+            {
+                "group[1]": [1.0, np.nan, np.nan],
+                "group[2]": [np.nan, 4.0, np.nan],
+            },
+            index=pd.Index(
+                ["first_group_only", "second_group_only", "all_missing"],
+                dtype=object,
+            ),
+        )
+        pd.testing.assert_frame_equal(fit.coefficients.loc[expected.index], expected)
+        np.testing.assert_allclose(fit.df_residual[-3:], [2.0, 2.0, 0.0])
+
+        fit = contrasts_fit(fit, contrasts=self.contrast_matrix[["Last3-First3"]])
+        fit = eBayes(fit)
+        self.assertTrue(fit.coefficients.loc[expected.index].isna().all().all())
+        self.assertTrue(fit.t.loc[expected.index].isna().all().all())
+        self.assertTrue(fit.p_value.loc[expected.index].isna().all().all())
+        self.assertTrue(np.isfinite(fit.p_value.iloc[:100].to_numpy()).all())
+
     def test_ebayes(self):
         fit = lmFit(self.y, self.design)
         fit2 = eBayes(fit)
