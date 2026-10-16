@@ -420,7 +420,7 @@ def tmixture_vector(tstat, stdev_unscaled, df, proportion, v0_lim=None):
         # misses a "ilogsf" function
         TailP = scipy.stats.t.sf(tstat[i], df=df[i])
         tstat[i] = scipy.stats.t.isf(TailP, df=MaxDF)
-        df[i] = MaxDF
+        # Subsequent calculations use MaxDF directly; do not modify input df.
 
     # Select top statistics
     o = np.flip(np.argsort(tstat))[:ntarget]
